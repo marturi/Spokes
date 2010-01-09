@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<class name="net.oitobstudio.spokesdc.trail.TrailSegment" table="dc_trails" lazy="false">
+		<id name="id" type="long" column="ogc_fid">
+			<generator class="native"/>
+		</id>
+		<property name="edge" column="wkb_geometry" type="org.hibernatespatial.GeometryUserType" insert="false" update="false"/>
+		<property name="name" column="name" type="string" insert="false" update="false"/>
+	</class>
+
+</hibernate-mapping>

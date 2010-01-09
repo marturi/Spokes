@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<class name="net.oitobstudio.spokesdc.street.StreetSegment" table="dc_street_edges" lazy="false">
+		<id name="id" type="long" column="ogc_fid">
+			<generator class="sequence">
+				<param name="sequence">dc_street_edges_ogc_fid_seq</param>
+			</generator>
+		</id>
+		<property name="edge" column="wkb_geometry" type="org.hibernatespatial.GeometryUserType"/>
+		<property name="street" column="registered" type="string"/>
+		<property name="bikeSegType" column="bike_seg_type" type="character"/>
+		<property name="direction" column="directiona" type="string"/>
+	</class>
+
+</hibernate-mapping>

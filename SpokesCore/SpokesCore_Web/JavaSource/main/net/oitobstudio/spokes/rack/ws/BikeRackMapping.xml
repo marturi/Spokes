@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
+
+<mapping>
+	<class name="net.oitobstudio.spokes.rack.BikeRacks">
+		<map-to xml="Racks"/>
+		<field name="BikeRacks" type="net.oitobstudio.spokes.rack.BikeRack" collection="arraylist">
+			<bind-xml name="Rack" node="element"/>
+		</field>
+		<field name="BikeRackFault" type="net.oitobstudio.spokes.SpokesFault">
+			<bind-xml name="Fault" node="element"/>
+		</field>
+	</class>
+
+	<class name="net.oitobstudio.spokes.rack.BikeRack">
+		<field name="RackCoordinate" type="java.lang.String">
+			<bind-xml name="RackCoord" node="element"/>
+		</field>
+		<field name="RackType" type="java.lang.Character">
+			<bind-xml name="type" node="attribute"/>
+		</field>
+		<field name="Address" type="java.lang.String">
+			<bind-xml name="Address" node="element"/>
+		</field>
+		<field name="Id" type="java.lang.Long">
+			<bind-xml name="id" node="attribute"/>
+		</field>
+		<field name="NumberOfThefts" type="java.lang.Integer">
+			<bind-xml name="thefts" node="attribute"/>
+		</field>
+	</class>
+
+</mapping>

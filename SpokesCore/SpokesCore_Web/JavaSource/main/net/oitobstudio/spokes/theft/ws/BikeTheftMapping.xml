@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
+
+<mapping>
+	<class name="net.oitobstudio.spokes.theft.BikeThefts">
+		<map-to xml="Thefts"/>
+		<field name="BikeThefts" type="net.oitobstudio.spokes.theft.BikeTheft" collection="arraylist">
+			<bind-xml name="Theft" node="element"/>
+		</field>
+		<field name="BikeTheftFault" type="net.oitobstudio.spokes.SpokesFault">
+			<bind-xml name="Fault" node="element"/>
+		</field>
+	</class>
+
+	<class name="net.oitobstudio.spokes.theft.BikeTheft">
+		<field name="TheftCoordinate" type="java.lang.String">
+			<bind-xml name="TheftCoord" node="element"/>
+		</field>
+		<field name="Comments" type="java.lang.String">
+			<bind-xml name="Comments" node="element"/>
+		</field>
+		<field name="TheftDate" type="java.util.Date">
+			<bind-xml name="Date" node="attribute"/>
+		</field>
+	</class>
+
+</mapping>

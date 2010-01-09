@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<bean id="spokesDCHibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">
+		<property name="sessionFactory" ref="spokesDCSessionFactory" />
+	</bean>
+
+	<bean id="spokesDCSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="spokesDCDataSource"/>
+		<property name="mappingResources">
+			<list>
+				<value>net/oitobstudio/spokesdc/street/hibernate/StreetSegment.hbm.xml</value>
+				<value>net/oitobstudio/spokesdc/trail/hibernate/TrailSegment.hbm.xml</value>
+				<value>net/oitobstudio/spokesdc/trailmerger/hibernate/TempSegment.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=org.hibernatespatial.postgis.PostgisDialect
+				hibernate.show_sql=false
+			</value>
+		</property>
+	</bean>
+
+	<bean id="hibernateTxManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="spokesDCSessionFactory"/>
+	</bean>
+
+	<tx:annotation-driven transaction-manager="hibernateTxManager"/>
+
+</beans>

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<class name="net.oitobstudio.spokes.rack.BikeRack" table="dc_bike_racks" lazy="false">
+		<id name="id" type="long" column="ogc_fid">
+			<generator class="sequence">
+				<param name="sequence">dc_bike_racks_ogc_fid_seq</param>
+			</generator>
+		</id>
+		<property name="rackPoint" column="wkb_geometry" type="org.hibernatespatial.GeometryUserType"/>
+		<property name="rackType" column="rack_type" type="character"/>
+		<property name="address" column="street" type="string"/>
+		<property name="numberOfThefts" type="integer">
+			<formula>(select count(*) from dc_rack_thefts rt where rt.rack_id=ogc_fid)</formula>
+		</property>
+	</class>
+
+	<sql-query name="nearestRacks">
+		<return alias="nearestRack" class="net.oitobstudio.spokes.rack.BikeRack"/>
+		select ogc_fid as {nearestRack.id}, rack_type as {nearestRack.rackType}, 
+			street as {nearestRack.address}, wkb_geometry as {nearestRack.rackPoint}, 
+			(select count(*) from dc_rack_thefts rt where rt.rack_id=ogc_fid) as {nearestRack.numberOfThefts}, 
+			st_distance(wkb_geometry, :coordinate) AS dist
+	    from dc_bike_racks
+ 		ORDER BY dist asc
+ 	</sql-query>
+
+</hibernate-mapping>

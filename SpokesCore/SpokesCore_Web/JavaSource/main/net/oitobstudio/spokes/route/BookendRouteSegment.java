@@ -1,0 +1,143 @@
+package net.oitobstudio.spokes.route;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import com.vividsolutions.jts.algorithm.Angle;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.linearref.LocationIndexedLine;
+import com.vividsolutions.jts.linearref.LinearLocation;
+
+public class BookendRouteSegment extends RouteSegment {
+	private Point onGraphPoint;
+	private LineString trimmedEdge;
+
+	public Point getOnGraphPoint() {
+		return onGraphPoint;
+	}
+
+	public boolean isStartEdge(){
+		return getNextSegment() != null;
+	}
+
+	public double getLength(){
+		float length = 0;
+		Coordinate[] coords = getCoordinateSequence();
+		if(coords != null){
+			for(int i=0; i<coords.length; i++){
+				if((i+1) < coords.length){
+					length += distFrom((float)coords[i].y, (float)coords[i].x, (float)coords[i+1].y, (float)coords[i+1].x);
+				}
+			}
+		}else{
+			return super.getLength();
+		}
+		return (double)length;
+	}
+
+	public Coordinate[] getCoordinateSequence(){
+		List<Coordinate> coordCollection = new ArrayList<Coordinate>();
+		Coordinate[] coords = null;
+		LineString te = getTrimmedEdge();
+		if(te != null){
+			coords = te.getCoordinates();
+			for(Coordinate c : coords){
+				coordCollection.add(c);
+			}
+			return coordCollection.toArray(new Coordinate[coordCollection.size()]);
+		}else{
+			return super.getCoordinateSequence();
+		}
+	}
+
+	public LineString getEdge(){
+		LineString trimmedEdge = getTrimmedEdge();
+		if(trimmedEdge != null){
+			return trimmedEdge;
+		}else{
+			return super.getEdge();
+		}
+	}
+
+	private LineString getTrimmedEdge(){
+		if(trimmedEdge == null){
+			LocationIndexedLine indexedLine = new LocationIndexedLine(super.getEdge());
+			LinearLocation startPointLocation = null;
+			LinearLocation endPointLocation = null;
+			if(isStartEdge()){
+				if(getNextSegment() != null){
+					Geometry intersection = super.getEdge().intersection(getNextSegment().getEdge());
+					if(intersection != null){
+						startPointLocation = indexedLine.indexOf(onGraphPoint.getCoordinate());
+						Coordinate endPointCoordinate = intersection.getCentroid().getCoordinate();
+						if(intersection instanceof LineString){
+							double distS = onGraphPoint.distance(((LineString) intersection).getStartPoint());
+							double distE = onGraphPoint.distance(((LineString) intersection).getEndPoint());
+							endPointCoordinate = distS > distE ? ((LineString)intersection).getStartPoint().getCoordinate() :
+								((LineString)intersection).getEndPoint().getCoordinate();
+						}
+						endPointLocation = indexedLine.indexOf(endPointCoordinate);
+					}
+				}
+			}else{
+				if(getPrevSegment() != null){
+					Geometry intersection = super.getEdge().intersection(getPrevSegment().getEdge());
+					if(intersection != null){
+						endPointLocation = indexedLine.indexOf(onGraphPoint.getCoordinate());
+						Coordinate startPointCoordinate = intersection.getCentroid().getCoordinate();
+						if(intersection instanceof LineString){
+							double distS = onGraphPoint.distance(((LineString) intersection).getStartPoint());
+							double distE = onGraphPoint.distance(((LineString) intersection).getEndPoint());
+							startPointCoordinate = distS > distE ? ((LineString)intersection).getStartPoint().getCoordinate() :
+								((LineString)intersection).getEndPoint().getCoordinate();
+						}
+						startPointLocation = indexedLine.indexOf(startPointCoordinate);
+					}
+				}
+			}
+			if(startPointLocation != null && endPointLocation != null){
+				trimmedEdge = (LineString)indexedLine.extractLine(startPointLocation, endPointLocation);
+			}
+		}
+		return trimmedEdge;
+	}
+
+	public String getHeading(){
+		double degrees = Angle.toDegrees(getAngle());
+		if(degrees >= 80 && degrees <= 100){
+			return "north";
+		}else if(degrees >= -100 && degrees <= -80){
+			return "south";
+		}else if((degrees >= -180 && degrees <= -170) || (degrees >= 170 && degrees <= 180)){
+			return "west";
+		}else if(degrees >= -10 && degrees <= 10){
+			return "east";
+		}else if(degrees >= 11 && degrees <= 79){
+			return "northeast";
+		}else if(degrees >= -79 && degrees <= -11){
+			return "southeast";
+		}else if(degrees >= -179 && degrees <= -101){
+			return "southwest";
+		}else{
+			return "northwest";
+		}
+	}
+
+	private float distFrom(float lat1, float lng1, float lat2, float lng2) {
+	    double earthRadius = 3958.75;
+	    double dLat = Math.toRadians(lat2-lat1);
+	    double dLng = Math.toRadians(lng2-lng1);
+	    double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+	               Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+	               Math.sin(dLng/2) * Math.sin(dLng/2);
+	    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	    double dist = earthRadius * c;
+
+	    int meterConversion = 1609;
+
+	    return new Float(dist * meterConversion).floatValue();
+	}
+}

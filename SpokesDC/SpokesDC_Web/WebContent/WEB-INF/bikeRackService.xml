@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<bean id="bikeRackService" class="net.oitobstudio.spokes.rack.BikeRackServiceImpl">
+        <property name="bikeRackRepository" ref="bikeRackRepository"/>
+        <property name="boundingBoxRepository" ref="boundingBoxRepository"/>
+        <property name="geometryFactory" ref="geometryFactory"/>
+    </bean>
+
+	<bean id="bikeRackRepository" class="net.oitobstudio.spokes.rack.hibernate.HibernateBikeRackRepository">
+		<constructor-arg ref="spokesHibernateTemplate"/>
+		<property name="geometryFactory" ref="geometryFactory"/>
+		<property name="bikeRackTableName" value="dc_bike_racks"/>
+        <property name="utmSrid" value="32618"/>
+	</bean>
+
+</beans>

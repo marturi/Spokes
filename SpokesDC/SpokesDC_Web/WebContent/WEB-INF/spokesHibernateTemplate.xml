@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<bean id="spokesHibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">
+		<property name="sessionFactory" ref="spokesSessionFactory" />
+	</bean>
+
+	<bean id="spokesSessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="spokesDataSource"/>
+		<property name="mappingResources">
+			<list>
+				<value>net/oitobstudio/spokes/route/hibernate/RouteSegment.hbm.xml</value>
+				<value>net/oitobstudio/spokes/rack/hibernate/BikeRack.hbm.xml</value>
+				<value>net/oitobstudio/spokes/shop/hibernate/BikeShop.hbm.xml</value>
+				<value>net/oitobstudio/spokes/theft/hibernate/BikeTheft.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect=org.hibernatespatial.postgis.PostgisDialect
+				hibernate.show_sql=false
+			</value>
+		</property>
+	</bean>
+
+	<bean id="hibernateTxManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="spokesSessionFactory"/>
+	</bean>
+
+	<tx:annotation-driven transaction-manager="hibernateTxManager"/>
+
+</beans>

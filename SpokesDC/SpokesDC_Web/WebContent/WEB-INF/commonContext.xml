@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+	<bean id="geometryFactory" class="com.vividsolutions.jts.geom.GeometryFactory">
+		<constructor-arg>
+			<bean class="com.vividsolutions.jts.geom.PrecisionModel"/>
+		</constructor-arg>
+		<constructor-arg value="4326"/>
+	</bean>
+
+	<bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller">
+		<property name="mappingLocations">
+			<list>
+				<value>classpath:net/oitobstudio/spokes/SpokesFaultMapping.xml</value>
+				<value>classpath:net/oitobstudio/spokes/SpokesConfirmMapping.xml</value>
+                <value>classpath:net/oitobstudio/spokes/route/ws/RouteMapping.xml</value>
+                <value>classpath:net/oitobstudio/spokes/rack/ws/BikeRackMapping.xml</value>
+                <value>classpath:net/oitobstudio/spokes/theft/ws/BikeTheftMapping.xml</value>
+                <value>classpath:net/oitobstudio/spokes/shop/ws/BikeShopMapping.xml</value>
+            </list>
+		</property>
+	</bean>
+
+	<bean id="boundingBoxRepository" class="net.oitobstudio.spokes.geometry.hibernate.HibernateBoundingBoxRepository" init-method="initBoundingBoxRepository">
+		<constructor-arg ref="spokesHibernateTemplate"/>
+		<constructor-arg value="dc_street_edges"/>
+	</bean>
+
+</beans>

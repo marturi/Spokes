@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
+
+<mapping>
+	<class name="net.oitobstudio.spokesdc.smartbike.SmartBikeStations">
+		<map-to xml="Stations"/>
+		<field name="SmartBikeStations" type="net.oitobstudio.spokesdc.smartbike.SmartBikeStation" collection="arraylist">
+			<bind-xml name="Station" node="element"/>
+		</field>
+		<field name="SmartBikeStationFault" type="net.oitobstudio.spokes.SpokesFault">
+			<bind-xml name="Fault" node="element"/>
+		</field>
+	</class>
+
+	<class name="net.oitobstudio.spokesdc.smartbike.SmartBikeStation">
+		<field name="StationCoordinate" type="java.lang.String">
+			<bind-xml name="StationCoord" node="element"/>
+		</field>
+		<field name="StationName" type="java.lang.String">
+			<bind-xml name="name" node="attribute"/>
+		</field>
+		<field name="Address" type="java.lang.String">
+			<bind-xml name="Address" node="element"/>
+		</field>
+		<field name="Quadrant" type="java.lang.String">
+			<bind-xml name="quadrant" node="attribute"/>
+		</field>
+		<field name="Id" type="java.lang.Long">
+			<bind-xml name="id" node="attribute"/>
+		</field>
+		<field name="Capacity" type="java.lang.Integer">
+			<bind-xml name="capacity" node="attribute"/>
+		</field>
+	</class>
+
+</mapping>

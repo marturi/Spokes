@@ -1,0 +1,5 @@
+"503" = "Spokes NYC is down temporarily.  Please try again later.";
+"GenericHTTP" = "Spokes NYC is down temporarily.  Please try again later.";
+"RouteService" = "Had trouble connecting to the Spokes routing service.  Please try again.";
+"RackService" = "Had trouble connecting to the Spokes bike rack service.  Please try again.";
+"ShopService" = "Had trouble connecting to the Spokes bike shop service.  Please try again.";

@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
+
+<mapping>
+	<class name="net.oitobstudio.spokes.route.Route">
+		<map-to xml="R"/>
+		<field name="RouteLegs" type="net.oitobstudio.spokes.route.RouteLeg" collection="arraylist">
+			<bind-xml name="Leg" node="element" location="Legs"/>
+		</field>
+		<field name="SegmentTypeSequence" collection="map">
+			<bind-xml name="SegType" node="element" location="SegTypeSequence">
+				<class name="org.exolab.castor.mapping.MapItem">
+					<field name="key" type="java.lang.String">
+						<bind-xml name="cidx" node="attribute"/>
+					</field>
+					<field name="value" type="java.lang.Character">
+						<bind-xml name="segType" node="attribute"/>
+					</field>
+				</class>
+			</bind-xml>
+		</field>
+		<field name="RouteLength" type="double">
+			<bind-xml name="l" node="attribute"/>
+		</field>
+		<field name="MaxX" type="double">
+			<bind-xml name="maxX" node="attribute"/>
+		</field>
+		<field name="MinX" type="double">
+			<bind-xml name="minX" node="attribute"/>
+		</field>
+		<field name="MaxY" type="double">
+			<bind-xml name="maxY" node="attribute"/>
+		</field>
+		<field name="MinY" type="double">
+			<bind-xml name="minY" node="attribute"/>
+		</field>
+		<field name="RouteFault" type="net.oitobstudio.spokes.SpokesFault">
+			<bind-xml name="Fault" node="element"/>
+		</field>
+	</class>
+
+	<class name="net.oitobstudio.spokes.route.RouteLeg">
+		<field name="CoordinateSequence" type="java.lang.String">
+			<bind-xml name="CS" node="element"/>
+		</field>
+		<field name="Length" type="double">
+			<bind-xml name="l" node="attribute"/>
+		</field>
+		<field name="Street" type="java.lang.String">
+			<bind-xml name="s" node="attribute"/>
+		</field>
+		<field name="Index" type="integer">
+			<bind-xml name="idx" node="attribute"/>
+		</field>
+		<field name="Turn" type="java.lang.String">
+			<bind-xml name="t" node="attribute"/>
+		</field>
+	</class>
+
+</mapping>

@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
+
+<mapping>
+	
+	<class name="net.oitobstudio.spokes.SpokesFault">
+		<map-to xml="Fault"/>
+		<field name="FaultMsg" type="java.lang.String">
+			<bind-xml name="Msg" node="element"/>
+		</field>
+	</class>
+
+</mapping>

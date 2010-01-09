@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<class name="net.oitobstudio.spokesdc.smartbike.SmartBikeStation" table="dc_smart_bike" lazy="false">
+		<id name="id" type="long" column="ogc_fid">
+			<generator class="sequence">
+				<param name="sequence">dc_smart_bike_ogc_fid_seq</param>
+			</generator>
+		</id>
+		<property name="stationPoint" column="wkb_geometry" type="org.hibernatespatial.GeometryUserType"/>
+		<property name="stationName" column="stationnam" type="string"/>
+		<property name="address" column="street" type="string"/>
+		<property name="quadrant" column="quadrant" type="string"/>
+		<property name="capacity" column="bikecount" type="integer"/>
+	</class>
+
+	<sql-query name="nearestSmartBikeStations">
+		<return alias="nearestSmartBikeStation" class="net.oitobstudio.spokesdc.smartbike.SmartBikeStation"/>
+		select ogc_fid as {nearestSmartBikeStation.id}, stationnam as {nearestSmartBikeStation.stationName}, 
+			address as {nearestSmartBikeStation.address}, wkb_geometry as {nearestSmartBikeStation.stationPoint}, 
+			bikecount as {nearestSmartBikeStation.capacity}, quadrant as {nearestSmartBikeStation.quadrant},
+			st_distance(wkb_geometry, :coordinate) AS dist
+	    from dc_smart_bike
+ 		ORDER BY dist asc
+ 	</sql-query>
+
+</hibernate-mapping>

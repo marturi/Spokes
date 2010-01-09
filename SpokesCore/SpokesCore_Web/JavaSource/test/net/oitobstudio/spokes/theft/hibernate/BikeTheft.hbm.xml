@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<class name="net.oitobstudio.spokes.theft.BikeTheft" table="nyc_bike_thefts" lazy="false">
+		<id name="id" type="long" column="ogc_fid">
+			<generator class="sequence">
+				<param name="sequence">nyc_bike_thefts_ogc_fid_seq</param>
+			</generator>
+		</id>
+		<property name="theftPoint" column="wkb_geometry" type="org.hibernatespatial.GeometryUserType"/>
+		<property name="comments" column="comments" type="string"/>
+		<property name="theftDate" column="theft_date" type="date"/>
+		<join table="nyc_rack_thefts" optional="true">
+			<key column="theft_id" unique="true"/>
+			<many-to-one name="bikeRack"
+				column="rack_id" 
+				not-null="true"
+				unique="true"/>
+		</join>
+		
+	</class>
+
+	<sql-query name="nearbyThefts">
+		<return alias="nearbyTheft" class="net.oitobstudio.spokes.theft.BikeTheft"/>
+	    select ogc_fid as {nearbyTheft.id}, comments as {nearbyTheft.comments}, theft_date as {nearbyTheft.theftDate},
+	    	wkb_geometry as {nearbyTheft.theftPoint}, NULL as {nearbyTheft.bikeRack}
+	    from nyc_bike_thefts
+ 		where
+   			st_expand(st_transform(st_setsrid(:currentLocation, 4326),32661), 1600) &amp;&amp; st_transform(wkb_geometry, 32661)
+ 		order by st_distance(st_transform(st_setsrid(:currentLocation, 4326),32661), st_transform(wkb_geometry, 32661)) asc
+ 		limit 50
+	</sql-query>
+
+</hibernate-mapping>

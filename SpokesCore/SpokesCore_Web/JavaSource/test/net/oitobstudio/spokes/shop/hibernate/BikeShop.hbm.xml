@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<class name="net.oitobstudio.spokes.shop.BikeShop" table="nyc_bike_shops" lazy="false">
+		<id name="id" type="long" column="ogc_fid">
+			<generator class="sequence">
+				<param name="sequence">nyc_bike_shops_ogc_fid_seq</param>
+			</generator>
+		</id>
+		<property name="hasRentals" column="has_rentals" type="character" length="1"/>
+		<property name="shopName" column="shop_name" type="string"/>
+		<property name="streetAddress" column="street" type="string"/>
+		<property name="borough" column="borough" type="string"/>
+		<property name="phoneNumber" column="phone" type="string"/>
+		<property name="shopPoint" column="wkb_geometry" type="org.hibernatespatial.GeometryUserType"/>
+	</class>
+
+	<sql-query name="nearestShops">
+		<return alias="nearestShop" class="net.oitobstudio.spokes.shop.BikeShop"/>
+	    select ogc_fid as {nearestShop.id}, has_rentals as {nearestShop.hasRentals}, street as {nearestShop.streetAddress},
+	    	shop_name as {nearestShop.shopName}, borough as {nearestShop.borough}, wkb_geometry as {nearestShop.shopPoint},
+	    	phone as {nearestShop.phoneNumber}, st_distance(wkb_geometry, :coordinate) AS dist
+	    from nyc_bike_shops
+ 		ORDER BY dist asc
+	</sql-query>
+
+</hibernate-mapping>

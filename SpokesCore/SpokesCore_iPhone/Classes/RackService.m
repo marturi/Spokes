@@ -1,0 +1,128 @@
+//
+//  RackService.m
+//  Spokes
+//
+//  Created by Matthew Arturi on 10/29/09.
+//  Copyright 2009 8B Studio, Inc. All rights reserved.
+//
+
+#import "RackService.h"
+#import "SpokesRequest.h"
+#import "RoutePointRepository.h"
+#import "RackPoint.h"
+
+@implementation RackService
+
+@synthesize currentRackPoint	= currentRackPoint;
+@synthesize currentElementValue = currentElementValue;
+@synthesize racks				= racks;
+
+- (id) initWithManagedObjectContext:(NSManagedObjectContext*)managedObjectContext {
+	if ((self = [super init])) {
+		_managedObjectContext = [managedObjectContext retain];
+	}
+	return self;
+}
+
+- (void) findClosestRacks:(CLLocationCoordinate2D)topLeftCoordinate 
+		bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate {
+	SpokesRequest *racksRequest = [[SpokesRequest alloc] init];
+	NSURLRequest *racksURLRequest = [racksRequest createRacksRequest:topLeftCoordinate 
+											   bottomRightCoordinate:bottomRightCoordinate];
+	[racksRequest release];
+	[self downloadAndParse:racksURLRequest];
+	if(self.spokesConnection != nil) {
+        do {
+			[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        } while (!done);
+    }
+	self.spokesConnection = nil;
+	self.responseData = nil;
+	NSMutableDictionary *params = nil;
+	if(self.connectionError != nil) {
+		params = [NSMutableDictionary dictionaryWithObject:self.connectionError forKey:@"serviceError"];
+		self.connectionError = nil;
+		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	} else {
+		if(self.racks != nil) {
+			params = [NSMutableDictionary dictionaryWithObject:self.racks forKey:@"pointsFound"];
+		} else {
+			params = [NSMutableDictionary dictionaryWithObject:[NSNull null] forKey:@"pointsFound"];
+		}
+		[params setObject:@"racks" forKey:@"pointType"];
+		NSNotification *notification = [NSNotification notificationWithName:@"PointsFound" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];		
+	}
+}
+
+#pragma mark -
+#pragma mark NSURLConnection Delegate methods
+
+- (void) connectionDidFinishLoading:(NSURLConnection*)connection {
+	if([self.responseData length] > 0) {
+		NSXMLParser *parser = [[NSXMLParser alloc] initWithData:responseData];
+		parser.delegate = self;
+		self.currentElementValue = [NSMutableString string];
+		self.racks = [NSMutableArray array];
+		[parser parse];
+		[parser release];
+	}
+    self.currentElementValue = nil;
+	//NSLog(@"%@", [[[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding] autorelease]);
+    self.responseData = nil;
+	[self performSelectorOnMainThread:@selector(toggleNetworkActivityIndicator:) 
+						   withObject:[NSNumber numberWithInt:NO] 
+						waitUntilDone:NO];
+	done = YES;
+}
+
+#pragma mark -
+#pragma mark NSXMLParser Delegate methods
+
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName 
+  namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qualifiedName
+	attributes:(NSDictionary *)attributeDict {
+	
+	if([elementName isEqualToString:@"Rack"]) {
+		self.currentRackPoint = (RackPoint*)[NSEntityDescription insertNewObjectForEntityForName:@"RackPoint" inManagedObjectContext:_managedObjectContext];
+		[self.currentRackPoint setRackType:[attributeDict objectForKey:@"type"]];
+		[self.currentRackPoint setThefts:[NSNumber numberWithInteger:[[attributeDict objectForKey:@"thefts"] integerValue]]];
+		[self.currentRackPoint setType:[NSNumber numberWithInteger:PointAnnotationTypeRack]];
+		[self.currentRackPoint setRackId:[NSNumber numberWithInteger:[[attributeDict objectForKey:@"id"] integerValue]]];
+	}
+}
+
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
+	[self.currentElementValue appendString:string];
+}
+
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
+  namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
+	
+	if([elementName isEqualToString:@"Racks"]) {
+		return;
+	} else if([elementName isEqualToString:@"Rack"]) {
+		[self.racks addObject:self.currentRackPoint];
+	} else if([elementName isEqualToString:@"RackCoord"]) {
+		NSArray *coord = [self.currentElementValue componentsSeparatedByString:@","];
+		NSNumber *longitude = [NSNumber numberWithDouble:[[coord objectAtIndex:0] doubleValue]];
+		NSNumber *latitude = [NSNumber numberWithDouble:[[coord objectAtIndex:1] doubleValue]];
+		self.currentRackPoint.longitude = longitude;
+		self.currentRackPoint.latitude = latitude;
+		[self.currentElementValue setString:@""];
+	} else if([elementName isEqualToString:@"Address"]) {
+		self.currentRackPoint.address = [NSString stringWithString:self.currentElementValue];
+		[self.currentElementValue setString:@""];
+	}
+}
+
+- (void) dealloc {
+	self.racks = nil;
+	self.currentRackPoint = nil;
+	self.currentElementValue = nil;
+	[_managedObjectContext release];
+	[super dealloc];
+}
+
+@end

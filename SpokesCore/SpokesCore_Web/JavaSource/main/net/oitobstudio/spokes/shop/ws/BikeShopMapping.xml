@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
+
+<mapping>
+	<class name="net.oitobstudio.spokes.shop.BikeShops">
+		<map-to xml="Shops"/>
+		<field name="BikeShops" type="net.oitobstudio.spokes.shop.BikeShop" collection="arraylist">
+			<bind-xml name="Shop" node="element"/>
+		</field>
+		<field name="BikeShopFault" type="net.oitobstudio.spokes.SpokesFault">
+			<bind-xml name="Fault" node="element"/>
+		</field>
+	</class>
+
+	<class name="net.oitobstudio.spokes.shop.BikeShop">
+		<field name="ShopCoordinate" type="java.lang.String">
+			<bind-xml name="ShopCoord" node="element"/>
+		</field>
+		<field name="Id" type="java.lang.Long">
+			<bind-xml name="id" node="attribute"/>
+		</field>
+		<field name="HasRentals" type="java.lang.Character">
+			<bind-xml name="rent" node="attribute"/>
+		</field>
+		<field name="ShopName" type="java.lang.String">
+			<bind-xml name="name" node="attribute"/>
+		</field>
+		<field name="Borough" type="java.lang.String">
+			<bind-xml name="boro" node="attribute"/>
+		</field>
+		<field name="StreetAddress" type="java.lang.String">
+			<bind-xml name="Address" node="element"/>
+		</field>
+		<field name="PhoneNumber" type="java.lang.String">
+			<bind-xml name="Phone" node="element"/>
+		</field>
+	</class>
+
+</mapping>

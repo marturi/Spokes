@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<class name="net.oitobstudio.spokes.route.RouteSegment" table="nyc_street_edges" lazy="true">
+		<id name="id" type="long" column="ogc_fid">
+			<generator class="native"/>
+		</id>
+		<property name="edge" column="wkb_geometry" type="org.hibernatespatial.GeometryUserType" insert="false" update="false"/>
+		<property name="segmentType" column="bike_seg_type" type="character" insert="false" update="false" not-null="false"/>
+		<property name="street" column="street" type="string" insert="false" update="false"/>
+		<property name="source" column="source" type="integer" insert="false" update="false"/>
+		<property name="target" column="target" type="integer" insert="false" update="false"/>
+		<property name="length" column="length" type="double" insert="false" update="false"/>
+	</class>
+
+	<class name="net.oitobstudio.spokes.route.BookendRouteSegment" table="nyc_street_edges" lazy="true">
+		<id name="id" type="long" column="ogc_fid">
+			<generator class="native"/>
+		</id>
+		<property name="edge" column="wkb_geometry" type="org.hibernatespatial.GeometryUserType" insert="false" update="false"/>
+		<property name="segmentType" column="bike_seg_type" type="character" insert="false" update="false" not-null="false"/>
+		<property name="street" column="street" type="string" insert="false" update="false"/>
+		<property name="source" column="source" type="integer" insert="false" update="false"/>
+		<property name="target" column="target" type="integer" insert="false" update="false"/>
+		<property name="length" column="length" type="double" insert="false" update="false"/>
+		<property name="onGraphPoint" column="onGraphPoint" type="org.hibernatespatial.GeometryUserType" insert="false" update="false"/>
+	</class>
+
+	<sql-query name="closestEdge">
+		<return alias="closestEdge" class="net.oitobstudio.spokes.route.BookendRouteSegment"/>
+			select ST_line_interpolate_point(e.wkb_geometry, ST_line_locate_point(e.wkb_geometry, :coordinate)) 
+					as {closestEdge.onGraphPoint},
+				e.ogc_fid as {closestEdge.id}, trim(both '\s' from e.street) as {closestEdge.street}, 
+				e.bike_seg_type as {closestEdge.segmentType}, e.source as {closestEdge.source}, 
+				e.target as {closestEdge.target}, e.wkb_geometry as {closestEdge.edge},
+				e.length as {closestEdge.length}
+			from
+				(SELECT ogc_fid, street, source, 
+	    			target, bike_seg_type, wkb_geometry,
+	    			length, st_distance(wkb_geometry, :coordinate) AS dist 
+	    		FROM dc_street_edges
+	    		WHERE wkb_geometry &amp;&amp; st_setsrid(st_box3d(:boundingGeom), 4326)
+	    		ORDER BY dist LIMIT 1) as e
+	</sql-query>
+
+	<sql-query name="shortestPath">
+		<return alias="routeSegment" class="net.oitobstudio.spokes.route.RouteSegment"/>
+		select e.ogc_fid as {routeSegment.id}, trim(both '\s' from e.street) as {routeSegment.street}, e.bike_seg_type as {routeSegment.segmentType},
+			e.source as {routeSegment.source}, e.target as {routeSegment.target}, e.wkb_geometry as {routeSegment.edge},
+			e.length as {routeSegment.length}
+		from dc_street_edges e,
+			(SELECT edge_id FROM shortest_path(
+				'SELECT e.ogc_fid as id, e.bike_seg_type, e.source, e.target, b.weight*e.cost as cost, 
+					(CASE WHEN e.trafdir NOT IN (''A'',''W'') THEN b.weight*e.rcost ELSE e.rcost END) as reverse_cost 
+				FROM dc_street_edges e, bike_seg_types b
+				WHERE e.bike_seg_type=b.bike_seg_type', 
+				:source, :target, true, true)) as route
+		where e.ogc_fid = route.edge_id
+	</sql-query>
+
+</hibernate-mapping>

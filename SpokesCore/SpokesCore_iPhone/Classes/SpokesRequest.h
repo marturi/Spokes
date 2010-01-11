@@ -20,6 +20,9 @@
 					  bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
 - (NSMutableURLRequest*) createGeocoderRequest:(NSString*)address;
 - (NSMutableURLRequest*) createReportTheftRequest:(RackPoint*)rackPoint;
+- (NSMutableURLRequest*) createAddRackRequest:(CLLocationCoordinate2D)newRackCoordinate 
+							  newRackLocation:(NSString*)newRackLocation
+								  newRackType:(NSString*)newRackType;
 - (void) signRequest:(NSMutableURLRequest*)request;
 
 @end

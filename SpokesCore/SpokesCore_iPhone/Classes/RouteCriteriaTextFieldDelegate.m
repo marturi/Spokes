@@ -32,9 +32,9 @@
 - (void) submitRoute {
 	RoutePoint *startPt = nil;
 	RoutePoint *endPt = nil;
-	startPt = [_rootViewController getRouteStartOrEndPoint:PointAnnotationTypeStart];
+	startPt = [_rootViewController makeStartOrEndRoutePoint:PointAnnotationTypeStart];
 	if(startPt != nil) {
-		endPt = [_rootViewController getRouteStartOrEndPoint:PointAnnotationTypeEnd];
+		endPt = [_rootViewController makeStartOrEndRoutePoint:PointAnnotationTypeEnd];
 		if(endPt != nil) {
 			NSDictionary *params = nil;
 			if(startPt != nil && endPt != nil) {

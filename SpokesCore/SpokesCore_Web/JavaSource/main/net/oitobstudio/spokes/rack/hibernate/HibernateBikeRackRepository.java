@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.transform.Transformers;
 import org.hibernate.type.CustomType;
 import org.hibernate.type.Type;
 import org.hibernatespatial.GeometryUserType;
@@ -20,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
-import net.oitobstudio.spokes.geometry.BoundingBox;
 import net.oitobstudio.spokes.rack.BikeRack;
 import net.oitobstudio.spokes.rack.BikeRackRepository;
 

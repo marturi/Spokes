@@ -56,6 +56,45 @@
 	}
 }
 
+- (void) addRack:(NSString*)rackLocation 
+		rackType:(int)rackType
+  rackCoordinate:(CLLocationCoordinate2D)rackCoordinate {
+	NSString* rackTypeStr = @"O";
+	if(rackType == 1) {
+		rackTypeStr = @"S";
+	} else if(rackType == 2) {
+		rackTypeStr = @"I";
+	}
+	SpokesRequest *addRackRequest = [[SpokesRequest alloc] init];
+	NSURLRequest *addRackURLRequest = [addRackRequest createAddRackRequest:rackCoordinate
+															newRackLocation:rackLocation 
+																newRackType:rackTypeStr];
+	[addRackRequest release];
+	[self downloadAndParse:addRackURLRequest];
+	if(self.spokesConnection != nil) {
+		do {
+			[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+		} while (!done);
+	}
+	self.spokesConnection = nil;
+	self.responseData = nil;
+	NSMutableDictionary *params = [NSMutableDictionary dictionary];
+	if(self.connectionError != nil) {
+		[params setObject:self.connectionError forKey:@"serviceError"];
+		self.connectionError = nil;
+		NSNotification *notification = [NSNotification notificationWithName:@"RackServiceError" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	} else {
+		if([self.response statusCode] == 201) {
+			[params setObject:@"YES" forKey:@"resourceCreated"];
+		} else {
+			[params setObject:@"NO" forKey:@"resourceCreated"];
+		}
+		NSNotification *notification = [NSNotification notificationWithName:@"RackAdded" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	}
+}
+
 #pragma mark -
 #pragma mark NSURLConnection Delegate methods
 
@@ -93,13 +132,9 @@
 	}
 }
 
-- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-	[self.currentElementValue appendString:string];
-}
-
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
   namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-	
+	[super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
 	if([elementName isEqualToString:@"Racks"]) {
 		return;
 	} else if([elementName isEqualToString:@"Rack"]) {
@@ -120,7 +155,6 @@
 - (void) dealloc {
 	self.racks = nil;
 	self.currentRackPoint = nil;
-	self.currentElementValue = nil;
 	[_managedObjectContext release];
 	[super dealloc];
 }

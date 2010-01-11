@@ -53,7 +53,7 @@ public class BikeRackServiceTest{
 
 	@Test
 	public void testAddRackPositive() throws Exception {
-		BikeRack newRack = new BikeRack("-73.9528557346964,40.6022703701773","My Rack Address");
+		BikeRack newRack = new BikeRack("-73.9528557346964,40.6022703701773","My Rack Address", 'O');
 		bikeRackService.addBikeRack(newRack);
 	}
 }

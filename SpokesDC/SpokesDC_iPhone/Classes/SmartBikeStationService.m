@@ -94,13 +94,10 @@
 	}
 }
 
-- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-	[self.currentElementValue appendString:string];
-}
-
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
   namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-	
+
+	[super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
 	if([elementName isEqualToString:@"Stations"]) {
 		return;
 	} else if([elementName isEqualToString:@"Station"]) {
@@ -121,7 +118,6 @@
 - (void) dealloc {
 	self.smartBikeStations = nil;
 	self.currentSmartBikeStationPoint = nil;
-	self.currentElementValue = nil;
 	[_managedObjectContext release];
 	[super dealloc];
 }

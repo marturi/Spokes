@@ -150,6 +150,35 @@
 	return req;
 }
 
+- (NSMutableURLRequest*) createAddRackRequest:(CLLocationCoordinate2D)newRackCoordinate 
+							  newRackLocation:(NSString*)newRackLocation
+								  newRackType:(NSString*)newRackType {
+	NSMutableString *urlString = [[NSMutableString alloc] init];
+	SpokesConstants* sc = [((SpokesAppDelegate*)[UIApplication sharedApplication].delegate) spokesConstants];
+	[urlString appendString:[sc baseURL]];
+	[urlString appendString:@"rack"];
+	
+	NSString *newRackCoordinateString = [NSString stringWithFormat:@"%f,%f",newRackCoordinate.longitude,newRackCoordinate.latitude];
+	
+	NSString *post =[NSString stringWithFormat:@"rackCoordinate=%@&rackAddress=%@&rackType=%@", newRackCoordinateString, newRackLocation, newRackType];
+	NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+	NSString *postLength = [NSString stringWithFormat:@"%d", [postData length]];
+	
+	NSURL *url = [[NSURL alloc] initWithString:urlString];
+	[urlString release];
+	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
+															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
+														 timeoutInterval:kRacksTimeout] autorelease];
+	[url release];
+	[req setHTTPMethod:@"POST"];
+	[req setValue:postLength forHTTPHeaderField:@"Content-Length"];
+	[req setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+	[req setHTTPBody:postData];	
+	[self signRequest:req];
+	[req addValue:@"gzip" forHTTPHeaderField:@"Accept-Encoding"];
+	return req;
+}
+
 - (void) signRequest:(NSMutableURLRequest*)request {
 	NSString* urlString = [request.URL absoluteString];
 	NSRange i = [urlString rangeOfString:@"icycle"];

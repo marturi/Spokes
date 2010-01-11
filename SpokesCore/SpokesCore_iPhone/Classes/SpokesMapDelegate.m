@@ -43,6 +43,7 @@
 														otherButtonTitles:@"Bike To Here", @"Bike From Here", nil];
 		actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
 		actionSheet.cancelButtonIndex = 2;
+		actionSheet.tag = 1;
 		[actionSheet showInView:_rootViewController.view];
 		[actionSheet release];
 	} else {

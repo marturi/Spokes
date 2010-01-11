@@ -133,13 +133,9 @@
 	}
 }
 
-- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-	[self.currentElementValue appendString:string];
-}
-
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
   namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-	
+	[super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
 	if([elementName isEqualToString:@"R"]) {
 		return;
 	} else if([elementName isEqualToString:@"Leg"]) {
@@ -162,7 +158,6 @@
 - (void) dealloc {
 	self.currentLeg = nil;
 	self.currentRoute = nil;
-	self.currentElementValue = nil;
 	[_managedObjectContext release];
 	[super dealloc];
 }

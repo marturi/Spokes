@@ -248,6 +248,14 @@
 					</object>
 					<int key="connectionID">170</int>
 				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchEventConnection" key="connection">
+						<string key="label">showAddView:</string>
+						<reference key="source" ref="299381666"/>
+						<reference key="destination" ref="372490531"/>
+					</object>
+					<int key="connectionID">173</int>
+				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
 				<object class="NSArray" key="orderedObjects">
@@ -378,7 +386,7 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>SpokesDCRootViewController</string>
 					<string>UIResponder</string>
-					<string>{{135, 147}, {320, 480}}</string>
+					<string>{{572, 89}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -411,7 +419,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">172</int>
+			<int key="maxID">173</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -436,8 +444,10 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>changeLeg:</string>
 							<string>clearValues:</string>
+							<string>doShowRoutePoints:</string>
 							<string>editRoute:</string>
 							<string>hideDirectionsNavBar:</string>
+							<string>showAddView:</string>
 							<string>showCurrentLocation:</string>
 							<string>showInfoView:</string>
 							<string>showRoutePoints:</string>
@@ -446,6 +456,8 @@
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>id</string>
+							<string>id</string>
 							<string>id</string>
 							<string>id</string>
 							<string>id</string>

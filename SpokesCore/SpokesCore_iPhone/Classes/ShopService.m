@@ -14,7 +14,6 @@
 @implementation ShopService
 
 @synthesize currentShopPoint	= currentShopPoint;
-@synthesize currentElementValue = currentElementValue;
 @synthesize shops				= shops;
 
 - (id) initWithManagedObjectContext:(NSManagedObjectContext*)managedObjectContext {
@@ -92,13 +91,9 @@
 	}
 }
 
-- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-	[self.currentElementValue appendString:string];
-}
-
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
   namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-	
+	[super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
 	if([elementName isEqualToString:@"Shops"]) {
 		return;
 	} else if([elementName isEqualToString:@"Shop"]) {
@@ -122,7 +117,6 @@
 - (void) dealloc {
 	self.shops = nil;
 	self.currentShopPoint = nil;
-	self.currentElementValue = nil;
 	[_managedObjectContext release];
 	[super dealloc];
 }

@@ -19,7 +19,6 @@ import net.oitobstudio.spokes.rack.BikeRack;
 import net.oitobstudio.spokes.rack.BikeRackCriteria;
 import net.oitobstudio.spokes.rack.BikeRackService;
 import net.oitobstudio.spokes.rack.BikeRacks;
-import net.oitobstudio.spokes.theft.BikeThefts;
 import net.oitobstudio.spokes.ws.SpokesBaseController;
 
 @Controller
@@ -64,9 +63,11 @@ public class BikeRackController extends SpokesBaseController{
 			HttpServletResponse response) {
 		String rackCoordinate = (String)addRackParams.getFirst("rackCoordinate");
 		String rackAddress = (String)addRackParams.getFirst("rackAddress");
+		String rackTypeStr = (String)addRackParams.getFirst("rackType");
+		Character rackType = rackTypeStr != null ? rackTypeStr.charAt(0) : null;
 		ModelAndView mav = new ModelAndView("marshaller");
 		try{
-			BikeRack newRack = new BikeRack(rackCoordinate, rackAddress);
+			BikeRack newRack = new BikeRack(rackCoordinate, rackAddress, rackType);
 			bikeRackService.addBikeRack(newRack);
 			SpokesConfirm confirm = new SpokesConfirm("The bike rack has been successfully reported.");
 			mav.addObject("SpokesResult", confirm);
@@ -79,7 +80,8 @@ public class BikeRackController extends SpokesBaseController{
 			response.setContentType("text/xml");
 		}catch(SpokesException e){
 			log.error(e);
-			mav.addObject("SpokesResult", new BikeThefts(e.getFault()));
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			mav.addObject("SpokesResult", new BikeRacks(e.getFault()));
 		}
 		return mav;
 	}

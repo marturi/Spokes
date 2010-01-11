@@ -6,14 +6,15 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LinearRing;
+
 import net.oitobstudio.spokes.SpokesException;
 import net.oitobstudio.spokes.geometry.BoundingBox;
 import net.oitobstudio.spokes.geometry.BoundingBoxRepository;
 import net.oitobstudio.spokes.geometry.GeometryUtils;
-
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LinearRing;
+import net.oitobstudio.spokes.rack.DuplicateRackException;
 
 public class BikeRackServiceImpl implements BikeRackService {
 	private GeometryFactory geometryFactory;
@@ -26,6 +27,8 @@ public class BikeRackServiceImpl implements BikeRackService {
 			newRack.makeRackPoint(geometryFactory, boundingBoxRepository.findGlobalBoundingBox());
 			if(!bikeRackRepository.isDuplicateRack(GeometryUtils.parseCoordinate(newRack.getRackCoordinate()))) {
 				bikeRackRepository.save(newRack);
+			}else{
+				throw new DuplicateRackException("There appears to already be a rack at or very near " + newRack.getAddress());
 			}
 		}
 	}

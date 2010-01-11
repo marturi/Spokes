@@ -14,7 +14,6 @@
 
 @interface RouteService : AbstractService {
 	NSManagedObjectContext *_managedObjectContext;
-	NSMutableString *currentElementValue;
 	Leg *currentLeg;
 	Route *currentRoute;
 	int coordinateCnt;
@@ -25,7 +24,6 @@
 - (void) deleteCurrentRoute;
 - (RouteService*) initWithManagedObjectContext:(NSManagedObjectContext*)managedObjectContext;
 
-@property (nonatomic, retain) NSMutableString *currentElementValue;
 @property (nonatomic, retain) Leg *currentLeg;
 @property (nonatomic, retain) Route *currentRoute;
 

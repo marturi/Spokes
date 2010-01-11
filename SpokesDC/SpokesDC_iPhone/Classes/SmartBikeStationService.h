@@ -14,7 +14,6 @@
 
 @interface SmartBikeStationService : AbstractService {
 	NSManagedObjectContext *_managedObjectContext;
-	NSMutableString *currentElementValue;
 	SmartBikeStationPoint *currentSmartBikeStationPoint;
 	NSMutableArray *smartBikeStations;
 }
@@ -23,7 +22,6 @@
 - (void) findClosestSmartBikeStations:(CLLocationCoordinate2D)topLeftCoordinate 
 	bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
 
-@property (nonatomic, retain) NSMutableString *currentElementValue;
 @property (nonatomic, retain) SmartBikeStationPoint *currentSmartBikeStationPoint;
 @property (nonatomic, retain) NSMutableArray *smartBikeStations;
 

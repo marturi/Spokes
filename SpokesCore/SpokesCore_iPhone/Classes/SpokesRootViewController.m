@@ -12,6 +12,7 @@
 #import "RoutePointDetailViewController.h"
 #import "SpokesInfoViewController.h"
 #import "NoConnectionViewController.h"
+#import "AddRackViewController.h"
 #import "Route.h"
 #import "Leg.h"
 #import "RoutePoint.h"
@@ -54,6 +55,7 @@
 @synthesize isLegTransition					= isLegTransition;
 @synthesize routePointDetailViewController	= routePointDetailViewController;
 @synthesize spokesInfoViewController		= spokesInfoViewController;
+@synthesize addRackViewController			= addRackViewController;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -141,6 +143,7 @@
 	self.routeCriteriaView = nil;
 	self.routePointDetailViewController = nil;
 	self.spokesInfoViewController = nil;
+	self.addRackViewController = nil;
 }
 
 - (void) showRouteCriteriaView {
@@ -155,6 +158,7 @@
 	self.routeNavigationView = nil;
 	self.routePointDetailViewController = nil;
 	self.spokesInfoViewController = nil;
+	self.addRackViewController = nil;
 }
 
 - (void) showRoutePointDetail {
@@ -176,6 +180,17 @@
 	}
 	[self.routeCriteriaView setTextFieldVisibility:NO];
 	[self.navigationController pushViewController:self.spokesInfoViewController animated:YES];
+	[self.navigationController setNavigationBarHidden:NO animated:YES];
+}
+
+- (void) showAddRackView {
+	if(self.addRackViewController == nil) {
+		AddRackViewController *arvc = [[AddRackViewController alloc] initWithViewController:self];
+		self.addRackViewController = arvc;
+		[arvc release];
+	}
+	[self.routeCriteriaView setTextFieldVisibility:NO];
+	[self.navigationController pushViewController:self.addRackViewController animated:YES];
 	[self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
@@ -305,34 +320,23 @@
 #pragma mark -
 #pragma mark RoutePoint management
 
-- (RoutePoint*) getRouteStartOrEndPoint:(PointAnnotationType)type {
+- (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type {
 	NSArray *results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:type];
 	RoutePoint *routePt = (results.count > 0) ? [results objectAtIndex:0] : nil;
 	if(routePt == nil) {
 		NSString *addressText = (type == PointAnnotationTypeStart) ? self.routeCriteriaView.startAddress.text : self.routeCriteriaView.endAddress.text;
-		if([addressText isEqualToString:@"Current Location"]) {
-			BOOL locationServicesEnabled = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).locationServicesEnabled;
-			if(_mapView.showsUserLocation && locationServicesEnabled) {
-				routePt = [RoutePoint routePointWithCoordinate:_mapView.userLocation.location.coordinate 
-													   context:managedObjectContext];
-				routePt.address = @"Current Location";
-			} else {
-				UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Can't Find You" 
-																message:@"We can't determine your current location.  Please enter an address instead."
-															   delegate:self 
-													  cancelButtonTitle:nil 
-													  otherButtonTitles:@"OK", nil];
-				[alert show];
-				[alert release];
-			}
-		} else {
-			GeocoderService *geocoderService = [[GeocoderService alloc] init];
-			routePt = [geocoderService createRoutePointFromAddress:type 
-													   addressText:addressText 
-														   context:managedObjectContext];
-			[geocoderService release];
-		}
+		routePt = [self makeMapPoint:type addressText:addressText];
 	}
+	return routePt;
+}
+
+- (RoutePoint*) makeMapPoint:(PointAnnotationType)type addressText:(NSString*)addressText {
+	RoutePoint *routePt = nil;
+	GeocoderService *geocoderService = [[GeocoderService alloc] initWithMapView:_mapView];
+	routePt = [geocoderService createRoutePointFromAddress:type 
+											   addressText:addressText 
+												   context:managedObjectContext];
+	[geocoderService release];
 	return routePt;
 }
 
@@ -428,6 +432,19 @@
 
 - (IBAction) showInfoView:(id)sender {
 	[self performSelector:@selector(showSpokesInfoView) withObject:nil afterDelay:0.01];
+}
+
+- (IBAction) showAddView:(id)sender {
+	UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@""
+															 delegate:self 
+													cancelButtonTitle:@"Cancel" 
+											   destructiveButtonTitle:nil
+													otherButtonTitles:@"Report Theft", @"Add Rack", @"Add Shop", nil];
+	actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+	actionSheet.cancelButtonIndex = 3;
+	actionSheet.tag = 2;
+	[actionSheet showInView:self.view];
+	[actionSheet release];
 }
 
 #pragma mark -
@@ -595,26 +612,39 @@
 #pragma mark UIActionSheetDelegate
 
 - (void) actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-	if(buttonIndex != actionSheet.cancelButtonIndex) {
-		if(buttonIndex == 0) {
-			RoutePointService *routePointService = [[RoutePointService alloc] init];
-			[routePointService assignPointAsRoutePointOfType:PointAnnotationTypeEnd 
-													 mapView:_mapView 
-													 context:managedObjectContext];
-			[routePointService release];
-			[self initAdresses];
-			[self expireRoute];
-		} else if(buttonIndex == 1) {
-			RoutePointService *routePointService = [[RoutePointService alloc] init];
-			[routePointService assignPointAsRoutePointOfType:PointAnnotationTypeStart 
-													 mapView:_mapView 
-													 context:managedObjectContext];
-			[routePointService release];
-			[self initAdresses];
-			[self expireRoute];
+	if(actionSheet.tag == 1) {
+		if(buttonIndex != actionSheet.cancelButtonIndex) {
+			if(buttonIndex == 0) {
+				RoutePointService *routePointService = [[RoutePointService alloc] init];
+				[routePointService assignPointAsRoutePointOfType:PointAnnotationTypeEnd 
+														 mapView:_mapView 
+														 context:managedObjectContext];
+				[routePointService release];
+				[self initAdresses];
+				[self expireRoute];
+			} else if(buttonIndex == 1) {
+				RoutePointService *routePointService = [[RoutePointService alloc] init];
+				[routePointService assignPointAsRoutePointOfType:PointAnnotationTypeStart 
+														 mapView:_mapView 
+														 context:managedObjectContext];
+				[routePointService release];
+				[self initAdresses];
+				[self expireRoute];
+			}
+			if(self.routeCriteriaView == nil) {
+				[self showRouteCriteriaView];
+			}
 		}
-		if(self.routeCriteriaView == nil) {
-			[self showRouteCriteriaView];
+	} else if(actionSheet.tag == 2) {
+		if(buttonIndex != actionSheet.cancelButtonIndex) {
+			if(buttonIndex == 0) {
+				
+			} else if(buttonIndex == 1) {
+				actionSheet.delegate = nil;
+				[self showAddRackView];
+			} else if(buttonIndex == 2) {
+				
+			}
 		}
 	}
 }
@@ -655,6 +685,7 @@
 	self.mapView = nil;
 	self.mapTypeToggle = nil;
 	self.spokesInfoViewController = nil;
+	self.addRackViewController = nil;
 	[managedObjectContext release];
 	[viewMode release];
     [super dealloc];

@@ -14,7 +14,6 @@
 
 @interface RackService : AbstractService {
 	NSManagedObjectContext *_managedObjectContext;
-	NSMutableString *currentElementValue;
 	RackPoint *currentRackPoint;
 	NSMutableArray *racks;
 }
@@ -22,8 +21,8 @@
 - (id) initWithManagedObjectContext:(NSManagedObjectContext*)managedObjectContext;
 - (void) findClosestRacks:(CLLocationCoordinate2D)topLeftCoordinate 
 		bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
+- (void) addRack:(NSString*)rackLocation rackType:(int)rackType rackCoordinate:(CLLocationCoordinate2D)rackCoordinate;
 
-@property (nonatomic, retain) NSMutableString *currentElementValue;
 @property (nonatomic, retain) RackPoint *currentRackPoint;
 @property (nonatomic, retain) NSMutableArray *racks;
 

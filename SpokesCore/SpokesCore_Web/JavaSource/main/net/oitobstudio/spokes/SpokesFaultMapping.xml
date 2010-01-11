@@ -6,7 +6,7 @@
 	<class name="net.oitobstudio.spokes.SpokesFault">
 		<map-to xml="Fault"/>
 		<field name="FaultMsg" type="java.lang.String">
-			<bind-xml name="Msg" node="element"/>
+			<bind-xml name="FaultMsg" node="element"/>
 		</field>
 	</class>
 

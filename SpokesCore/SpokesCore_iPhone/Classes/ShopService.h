@@ -14,7 +14,6 @@
 
 @interface ShopService : AbstractService {
 	NSManagedObjectContext *_managedObjectContext;
-	NSMutableString *currentElementValue;
 	ShopPoint *currentShopPoint;
 	NSMutableArray *shops;
 }
@@ -23,7 +22,6 @@
 - (void) findClosestShops:(CLLocationCoordinate2D)topLeftCoordinate 
 		bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
 
-@property (nonatomic, retain) NSMutableString *currentElementValue;
 @property (nonatomic, retain) ShopPoint *currentShopPoint;
 @property (nonatomic, retain) NSMutableArray *shops;
 

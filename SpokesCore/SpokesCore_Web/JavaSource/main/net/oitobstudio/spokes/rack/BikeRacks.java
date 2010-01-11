@@ -28,7 +28,10 @@ public class BikeRacks {
 	}
 
 	public List<BikeRack> getBikeRacks() {
-		return Collections.unmodifiableList(bikeRacks);
+		if(bikeRacks != null) {
+			return Collections.unmodifiableList(bikeRacks);
+		}
+		return null;
 	}
 
 	public SpokesFault getBikeRackFault() {

@@ -10,7 +10,7 @@
 #import <CoreData/CoreData.h>
 #import "PointAnnotation.h"
 
-@class RoutePointDetailViewController,RouteCriteriaView,RouteNavigationView,RouteView,SpokesInfoViewController;
+@class RoutePointDetailViewController,RouteCriteriaView,RouteNavigationView,RouteView,SpokesInfoViewController,AddRackViewController;
 
 @interface SpokesRootViewController : UIViewController <UIActionSheetDelegate> {
 	IBOutlet MKMapView *_mapView;
@@ -19,6 +19,7 @@
 	RouteNavigationView *routeNavigationView;
 	RoutePointDetailViewController *routePointDetailViewController;
 	SpokesInfoViewController *spokesInfoViewController;
+	AddRackViewController *addRackViewController;
 	NSManagedObjectContext *managedObjectContext;
 	NSString *viewMode;
 	RouteView *currentRouteView;
@@ -31,6 +32,7 @@
 - (IBAction) showCurrentLocation:(id)sender;
 - (IBAction) toggleMapType:(id)sender;
 - (IBAction) showInfoView:(id)sender;
+- (IBAction) showAddView:(id)sender;
 - (void) clearValues:(id)sender;
 - (void) hideDirectionsNavBar:(id)sender;
 - (void) startNavigatingRoute:(id)sender;
@@ -40,8 +42,10 @@
 - (void) removeRouteAnnotations;
 - (void) showRouteCriteriaView;
 - (void) showRoutePointDetail;
+- (void) showAddRackView;
 - (BOOL) validateRouteCriteria;
-- (RoutePoint*) getRouteStartOrEndPoint:(PointAnnotationType)type;
+- (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type;
+- (RoutePoint*) makeMapPoint:(PointAnnotationType)type addressText:(NSString*)addressText;
 - (void) handleFieldChange:(UITextField*)textField;
 - (void) initAdresses;
 - (void) expireRoute;
@@ -56,6 +60,7 @@
 @property (nonatomic, retain) RouteView *currentRouteView;
 @property (nonatomic, retain) RoutePointDetailViewController *routePointDetailViewController;
 @property (nonatomic, retain) SpokesInfoViewController *spokesInfoViewController;
+@property (nonatomic, retain) AddRackViewController *addRackViewController;
 @property BOOL isLegTransition;
 
 @end

@@ -14,6 +14,8 @@
 @synthesize spokesConnection	= spokesConnection;
 @synthesize connectionError		= connectionError;
 @synthesize response			= _response;
+@synthesize faultMsg			= faultMsg;
+@synthesize currentElementValue	= currentElementValue;
 
 - (void) downloadAndParse:(NSURLRequest*)request {
 	done = NO;
@@ -59,10 +61,24 @@
 	}
 }
 
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
+	[self.currentElementValue appendString:string];
+}
+
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
+  namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
+	if([elementName isEqualToString:@"FaultMsg"]) {
+		self.faultMsg = [NSString stringWithString:self.currentElementValue];
+		[self.currentElementValue setString:@""];
+	}
+}
+
 #pragma mark -
 #pragma mark Cleanup
 
 - (void) dealloc {
+	self.faultMsg = nil;
+	self.currentElementValue = nil;
 	[responseData release];
 	[spokesConnection release];
 	[connectionError release];

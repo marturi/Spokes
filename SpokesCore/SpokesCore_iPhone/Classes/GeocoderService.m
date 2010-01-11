@@ -14,7 +14,6 @@
 
 @interface GeocoderService()
 
-- (BOOL) validateCoordinate:(CLLocationCoordinate2D)coord;
 - (void) showOutOfBoundsError;
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal;
 
@@ -24,6 +23,14 @@
 @implementation GeocoderService
 
 @synthesize addressLocation = addressLocation;
+@synthesize done			= done;
+
+- (id) initWithMapView:(MKMapView*)mapView {
+	if ((self = [super init])) {
+		_mapView = [mapView retain];
+	}
+	return self;
+}
 
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal {
 	[UIApplication sharedApplication].networkActivityIndicatorVisible = [onOffVal intValue];
@@ -65,17 +72,34 @@
 }
 
 - (void) addressLocation:(NSString*)addressText {
-	SpokesRequest *geocoderRequest = [[SpokesRequest alloc] init];
-	NSURLRequest *req = [geocoderRequest createGeocoderRequest:addressText];
-	[geocoderRequest release];
-	[self downloadAndParse:req];
-	if(self.spokesConnection != nil) {
-		do {
-			[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-		} while (!done);
+	if([addressText isEqualToString:@"Current Location"]) {
+		BOOL locationServicesEnabled = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).locationServicesEnabled;
+		if(_mapView.showsUserLocation && locationServicesEnabled) {
+			self.addressLocation = _mapView.userLocation.location;
+			done = YES;
+		} else {
+			UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Can't Find You" 
+															message:@"We can't determine your current location.  Please enter an address instead."
+														   delegate:self 
+												  cancelButtonTitle:nil 
+												  otherButtonTitles:@"OK", nil];
+			[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
+			[alert release];
+			done = YES;
+		}
+	} else {
+		SpokesRequest *geocoderRequest = [[SpokesRequest alloc] init];
+		NSURLRequest *req = [geocoderRequest createGeocoderRequest:addressText];
+		[geocoderRequest release];
+		[self downloadAndParse:req];
+		if(self.spokesConnection != nil) {
+			do {
+				[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+			} while (!done);
+		}
+		self.spokesConnection = nil;
+		self.responseData = nil;
 	}
-	self.spokesConnection = nil;
-	self.responseData = nil;
 }
 
 - (BOOL) validateCoordinate:(CLLocationCoordinate2D)coord {
@@ -112,6 +136,7 @@
 
 - (void) dealloc {
 	self.addressLocation = nil;
+	[_mapView release];
 	[super dealloc];
 }
 

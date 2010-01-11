@@ -14,6 +14,8 @@
 	BOOL isFault;
 	NSError *connectionError;
 	NSHTTPURLResponse *_response;
+	NSString *faultMsg;
+	NSMutableString *currentElementValue;
 }
 
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal;
@@ -23,5 +25,7 @@
 @property (nonatomic, retain) NSURLConnection *spokesConnection;
 @property (nonatomic, retain) NSError *connectionError;
 @property (nonatomic, retain) NSHTTPURLResponse *response;
+@property (nonatomic, retain) NSString *faultMsg;
+@property (nonatomic, retain) NSMutableString *currentElementValue;
 
 @end

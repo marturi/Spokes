@@ -24,9 +24,10 @@ public class BikeRack {
 		this.id = id;
 	}
 
-	public BikeRack(String rackCoordinate, String address) {
+	public BikeRack(String rackCoordinate, String address, Character rackType) {
 		this.rackCoordinate = rackCoordinate;
 		this.address = address;
+		this.rackType = rackType;
 	}
 
 	public long getId() {

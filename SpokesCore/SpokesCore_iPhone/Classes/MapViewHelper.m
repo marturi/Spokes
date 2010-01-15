@@ -96,6 +96,7 @@
 			}
 			[mapView setRegion:fitRegion animated:NO];
 		} else {
+			//NSLog(@"%f,%f,%f,%f",region.center.longitude,region.center.latitude,region.span.longitudeDelta,region.span.latitudeDelta);
 			[mapView setRegion:region animated:NO];
 		}
 	}

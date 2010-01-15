@@ -28,4 +28,8 @@
 	return nil;
 }
 
+- (NSString*) geocodeViewportBias {
+	return nil;
+}
+
 @end

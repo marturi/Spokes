@@ -19,6 +19,8 @@
 
 #define kAdWhirlApplicationKey @"11b9219f4707102d840c2e1e0de86337"
 
+#define kGeocodeViewportBias @"ll=38.900104,-77.031563&spn=0.233046,0.253621"
+
 @interface SpokesDCConstants : SpokesConstants
 
 @end

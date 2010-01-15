@@ -29,9 +29,12 @@
 }
 
 - (NSMutableURLRequest*) createGeocoderRequest:(NSString*)address {
+	SpokesConstants* sc = [((SpokesAppDelegate*)[UIApplication sharedApplication].delegate) spokesConstants];
 	NSMutableString *urlString = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"http://maps.google.com/maps/geo?q=%@&output=csv", 
 																		  [address stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
-	[urlString appendString:@"&ll=40.706480,-73.977615&spn=0.427378,0.564982&sensor=true&key="];
+	[urlString appendString:@"&"];
+	[urlString appendString:[sc geocodeViewportBias]];
+	[urlString appendString:@"&sensor=true&key="];
 	[urlString appendString:kGoogleMapsAPIKey];
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];

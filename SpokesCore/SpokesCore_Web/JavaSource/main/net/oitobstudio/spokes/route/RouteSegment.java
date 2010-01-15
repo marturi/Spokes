@@ -7,15 +7,15 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.algorithm.Angle;
 
 public class RouteSegment {
-	private long id;
-	private LineString edge;
-	private Character segmentType;
-	private String street;
-	private int source;
-	private int target;
-	private double length;
-	private RouteSegment prevSegment;
-	private RouteSegment nextSegment;
+	protected long id;
+	protected LineString edge;
+	protected Character segmentType;
+	protected String street;
+	protected int source;
+	protected int target;
+	protected double length;
+	protected RouteSegment prevSegment;
+	protected RouteSegment nextSegment;
 
 	public long getId(){
 		return id;

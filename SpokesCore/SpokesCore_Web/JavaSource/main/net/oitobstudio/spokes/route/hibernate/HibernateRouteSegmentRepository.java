@@ -36,30 +36,36 @@ public class HibernateRouteSegmentRepository extends HibernateDaoSupport impleme
 		geometryType = new CustomType(GeometryUserType.class, null);
 	}
 
-	public BookendRouteSegment findClosestEdge(final Coordinate coordinate){
+	public List<BookendRouteSegment> findClosestEdges(final Coordinate coordinate){
 		final LinearRing bb = BoundingBox.makeBoundingGeometryForPoint(geometryFactory, coordinate, .005);
-		BookendRouteSegment closestEdge =  getHibernateTemplate().execute(new HibernateCallback<BookendRouteSegment>() {
-			public BookendRouteSegment doInHibernate(Session session) throws HibernateException,
+		List<BookendRouteSegment> closestEdges =  getHibernateTemplate().execute(new HibernateCallback<List<BookendRouteSegment>>() {
+			public List<BookendRouteSegment> doInHibernate(Session session) throws HibernateException,
 					SQLException {
 				Query q = session.getNamedQuery("closestEdge");
 				q.setParameter("coordinate", geometryFactory.createPoint(coordinate), geometryType);
 				q.setParameter("boundingGeom", bb, geometryType);
-				List<BookendRouteSegment> r = q.list();
-				if(r != null && r.size() > 0){
-					return r.get(0);
-				}
-				return null;
+				return q.list();
 			}
 		});
-		return closestEdge;
+		initBookend(closestEdges);
+		return closestEdges;
+	}
+
+	private void initBookend(List<BookendRouteSegment> edges){
+		if(edges != null && edges.size() == 2){
+			BookendRouteSegment targetSegment = edges.get(0);
+			targetSegment.setNearestNeighbor(edges.get(1));
+		}
 	}
 
 	public List<RouteSegment> findShortestPathRoute(BookendRouteSegment startEdge, 
 			BookendRouteSegment endEdge, 
 			Map<String,String> options){
+		//System.out.println("startEdge.getStartOrEndVertex() = " + startEdge.getStartOrEndVertex());
+		//System.out.println("endEdge.getStartOrEndVertex() = " + endEdge.getStartOrEndVertex());
 		List<RouteSegment> segments = getHibernateTemplate().findByNamedQueryAndNamedParam("shortestPath", 
 				new String[]{"source", "target"}, 
-				new Object[]{new Integer(startEdge.getTarget()), new Integer(endEdge.getSource())});
+				new Object[]{new Integer(startEdge.getStartOrEndVertex()), new Integer(endEdge.getStartOrEndVertex())});
 		addBookendSegment(segments, startEdge, true);
 		addBookendSegment(segments, endEdge, false);
 		return segments;
@@ -68,6 +74,7 @@ public class HibernateRouteSegmentRepository extends HibernateDaoSupport impleme
 	private void addBookendSegment(List<RouteSegment> segments, 
 			BookendRouteSegment segment, 
 			boolean isStartEdge) {
+		checkForZeroLengthBookend(segments, segment, isStartEdge);
 		int index = isStartEdge ? 0 : (segments.size() - 1);
 		RouteSegment rs = segments.get(index);
 		if(segment.getSource() == rs.getSource() && segment.getTarget() == rs.getTarget()) {
@@ -77,6 +84,15 @@ public class HibernateRouteSegmentRepository extends HibernateDaoSupport impleme
 			segments.add(0, segment);
 		} else {
 			segments.add(segment);
+		}
+	}
+
+	private void checkForZeroLengthBookend(List<RouteSegment> segments, 
+			BookendRouteSegment segment, 
+			boolean isStartEdge) {
+		if(segment.distanceFromVertex() < 1) {
+			int index = isStartEdge ? 0 : (segments.size() - 1);
+			segment.gobbleSegment(segments.remove(index));
 		}
 	}
 

@@ -28,4 +28,8 @@
 	return kAdWhirlApplicationKey;
 }
 
+- (NSString*) geocodeViewportBias {
+	return kGeocodeViewportBias;
+}
+
 @end

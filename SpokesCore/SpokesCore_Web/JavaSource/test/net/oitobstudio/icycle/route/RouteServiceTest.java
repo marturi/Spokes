@@ -2,6 +2,7 @@ package net.oitobstudio.icycle.route;
 
 import java.io.StringWriter;
 import java.util.Map;
+import java.util.List;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
@@ -25,7 +26,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.vividsolutions.jts.geom.Coordinate;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={"/routeService.xml", "/iCycleHibernateTemplate.xml", "/testDataSource.xml", "/commonContext.xml"})
+@ContextConfiguration(locations={"/routeService.xml", "/spokesHibernateTemplate.xml", "/testDataSource.xml", "/commonContext.xml"})
 
 public class RouteServiceTest{
 	@Autowired
@@ -39,11 +40,11 @@ public class RouteServiceTest{
 
 	@Test
 	public void testGetClosestEdge() throws Exception{
-		Coordinate startPoint = new Coordinate(-74.000633,40.604256);
-		RouteSegment closestEdge = routeSegmentRepository.findClosestEdge(startPoint);
-		System.out.println(closestEdge.getId());
-		System.out.println(closestEdge.getStreet());
-		System.out.println(closestEdge.getEdge().toText());
+		//Coordinate startPoint = new Coordinate(-73.9808921,40.7534881);
+		Coordinate startPoint = new Coordinate(-73.9805820,40.7534670);
+		List<BookendRouteSegment> closestEdges = routeSegmentRepository.findClosestEdges(startPoint);
+		System.out.println(closestEdges.get(0).getId());
+		System.out.println(closestEdges.get(0).getStreet());
 	}
 
 	@Test
@@ -55,8 +56,8 @@ public class RouteServiceTest{
 	@Test
 	public void testGetShortestPathRoute() throws Exception{
 		//-73.983911,40.674180  -73.983237,40.672976
-		String startCoord = "-73.983911,40.674180";
-		String endCoord = "-73.983237,40.672976";
+		String startCoord = "-73.9808921,40.7534881";
+		String endCoord = "-74.0006328,40.6042563";
 		Map<String, String> options = null;
 		RouteCriteria criteria = new RouteCriteria(startCoord, endCoord, options);
 		Route route = routeService.getShortestPathRoute(criteria);

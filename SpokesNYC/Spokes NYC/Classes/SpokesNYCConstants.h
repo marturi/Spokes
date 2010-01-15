@@ -13,9 +13,11 @@
 #define maxLatitude 40.920104
 #define minLatitude 40.492856
 
-#define kSpokesBaseURL @"http://localhost:8080/SpokesNYC_Web/icycle/"
+#define kSpokesBaseURL @"http://localhost:8080/iCycle_Web/icycle/"
 
 #define kAdWhirlApplicationKey @"b4eab3fc0faa102dada5b193ce4f21b9"
+
+#define kGeocodeViewportBias @"ll=40.706480,-73.977615&spn=0.427378,0.564982"
 
 @interface SpokesNYCConstants : SpokesConstants
 

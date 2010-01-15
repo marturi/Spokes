@@ -13,7 +13,10 @@ import com.vividsolutions.jts.linearref.LinearLocation;
 
 public class BookendRouteSegment extends RouteSegment {
 	private Point onGraphPoint;
+	private Point onGraphPointReprojected;
+	private LineString edgeReprojected;
 	private LineString trimmedEdge;
+	private RouteSegment nearestNeighbor;
 
 	public Point getOnGraphPoint() {
 		return onGraphPoint;
@@ -21,6 +24,44 @@ public class BookendRouteSegment extends RouteSegment {
 
 	public boolean isStartEdge(){
 		return getNextSegment() != null;
+	}
+
+	private boolean isIntersection(){
+		if(onGraphPointReprojected.isWithinDistance(edgeReprojected.getStartPoint(), 2) ||
+				onGraphPointReprojected.isWithinDistance(edgeReprojected.getEndPoint(), 2)) {
+			return true;
+		}
+		return false;
+	}
+
+	public double distanceFromVertex(){
+		return Math.min(onGraphPointReprojected.distance(edgeReprojected.getStartPoint()),
+				onGraphPointReprojected.distance(edgeReprojected.getEndPoint()));
+	}
+
+	public int getStartOrEndVertex(){
+		int startOrEndVertex = isStartEdge() ? getTarget() : getSource();
+		if(isIntersection() && nearestNeighbor != null){
+			if(getSource() == nearestNeighbor.getSource() ||
+					getSource() == nearestNeighbor.getTarget()){
+				startOrEndVertex = getSource();
+			} else if(getTarget() == nearestNeighbor.getSource() ||
+					getTarget() == nearestNeighbor.getTarget()){
+				startOrEndVertex = getTarget();
+			}
+		}
+		return startOrEndVertex;
+	}
+
+	public void gobbleSegment(RouteSegment gobbledSegment) {
+		this.id = gobbledSegment.id;
+		this.edge = gobbledSegment.edge;
+		this.segmentType = gobbledSegment.segmentType;
+		this.street = gobbledSegment.street;
+		this.source = gobbledSegment.source;
+		this.target = gobbledSegment.target;
+		this.prevSegment = gobbledSegment.prevSegment;
+		this.nextSegment = gobbledSegment.nextSegment;
 	}
 
 	public double getLength(){
@@ -72,14 +113,17 @@ public class BookendRouteSegment extends RouteSegment {
 					Geometry intersection = super.getEdge().intersection(getNextSegment().getEdge());
 					if(intersection != null){
 						startPointLocation = indexedLine.indexOf(onGraphPoint.getCoordinate());
-						Coordinate endPointCoordinate = intersection.getCentroid().getCoordinate();
-						if(intersection instanceof LineString){
-							double distS = onGraphPoint.distance(((LineString) intersection).getStartPoint());
-							double distE = onGraphPoint.distance(((LineString) intersection).getEndPoint());
-							endPointCoordinate = distS > distE ? ((LineString)intersection).getStartPoint().getCoordinate() :
-								((LineString)intersection).getEndPoint().getCoordinate();
+						Point centroid = intersection.getCentroid();
+						if(centroid != null) {
+							Coordinate endPointCoordinate = centroid.getCoordinate();
+							if(intersection instanceof LineString){
+								double distS = onGraphPoint.distance(((LineString) intersection).getStartPoint());
+								double distE = onGraphPoint.distance(((LineString) intersection).getEndPoint());
+								endPointCoordinate = distS > distE ? ((LineString)intersection).getStartPoint().getCoordinate() :
+									((LineString)intersection).getEndPoint().getCoordinate();
+							}
+							endPointLocation = indexedLine.indexOf(endPointCoordinate);
 						}
-						endPointLocation = indexedLine.indexOf(endPointCoordinate);
 					}
 				}
 			}else{
@@ -87,14 +131,17 @@ public class BookendRouteSegment extends RouteSegment {
 					Geometry intersection = super.getEdge().intersection(getPrevSegment().getEdge());
 					if(intersection != null){
 						endPointLocation = indexedLine.indexOf(onGraphPoint.getCoordinate());
-						Coordinate startPointCoordinate = intersection.getCentroid().getCoordinate();
-						if(intersection instanceof LineString){
-							double distS = onGraphPoint.distance(((LineString) intersection).getStartPoint());
-							double distE = onGraphPoint.distance(((LineString) intersection).getEndPoint());
-							startPointCoordinate = distS > distE ? ((LineString)intersection).getStartPoint().getCoordinate() :
-								((LineString)intersection).getEndPoint().getCoordinate();
+						Point centroid = intersection.getCentroid();
+						if(centroid != null){
+							Coordinate startPointCoordinate = centroid.getCoordinate();
+							if(intersection instanceof LineString){
+								double distS = onGraphPoint.distance(((LineString) intersection).getStartPoint());
+								double distE = onGraphPoint.distance(((LineString) intersection).getEndPoint());
+								startPointCoordinate = distS > distE ? ((LineString)intersection).getStartPoint().getCoordinate() :
+									((LineString)intersection).getEndPoint().getCoordinate();
+							}
+							startPointLocation = indexedLine.indexOf(startPointCoordinate);
 						}
-						startPointLocation = indexedLine.indexOf(startPointCoordinate);
 					}
 				}
 			}
@@ -103,6 +150,10 @@ public class BookendRouteSegment extends RouteSegment {
 			}
 		}
 		return trimmedEdge;
+	}
+
+	public void setNearestNeighbor(RouteSegment nearestNeighbor) {
+		this.nearestNeighbor = nearestNeighbor;
 	}
 
 	public String getHeading(){

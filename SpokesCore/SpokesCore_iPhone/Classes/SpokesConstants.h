@@ -26,5 +26,6 @@
 - (CLLocationCoordinate2D) maxCoordinate;
 - (NSString*) baseURL;
 - (NSString*) adWhirlAppKey;
+- (NSString*) geocodeViewportBias;
 
 @end

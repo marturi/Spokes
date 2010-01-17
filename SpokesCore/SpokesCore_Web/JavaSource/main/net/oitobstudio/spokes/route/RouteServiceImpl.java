@@ -22,10 +22,10 @@ public class RouteServiceImpl implements RouteService {
 		Point endPoint = geometryFactory.createPoint(routeCriteria.getEndPoint());
 		List<BookendRouteSegment> startEdges = routeSegmentRepository.findClosestEdges(startPoint.getCoordinate());
 		List<BookendRouteSegment> endEdges = routeSegmentRepository.findClosestEdges(endPoint.getCoordinate());
-		if(startEdges == null || endEdges == null){
+		if(startEdges == null || startEdges.isEmpty() || endEdges == null || endEdges.isEmpty()){
 			int exType = ClosestEdgeNotFoundException.END;
 			String badCoord = endPoint.getCoordinate().toString();
-			if(startEdges == null){
+			if(startEdges == null || startEdges.isEmpty()){
 				exType = ClosestEdgeNotFoundException.START;
 				badCoord = startPoint.getCoordinate().toString();
 			}

@@ -37,7 +37,7 @@ public class HibernateRouteSegmentRepository extends HibernateDaoSupport impleme
 	}
 
 	public List<BookendRouteSegment> findClosestEdges(final Coordinate coordinate){
-		final LinearRing bb = BoundingBox.makeBoundingGeometryForPoint(geometryFactory, coordinate, .005);
+		final LinearRing bb = BoundingBox.makeBoundingGeometryForPoint(geometryFactory, coordinate, .05);
 		List<BookendRouteSegment> closestEdges =  getHibernateTemplate().execute(new HibernateCallback<List<BookendRouteSegment>>() {
 			public List<BookendRouteSegment> doInHibernate(Session session) throws HibernateException,
 					SQLException {

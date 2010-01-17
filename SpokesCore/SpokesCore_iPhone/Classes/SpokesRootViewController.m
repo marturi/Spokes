@@ -76,6 +76,11 @@
 											 selector:@selector(handleServiceError:)
 												 name:@"ServiceError" 
 											   object:nil];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(handleSpokesFault:)
+												 name:@"SpokesFault" 
+											   object:nil];
 
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	viewMode = [defaults objectForKey:@"viewMode"];
@@ -482,6 +487,18 @@
 
 #pragma mark -
 #pragma mark Error Handling
+
+- (void) handleSpokesFault:(NSNotification*)notification {
+	NSDictionary *params = [notification userInfo];
+	NSString *faultMessage = [params objectForKey:@"faultMessage"];
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Whoops!" 
+													message:faultMessage 
+												   delegate:self 
+										  cancelButtonTitle:nil 
+										  otherButtonTitles:@"OK", nil];
+	[alert show];
+	[alert release];
+}
 
 - (void) handleServiceError:(NSNotification*)notification {
 	NSDictionary *params = [notification userInfo];

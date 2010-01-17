@@ -66,15 +66,17 @@
 		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
 		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
 	} else {
-		if(self.currentRoute != nil) {
-			self.currentRoute.startAddress = [startPoint address];
-			self.currentRoute.endAddress = [endPoint address];
-			params = [NSMutableDictionary dictionaryWithObjectsAndKeys:startPoint,@"startPoint",endPoint,@"endPoint",self.currentRoute,@"newRoute",nil];
-		} else {
-			params = [NSMutableDictionary dictionaryWithObject:[NSNull null] forKey:@"newRoute"];
+		if(!isFault) {
+			if(self.currentRoute != nil) {
+				self.currentRoute.startAddress = [startPoint address];
+				self.currentRoute.endAddress = [endPoint address];
+				params = [NSMutableDictionary dictionaryWithObjectsAndKeys:startPoint,@"startPoint",endPoint,@"endPoint",self.currentRoute,@"newRoute",nil];
+			} else {
+				params = [NSMutableDictionary dictionaryWithObject:[NSNull null] forKey:@"newRoute"];
+			}
+			NSNotification *notification = [NSNotification notificationWithName:@"NewRoute" object:nil userInfo:params];
+			[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
 		}
-		NSNotification *notification = [NSNotification notificationWithName:@"NewRoute" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
 	}
 }
 
@@ -86,15 +88,23 @@
 	if([self.responseData length] > 0) {
 		NSXMLParser *parser = [[NSXMLParser alloc] initWithData:responseData];
 		parser.delegate = self;
-		[self deleteCurrentRoute];
 		self.currentElementValue = [NSMutableString string];
-		self.currentRoute = (Route*)[NSEntityDescription insertNewObjectForEntityForName:@"Route" 
-															  inManagedObjectContext:_managedObjectContext];
-		[parser parse];
-		[parser release];
+		if(!isFault) {
+			[self deleteCurrentRoute];
+			self.currentRoute = (Route*)[NSEntityDescription insertNewObjectForEntityForName:@"Route" 
+																	  inManagedObjectContext:_managedObjectContext];
+			[parser parse];
+			[parser release];
+		} else {
+			[parser parse];
+			[parser release];
+			NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:self.faultMsg forKey:@"faultMessage"];
+			NSNotification *notification = [NSNotification notificationWithName:@"SpokesFault" object:nil userInfo:params];
+			[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+		}
+		self.currentElementValue = nil;
+		self.responseData = nil;
 	}
-	self.currentElementValue = nil;
-	self.responseData = nil;
 	[self performSelectorOnMainThread:@selector(toggleNetworkActivityIndicator:) 
 						   withObject:[NSNumber numberWithInt:NO] 
 						waitUntilDone:NO];

@@ -39,6 +39,7 @@ public class RouteController extends SpokesBaseController{
 		}catch(SpokesException e){
 			log.error(e);
 			mav.addObject("SpokesResult", new Route(e.getFault()));
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			super.addFaultHeader(response);
 		}
 		return mav;

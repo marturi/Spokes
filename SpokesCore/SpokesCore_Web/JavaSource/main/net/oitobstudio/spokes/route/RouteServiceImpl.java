@@ -31,6 +31,8 @@ public class RouteServiceImpl implements RouteService {
 			}
 			throw new ClosestEdgeNotFoundException("No street found near coord " + badCoord, exType);
 		}
+		startEdges.get(0).setAccuracyLevel(routeCriteria.getStartPointAccuracyLevel());
+		endEdges.get(0).setAccuracyLevel(routeCriteria.getEndPointAccuracyLevel());
 		List<RouteSegment> spSegments = routeSegmentRepository.findShortestPathRoute(startEdges.get(0), endEdges.get(0), routeCriteria.getOptions());
 		Route spRoute = new Route(spSegments, geometryFactory);
 		return spRoute;

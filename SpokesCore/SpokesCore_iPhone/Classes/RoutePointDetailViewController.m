@@ -163,7 +163,19 @@
 }
 
 - (void) reportTheft:(id)sender {
-	[self performSelector:@selector(sendReportTheftRequest) withObject:nil afterDelay:0.01];
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Report Theft" 
+													message:@"Are you sure you want to report a theft from this rack?"
+												   delegate:self 
+										  cancelButtonTitle:@"Cancel" 
+										  otherButtonTitles:@"Report Theft", nil];
+	[alert show];
+	[alert release];
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+	if(buttonIndex == 1) {
+		[self performSelector:@selector(sendReportTheftRequest) withObject:nil afterDelay:0.01];
+	}
 }
 
 - (void) sendReportTheftRequest {

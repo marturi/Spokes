@@ -15,6 +15,7 @@
 @dynamic longitude;
 @dynamic latitude;
 @dynamic isSelected;
+@dynamic accuracyLevel;
 
 + (RoutePoint*) routePointWithCoordinate:(CLLocationCoordinate2D)coordinate 
 								 context:(NSManagedObjectContext*)context {

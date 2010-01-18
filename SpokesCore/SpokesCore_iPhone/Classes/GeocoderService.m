@@ -23,6 +23,7 @@
 @implementation GeocoderService
 
 @synthesize addressLocation = addressLocation;
+@synthesize accuracyLevel	= accuracyLevel;
 @synthesize done			= done;
 
 - (id) initWithMapView:(MKMapView*)mapView {
@@ -53,6 +54,7 @@
 				self.addressLocation = nil;
 				point.address = addressText;
 				point.type = [NSNumber numberWithInt:type];
+				point.accuracyLevel = self.accuracyLevel;
 			}else{
 				[self performSelectorOnMainThread:@selector(showOutOfBoundsError) withObject:nil waitUntilDone:false];
 			}
@@ -125,6 +127,7 @@
 	[locationString release];
 	CLLocationCoordinate2D location = {0.0, 0.0};
 	if([listItems count] >= 4 && [[listItems objectAtIndex:0] isEqualToString:@"200"]) {
+		self.accuracyLevel = [listItems objectAtIndex:1];
 		location.latitude = [[listItems objectAtIndex:2] doubleValue];
 		location.longitude = [[listItems objectAtIndex:3] doubleValue];
 		self.addressLocation = [[[CLLocation alloc] initWithLatitude:location.latitude 
@@ -136,6 +139,7 @@
 
 - (void) dealloc {
 	self.addressLocation = nil;
+	self.accuracyLevel = nil;
 	[_mapView release];
 	[super dealloc];
 }

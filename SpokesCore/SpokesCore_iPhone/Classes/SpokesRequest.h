@@ -8,12 +8,11 @@
 
 #import <CoreLocation/CoreLocation.h>
 
-@class RackPoint;
+@class RackPoint, RoutePoint;
 
 @interface SpokesRequest : NSObject
 
-- (NSMutableURLRequest*) createRouteRequest:(CLLocationCoordinate2D)startCoordinate 
-							  endCoordinate:(CLLocationCoordinate2D)endCoordinate;
+- (NSMutableURLRequest*) createRouteRequest:(RoutePoint*)startPoint endPoint:(RoutePoint*)endPoint;
 - (NSMutableURLRequest*) createRacksRequest:(CLLocationCoordinate2D)topLeftCoordinate 
 					  bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
 - (NSMutableURLRequest*) createShopsRequest:(CLLocationCoordinate2D)topLeftCoordinate 

@@ -10,6 +10,7 @@
 #import "SpokesConstants.h"
 #import "SpokesRequest.h"
 #import "RackPoint.h"
+#import "RoutePoint.h"
 #import <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 
@@ -45,19 +46,24 @@
 	return req;
 }
 
-- (NSMutableURLRequest*) createRouteRequest:(CLLocationCoordinate2D)startCoordinate 
-							  endCoordinate:(CLLocationCoordinate2D)endCoordinate {
+- (NSMutableURLRequest*) createRouteRequest:(RoutePoint*)startPoint endPoint:(RoutePoint*)endPoint {
 	SpokesConstants* sc = [((SpokesAppDelegate*)[UIApplication sharedApplication].delegate) spokesConstants];
 	NSMutableString *urlString = [[NSMutableString alloc] init];
 	[urlString appendString:[sc baseURL]];
 	[urlString appendString:@"route/"];
-	[urlString appendString:[NSString stringWithFormat:@"%f", startCoordinate.longitude]];
+	[urlString appendString:[NSString stringWithFormat:@"%f", [startPoint coordinate].longitude]];
 	[urlString appendString:@","];
-	[urlString appendString:[NSString stringWithFormat:@"%f", startCoordinate.latitude]];
+	[urlString appendString:[NSString stringWithFormat:@"%f", [startPoint coordinate].latitude]];
+	[urlString appendString:@"("];
+	[urlString appendString:startPoint.accuracyLevel];
+	[urlString appendString:@")"];
 	[urlString appendString:@"_"];
-	[urlString appendString:[NSString stringWithFormat:@"%f", endCoordinate.longitude]];
+	[urlString appendString:[NSString stringWithFormat:@"%f", [endPoint coordinate].longitude]];
 	[urlString appendString:@","];
-	[urlString appendString:[NSString stringWithFormat:@"%f", endCoordinate.latitude]];
+	[urlString appendString:[NSString stringWithFormat:@"%f", [endPoint coordinate].latitude]];
+	[urlString appendString:@"("];
+	[urlString appendString:endPoint.accuracyLevel];
+	[urlString appendString:@")"];
 	[urlString appendString:@"/"];
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];

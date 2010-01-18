@@ -41,9 +41,9 @@ public class RouteServiceTest{
 	@Test
 	public void testGetClosestEdge() throws Exception{
 		//Coordinate startPoint = new Coordinate(-73.9808921,40.7534881);-73.9520084,40.8516544
-		Coordinate startPoint = new Coordinate(-73.9520084,40.8516544);
+		Coordinate startPoint = new Coordinate(-73.952008, 40.851654);
 		List<BookendRouteSegment> closestEdges = routeSegmentRepository.findClosestEdges(startPoint);
-		//System.out.println(closestEdges.get(0).getId());
+		System.out.println(closestEdges);
 		//System.out.println(closestEdges.get(0).getStreet());
 	}
 

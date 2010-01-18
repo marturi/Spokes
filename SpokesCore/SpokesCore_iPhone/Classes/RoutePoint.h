@@ -10,15 +10,14 @@
 #import <CoreLocation/CoreLocation.h>
 #import "PointAnnotation.h"
 
-@interface RoutePoint :  NSManagedObject  
-{
-}
+@interface RoutePoint :  NSManagedObject
 
 @property (nonatomic, retain) NSString * address;
 @property (nonatomic, retain) NSNumber * type;
 @property (nonatomic, retain) NSNumber * longitude;
 @property (nonatomic, retain) NSNumber * latitude;
 @property (nonatomic, retain) NSNumber * isSelected;
+@property (nonatomic, retain) NSString * accuracyLevel;
 @property (readonly) NSString * annotationTitle;
 
 - (CLLocationCoordinate2D) coordinate;

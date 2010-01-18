@@ -17,11 +17,38 @@ public class RouteCriteria {
 	private Coordinate startPt;
 	private Coordinate endPt;
 	private Map<String,String> options;
+	private String startPointAccuracyLevel;
+	private String endPointAccuracyLevel;
 
 	public RouteCriteria(String startPtStr, String endPtStr, Map<String,String> options){
-		this.startPtStr = startPtStr;
-		this.endPtStr = endPtStr;
+		parsePoint(startPtStr, true);
+		parsePoint(endPtStr, false);
 		this.options = options;
+	}
+
+	private void parsePoint(String pointString, boolean isStartPoint){
+		boolean hasAccuracyLevel = pointString.indexOf("(") > -1;
+		String accuracyLevel = null;
+		String ptString = pointString;
+		if(hasAccuracyLevel){
+			accuracyLevel = pointString.substring(pointString.indexOf("(")+1, pointString.indexOf(")"));
+			ptString = pointString.substring(0, pointString.indexOf("("));
+		}
+		if(isStartPoint){
+			this.startPtStr = ptString;
+			this.startPointAccuracyLevel = accuracyLevel;
+		}else{
+			this.endPtStr = ptString;
+			this.endPointAccuracyLevel = accuracyLevel;
+		}
+	}
+
+	public String getStartPointAccuracyLevel() {
+		return this.startPointAccuracyLevel;
+	}
+
+	public String getEndPointAccuracyLevel() {
+		return this.endPointAccuracyLevel;
 	}
 
 	public Coordinate getStartPoint(){

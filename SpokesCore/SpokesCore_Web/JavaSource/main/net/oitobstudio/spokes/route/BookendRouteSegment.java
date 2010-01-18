@@ -17,6 +17,18 @@ public class BookendRouteSegment extends RouteSegment {
 	private LineString edgeReprojected;
 	private LineString trimmedEdge;
 	private RouteSegment nearestNeighbor;
+	private String accuracyLevel;
+
+	public static final String UNKNOWN 		= "0";
+	public static final String COUNTRY 		= "1";
+	public static final String REGION 		= "2";
+	public static final String SUBREGION 	= "3";
+	public static final String TOWN 		= "4";
+	public static final String POSTAL_CODE 	= "5";
+	public static final String STREET 		= "6";
+	public static final String INTERSECTION	= "7";
+	public static final String ADDRESS 		= "8";
+	public static final String PREMISE 		= "9";
 
 	public Point getOnGraphPoint() {
 		return onGraphPoint;
@@ -26,8 +38,14 @@ public class BookendRouteSegment extends RouteSegment {
 		return getNextSegment() != null;
 	}
 
+	void setAccuracyLevel(String accuracyLevel) {
+		this.accuracyLevel = accuracyLevel;
+	}
+
 	private boolean isIntersection(){
-		if(onGraphPointReprojected.isWithinDistance(edgeReprojected.getStartPoint(), 2) ||
+		if(accuracyLevel != null && accuracyLevel.equals(INTERSECTION)){
+			return true;
+		}else if(onGraphPointReprojected.isWithinDistance(edgeReprojected.getStartPoint(), 2) ||
 				onGraphPointReprojected.isWithinDistance(edgeReprojected.getEndPoint(), 2)) {
 			return true;
 		}

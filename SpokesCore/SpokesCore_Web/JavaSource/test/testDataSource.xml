@@ -8,10 +8,10 @@
 
 	<bean id="spokesDataSource" class="org.postgresql.ds.PGSimpleDataSource">
 		<property name="databaseName" value="iCycle"/>
-		<property name="serverName" value="localhost"/>
+		<property name="serverName" value="ec2-174-129-111-139.compute-1.amazonaws.com"/>
 		<property name="portNumber" value="5432"/>
 		<property name="user" value="postgres"/>
-		<property name="password" value="postgres"/>
+		<property name="password" value="da0430"/>
 	</bean>
 
 </beans>

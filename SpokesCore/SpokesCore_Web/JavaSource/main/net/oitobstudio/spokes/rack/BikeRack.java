@@ -57,7 +57,7 @@ public class BikeRack {
 			throw new PointOutOfBoundsException("Point outside of bounding coordinates " + rackCoord, 
 				"The location of the bike rack seems to be outside of city limits.");
 		}
-		rackPoint = geometryFactory.createPoint(GeometryUtils.parseCoordinate(getRackCoordinate()));
+		rackPoint = geometryFactory.createPoint(rackCoord);
 	}
 
 	public int getNumberOfThefts(){

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.DataAccessException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -19,6 +20,18 @@ public class BikeShopServiceImpl implements BikeShopService {
 	private BoundingBoxRepository boundingBoxRepository;
 	private BikeShopRepository bikeShopRepository;
 	private static Logger log = Logger.getLogger(BikeShopServiceImpl.class);
+
+	public void addBikeShop(BikeShop newShop) throws SpokesException, DataAccessException {
+		if(newShop != null){
+			newShop.makeShopPoint(geometryFactory, boundingBoxRepository.findGlobalBoundingBox());
+			if(!bikeShopRepository.isDuplicateShop(newShop)) {
+				bikeShopRepository.save(newShop);
+			}else{
+				throw new DuplicateShopException("There appears to already be a shop at or very near " + 
+						newShop.getStreetAddress() + " with the name " + newShop.getShopName());
+			}
+		}
+	}
 
 	public BikeShops findNearestBikeShops(BikeShopCriteria criteria) throws SpokesException {
 		criteria.validateBikeShopCriteria(geometryFactory);

@@ -21,6 +21,11 @@
 - (id) initWithManagedObjectContext:(NSManagedObjectContext*)managedObjectContext;
 - (void) findClosestShops:(CLLocationCoordinate2D)topLeftCoordinate 
 		bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
+- (void) addShop:(NSString*)shopAddress 
+		shopName:(NSString*)shopName
+	  hasRentals:(NSString*)hasRentals 
+	   shopPhone:(NSString*)shopPhone
+  shopCoordinate:(CLLocationCoordinate2D)shopCoordinate;
 
 @property (nonatomic, retain) ShopPoint *currentShopPoint;
 @property (nonatomic, retain) NSMutableArray *shops;

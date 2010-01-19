@@ -21,7 +21,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={"/bikeShopService.xml", "/iCycleHibernateTemplate.xml", "/testDataSource.xml", "/commonContext.xml"})
+@ContextConfiguration(locations={"/bikeShopService.xml", "/spokesHibernateTemplate.xml", "/testDataSource.xml", "/commonContext.xml"})
 
 public class BikeShopServiceTest{
 	@Autowired
@@ -40,6 +40,17 @@ public class BikeShopServiceTest{
 		Result sResult = new StreamResult(myWriter);
 		castorMarshaller.marshal(nearestShops, sResult);
         System.out.println(myWriter.getBuffer().toString());
+	}
+
+	@Test
+	public void testAddBikeShop() throws Exception{
+		String shopCoordinate = "-73.99423484, 40.64027808";
+		String shopAddress = "some address";
+		String shopName = "matty's";
+		String shopPhone = "(718) 399-1480";
+		Character hasRentals = 'Y';
+		BikeShop newShop = new BikeShop(shopName, shopAddress, shopPhone, shopCoordinate, hasRentals);
+		bikeShopService.addBikeShop(newShop);
 	}
 
 	@Test

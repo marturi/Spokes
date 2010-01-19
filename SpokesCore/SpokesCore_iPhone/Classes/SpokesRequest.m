@@ -65,6 +65,7 @@
 	[urlString appendString:endPoint.accuracyLevel];
 	[urlString appendString:@")"];
 	[urlString appendString:@"/"];
+	NSLog(@"%@", urlString);
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
@@ -178,6 +179,37 @@
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kRacksTimeout] autorelease];
+	[url release];
+	[req setHTTPMethod:@"POST"];
+	[req setValue:postLength forHTTPHeaderField:@"Content-Length"];
+	[req setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+	[req setHTTPBody:postData];	
+	[self signRequest:req];
+	[req addValue:@"gzip" forHTTPHeaderField:@"Accept-Encoding"];
+	return req;
+}
+
+- (NSMutableURLRequest*) createAddShopRequest:(CLLocationCoordinate2D)newShopCoordinate 
+							   newShopAddress:(NSString*)newShopAddress
+								  newShopName:(NSString*)newShopName
+								   hasRentals:(NSString*)hasRentals
+								 newShopPhone:(NSString*)newShopPhone {
+	NSMutableString *urlString = [[NSMutableString alloc] init];
+	SpokesConstants* sc = [((SpokesAppDelegate*)[UIApplication sharedApplication].delegate) spokesConstants];
+	[urlString appendString:[sc baseURL]];
+	[urlString appendString:@"shop"];
+	
+	NSString *newShopCoordinateString = [NSString stringWithFormat:@"%f,%f",newShopCoordinate.longitude,newShopCoordinate.latitude];
+	
+	NSString *post =[NSString stringWithFormat:@"shopCoordinate=%@&shopAddress=%@&shopName=%@&hasRentals=%@&shopPhone=%@", newShopCoordinateString, newShopAddress, newShopName, hasRentals, newShopPhone];
+	NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+	NSString *postLength = [NSString stringWithFormat:@"%d", [postData length]];
+	
+	NSURL *url = [[NSURL alloc] initWithString:urlString];
+	[urlString release];
+	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
+															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
+														 timeoutInterval:kShopsTimeout] autorelease];
 	[url release];
 	[req setHTTPMethod:@"POST"];
 	[req setValue:postLength forHTTPHeaderField:@"Content-Length"];

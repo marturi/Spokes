@@ -22,6 +22,11 @@
 - (NSMutableURLRequest*) createAddRackRequest:(CLLocationCoordinate2D)newRackCoordinate 
 							  newRackLocation:(NSString*)newRackLocation
 								  newRackType:(NSString*)newRackType;
+- (NSMutableURLRequest*) createAddShopRequest:(CLLocationCoordinate2D)newShopCoordinate 
+							   newShopAddress:(NSString*)newShopAddress
+								  newShopName:(NSString*)newShopName
+								   hasRentals:(NSString*)hasRentals
+								 newShopPhone:(NSString*)newShopPhone;
 - (void) signRequest:(NSMutableURLRequest*)request;
 
 @end

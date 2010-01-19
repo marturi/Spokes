@@ -166,8 +166,8 @@
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Report Theft" 
 													message:@"Are you sure you want to report a theft from this rack?"
 												   delegate:self 
-										  cancelButtonTitle:@"Cancel" 
-										  otherButtonTitles:@"Report Theft", nil];
+										  cancelButtonTitle:@"No" 
+										  otherButtonTitles:@"Yes", nil];
 	[alert show];
 	[alert release];
 }

@@ -52,13 +52,6 @@
 	if([[(NSHTTPURLResponse*)response allHeaderFields] objectForKey:@"X-Spokes-Fault"] != nil) {
 		isFault = YES;
 	}
-	if([(NSHTTPURLResponse*)response statusCode] != 200 && [(NSHTTPURLResponse*)response statusCode] != 201) {
-		NSString *responseCode = [NSString stringWithFormat:@"%i", [(NSHTTPURLResponse*)response statusCode]];
-		NSString *errMsg = NSLocalizedString(responseCode, @"HTTP error message");
-		if(errMsg == nil) {
-			errMsg = NSLocalizedString(@"GenericHTTP", @"HTTP error message");
-		}
-	}
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {

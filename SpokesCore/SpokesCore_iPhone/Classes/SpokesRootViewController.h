@@ -10,7 +10,8 @@
 #import <CoreData/CoreData.h>
 #import "PointAnnotation.h"
 
-@class RoutePointDetailViewController,RouteCriteriaView,RouteNavigationView,RouteView,SpokesInfoViewController,AddRackViewController;
+@class RoutePointDetailViewController,RouteCriteriaView,RouteNavigationView,RouteView,SpokesInfoViewController,
+	AddRackViewController,AddShopViewController;
 
 @interface SpokesRootViewController : UIViewController <UIActionSheetDelegate> {
 	IBOutlet MKMapView *_mapView;
@@ -20,6 +21,7 @@
 	RoutePointDetailViewController *routePointDetailViewController;
 	SpokesInfoViewController *spokesInfoViewController;
 	AddRackViewController *addRackViewController;
+	AddShopViewController *addShopViewController;
 	NSManagedObjectContext *managedObjectContext;
 	NSString *viewMode;
 	RouteView *currentRouteView;
@@ -61,6 +63,7 @@
 @property (nonatomic, retain) RoutePointDetailViewController *routePointDetailViewController;
 @property (nonatomic, retain) SpokesInfoViewController *spokesInfoViewController;
 @property (nonatomic, retain) AddRackViewController *addRackViewController;
+@property (nonatomic, retain) AddShopViewController *addShopViewController;
 @property BOOL isLegTransition;
 
 @end

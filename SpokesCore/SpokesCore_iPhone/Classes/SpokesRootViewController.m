@@ -13,6 +13,7 @@
 #import "SpokesInfoViewController.h"
 #import "NoConnectionViewController.h"
 #import "AddRackViewController.h"
+#import "AddShopViewController.h"
 #import "Route.h"
 #import "Leg.h"
 #import "RoutePoint.h"
@@ -56,6 +57,7 @@
 @synthesize routePointDetailViewController	= routePointDetailViewController;
 @synthesize spokesInfoViewController		= spokesInfoViewController;
 @synthesize addRackViewController			= addRackViewController;
+@synthesize addShopViewController			= addShopViewController;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -149,6 +151,7 @@
 	self.routePointDetailViewController = nil;
 	self.spokesInfoViewController = nil;
 	self.addRackViewController = nil;
+	self.addShopViewController = nil;
 }
 
 - (void) showRouteCriteriaView {
@@ -164,6 +167,7 @@
 	self.routePointDetailViewController = nil;
 	self.spokesInfoViewController = nil;
 	self.addRackViewController = nil;
+	self.addShopViewController = nil;
 }
 
 - (void) showRoutePointDetail {
@@ -196,6 +200,17 @@
 	}
 	[self.routeCriteriaView setTextFieldVisibility:NO];
 	[self.navigationController pushViewController:self.addRackViewController animated:YES];
+	[self.navigationController setNavigationBarHidden:NO animated:YES];
+}
+
+- (void) showAddShopView {
+	if(self.addShopViewController == nil) {
+		AddShopViewController *asvc = [[AddShopViewController alloc] initWithViewController:self];
+		self.addShopViewController = asvc;
+		[asvc release];
+	}
+	[self.routeCriteriaView setTextFieldVisibility:NO];
+	[self.navigationController pushViewController:self.addShopViewController animated:YES];
 	[self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
@@ -660,7 +675,7 @@
 				actionSheet.delegate = nil;
 				[self showAddRackView];
 			} else if(buttonIndex == 2) {
-				
+				[self showAddShopView];
 			}
 		}
 	}
@@ -703,6 +718,7 @@
 	self.mapTypeToggle = nil;
 	self.spokesInfoViewController = nil;
 	self.addRackViewController = nil;
+	self.addShopViewController = nil;
 	[managedObjectContext release];
 	[viewMode release];
     [super dealloc];

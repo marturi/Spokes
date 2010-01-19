@@ -69,14 +69,13 @@ public class BikeRackController extends SpokesBaseController{
 		try{
 			BikeRack newRack = new BikeRack(rackCoordinate, rackAddress, rackType);
 			bikeRackService.addBikeRack(newRack);
-			SpokesConfirm confirm = new SpokesConfirm("The bike rack has been successfully reported.");
+			SpokesConfirm confirm = new SpokesConfirm("The bike rack has been successfully added.");
 			mav.addObject("SpokesResult", confirm);
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			StringBuffer uri = request.getRequestURL();
 			uri.append("/");
 			uri.append(newRack.getId());
 			response.setHeader("Location", uri.toString());
-			//response.setContentLength(mav.getView().toString().getBytes().length);
 			response.setContentType("text/xml");
 		}catch(SpokesException e){
 			log.error(e);

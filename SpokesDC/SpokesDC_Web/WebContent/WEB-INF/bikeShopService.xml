@@ -19,6 +19,8 @@
 	<bean id="bikeShopRepository" class="net.oitobstudio.spokes.shop.hibernate.HibernateBikeShopRepository">
 		<constructor-arg ref="spokesHibernateTemplate"/>
 		<property name="geometryFactory" ref="geometryFactory"/>
+		<property name="bikeShopTableName" value="dc_bike_shops"/>
+        <property name="utmSrid" value="32618"/>
 	</bean>
 
 </beans>

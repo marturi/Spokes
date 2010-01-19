@@ -7,4 +7,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 public interface BikeShopRepository {
 	public List<BikeShop> findNearestBikeShops(Coordinate currentLocation);
 	public BikeShop findBikeShop(long shopId);
+	public void save(BikeShop shop);
+	public boolean isDuplicateShop(BikeShop newShop);
 }

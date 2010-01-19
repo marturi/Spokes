@@ -55,6 +55,44 @@
 	}
 }
 
+- (void) addShop:(NSString*)shopAddress 
+		shopName:(NSString*)shopName
+	  hasRentals:(NSString*)hasRentals 
+	   shopPhone:(NSString*)shopPhone 
+  shopCoordinate:(CLLocationCoordinate2D)shopCoordinate {
+	
+	SpokesRequest *addShopRequest = [[SpokesRequest alloc] init];
+	NSURLRequest *addShopURLRequest = [addShopRequest createAddShopRequest:shopCoordinate
+															newShopAddress:shopAddress 
+															   newShopName:shopName
+																hasRentals:hasRentals
+															  newShopPhone:shopPhone];
+	[addShopRequest release];
+	[self downloadAndParse:addShopURLRequest];
+	if(self.spokesConnection != nil) {
+		do {
+			[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+		} while (!done);
+	}
+	self.spokesConnection = nil;
+	self.responseData = nil;
+	NSMutableDictionary *params = [NSMutableDictionary dictionary];
+	if(self.connectionError != nil) {
+		[params setObject:self.connectionError forKey:@"serviceError"];
+		self.connectionError = nil;
+		NSNotification *notification = [NSNotification notificationWithName:@"ShopServiceError" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	} else {
+		if([self.response statusCode] == 201) {
+			[params setObject:@"YES" forKey:@"resourceCreated"];
+		} else {
+			[params setObject:@"NO" forKey:@"resourceCreated"];
+		}
+		NSNotification *notification = [NSNotification notificationWithName:@"ShopAdded" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	}
+}
+
 #pragma mark -
 #pragma mark NSURLConnection Delegate methods
 

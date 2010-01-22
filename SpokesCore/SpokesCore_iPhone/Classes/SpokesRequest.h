@@ -19,6 +19,8 @@
 					  bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
 - (NSMutableURLRequest*) createGeocoderRequest:(NSString*)address;
 - (NSMutableURLRequest*) createReportTheftRequest:(RackPoint*)rackPoint;
+- (NSMutableURLRequest*) createReportTheftRequest:(CLLocationCoordinate2D)theftCoordinate 
+										 comments:(NSString*)comments;
 - (NSMutableURLRequest*) createAddRackRequest:(CLLocationCoordinate2D)newRackCoordinate 
 							  newRackLocation:(NSString*)newRackLocation
 								  newRackType:(NSString*)newRackType;

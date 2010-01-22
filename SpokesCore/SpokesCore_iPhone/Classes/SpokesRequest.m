@@ -149,7 +149,40 @@
 	[urlString release];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
-														 timeoutInterval:kShopsTimeout] autorelease];
+														 timeoutInterval:kTheftsTimeout] autorelease];
+	[url release];
+	[req setHTTPMethod:@"POST"];
+	[req setValue:postLength forHTTPHeaderField:@"Content-Length"];
+	[req setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+	[req setHTTPBody:postData];	
+	[self signRequest:req];
+	[req addValue:@"gzip" forHTTPHeaderField:@"Accept-Encoding"];
+	return req;
+}
+
+- (NSMutableURLRequest*) createReportTheftRequest:(CLLocationCoordinate2D)theftCoordinate 
+										 comments:(NSString*)comments {
+	NSMutableString *urlString = [[NSMutableString alloc] init];
+	SpokesConstants* sc = [((SpokesAppDelegate*)[UIApplication sharedApplication].delegate) spokesConstants];
+	[urlString appendString:[sc baseURL]];
+	[urlString appendString:@"theft"];
+	
+	NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+	[dateFormatter setDateFormat:kSpokesDateFormat];
+	NSString *dateString = [dateFormatter stringFromDate:[NSDate date]];
+	[dateFormatter release];
+	
+	NSString *theftCoordinateString = [NSString stringWithFormat:@"%f,%f",theftCoordinate.longitude,theftCoordinate.latitude];
+	
+	NSString *post =[NSString stringWithFormat:@"theftCoordinate=%@&theftDate=%@&comments=%@", theftCoordinateString, dateString, comments];
+	NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+	NSString *postLength = [NSString stringWithFormat:@"%d", [postData length]];
+	
+	NSURL *url = [[NSURL alloc] initWithString:urlString];
+	[urlString release];
+	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
+															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
+														 timeoutInterval:kTheftsTimeout] autorelease];
 	[url release];
 	[req setHTTPMethod:@"POST"];
 	[req setValue:postLength forHTTPHeaderField:@"Content-Length"];

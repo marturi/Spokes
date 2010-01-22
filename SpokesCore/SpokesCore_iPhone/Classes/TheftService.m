@@ -41,6 +41,35 @@
 	}
 }
 
+- (void) reportTheft:(CLLocationCoordinate2D)theftCoordinate comments:(NSString*)comments {
+	SpokesRequest *reportTheftRequest = [[SpokesRequest alloc] init];
+	NSURLRequest *reportTheftURLRequest = [reportTheftRequest createReportTheftRequest:theftCoordinate comments:comments];
+	[reportTheftRequest release];
+	[self downloadAndParse:reportTheftURLRequest];
+	if(self.spokesConnection != nil) {
+        do {
+			[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+        } while (!done);
+    }
+	self.spokesConnection = nil;
+	self.responseData = nil;
+	NSMutableDictionary *params = [NSMutableDictionary dictionary];
+	if(self.connectionError != nil) {
+		[params setObject:self.connectionError forKey:@"serviceError"];
+		self.connectionError = nil;
+		NSNotification *notification = [NSNotification notificationWithName:@"TheftServiceError" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	} else {
+		if([self.response statusCode] == 201) {
+			[params setObject:@"YES" forKey:@"resourceCreated"];
+		} else {
+			[params setObject:@"NO" forKey:@"resourceCreated"];
+		}
+		NSNotification *notification = [NSNotification notificationWithName:@"TheftReported" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	}
+}
+
 #pragma mark -
 #pragma mark NSURLConnection Delegate methods
 

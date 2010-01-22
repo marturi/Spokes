@@ -11,7 +11,7 @@
 #import "PointAnnotation.h"
 
 @class RoutePointDetailViewController,RouteCriteriaView,RouteNavigationView,RouteView,SpokesInfoViewController,
-	AddRackViewController,AddShopViewController;
+	AddRackViewController,AddShopViewController,ReportTheftViewController;
 
 @interface SpokesRootViewController : UIViewController <UIActionSheetDelegate> {
 	IBOutlet MKMapView *_mapView;
@@ -22,6 +22,7 @@
 	SpokesInfoViewController *spokesInfoViewController;
 	AddRackViewController *addRackViewController;
 	AddShopViewController *addShopViewController;
+	ReportTheftViewController *reportTheftViewController;
 	NSManagedObjectContext *managedObjectContext;
 	NSString *viewMode;
 	RouteView *currentRouteView;
@@ -45,6 +46,7 @@
 - (void) showRouteCriteriaView;
 - (void) showRoutePointDetail;
 - (void) showAddRackView;
+- (void) showReportTheftView;
 - (BOOL) validateRouteCriteria;
 - (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type;
 - (RoutePoint*) makeMapPoint:(PointAnnotationType)type addressText:(NSString*)addressText;
@@ -64,6 +66,7 @@
 @property (nonatomic, retain) SpokesInfoViewController *spokesInfoViewController;
 @property (nonatomic, retain) AddRackViewController *addRackViewController;
 @property (nonatomic, retain) AddShopViewController *addShopViewController;
+@property (nonatomic, retain) ReportTheftViewController *reportTheftViewController;
 @property BOOL isLegTransition;
 
 @end

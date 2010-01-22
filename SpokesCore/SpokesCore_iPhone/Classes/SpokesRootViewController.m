@@ -14,6 +14,7 @@
 #import "NoConnectionViewController.h"
 #import "AddRackViewController.h"
 #import "AddShopViewController.h"
+#import "ReportTheftViewController.h"
 #import "Route.h"
 #import "Leg.h"
 #import "RoutePoint.h"
@@ -58,6 +59,7 @@
 @synthesize spokesInfoViewController		= spokesInfoViewController;
 @synthesize addRackViewController			= addRackViewController;
 @synthesize addShopViewController			= addShopViewController;
+@synthesize reportTheftViewController		= reportTheftViewController;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -152,6 +154,7 @@
 	self.spokesInfoViewController = nil;
 	self.addRackViewController = nil;
 	self.addShopViewController = nil;
+	self.reportTheftViewController = nil;
 }
 
 - (void) showRouteCriteriaView {
@@ -168,6 +171,7 @@
 	self.spokesInfoViewController = nil;
 	self.addRackViewController = nil;
 	self.addShopViewController = nil;
+	self.reportTheftViewController = nil;
 }
 
 - (void) showRoutePointDetail {
@@ -211,6 +215,17 @@
 	}
 	[self.routeCriteriaView setTextFieldVisibility:NO];
 	[self.navigationController pushViewController:self.addShopViewController animated:YES];
+	[self.navigationController setNavigationBarHidden:NO animated:YES];
+}
+
+- (void) showReportTheftView {
+	if(self.reportTheftViewController == nil) {
+		ReportTheftViewController *rtvc = [[ReportTheftViewController alloc] initWithViewController:self];
+		self.reportTheftViewController = rtvc;
+		[rtvc release];
+	}
+	[self.routeCriteriaView setTextFieldVisibility:NO];
+	[self.navigationController pushViewController:self.reportTheftViewController animated:YES];
 	[self.navigationController setNavigationBarHidden:NO animated:YES];
 }
 
@@ -670,7 +685,7 @@
 	} else if(actionSheet.tag == 2) {
 		if(buttonIndex != actionSheet.cancelButtonIndex) {
 			if(buttonIndex == 0) {
-				
+				[self showReportTheftView];
 			} else if(buttonIndex == 1) {
 				actionSheet.delegate = nil;
 				[self showAddRackView];
@@ -719,6 +734,7 @@
 	self.spokesInfoViewController = nil;
 	self.addRackViewController = nil;
 	self.addShopViewController = nil;
+	self.reportTheftViewController = nil;
 	[managedObjectContext release];
 	[viewMode release];
     [super dealloc];

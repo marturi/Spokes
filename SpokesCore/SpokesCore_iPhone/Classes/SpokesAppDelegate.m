@@ -27,16 +27,14 @@
 	self.locationServicesEnabled = locationManager.locationServicesEnabled;
 	[locationManager release];
 
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:self.managedObjectContext];
-	rootViewController.managedObjectContext = managedObjectContext;
-	[routeService release];
+	rootViewController.managedObjectContext = self.managedObjectContext;
 
 	if(getenv("NSZombieEnabled") || getenv("NSAutoreleaseFreedObjectCheckEnabled")) {
 		NSLog(@"NSZombieEnabled/NSAutoreleaseFreedObjectCheckEnabled enabled!");
 	}
 
 	[window addSubview:rootViewController.view];
-	[window addSubview: navController.view];
+	[window addSubview:navController.view];
 	[window makeKeyAndVisible];
 
 	splashView = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, 320, 480)];

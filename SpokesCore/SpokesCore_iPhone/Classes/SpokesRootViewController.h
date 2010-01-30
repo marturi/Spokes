@@ -12,7 +12,7 @@
 #import "EventDispatchingWindow.h"
 
 @class RoutePointDetailViewController,RouteCriteriaViewController,RouteNavigationViewController,SpokesInfoViewController,
-	AddRackViewController,AddShopViewController,ReportTheftViewController;
+	AddRackViewController,AddShopViewController,ReportTheftViewController,RouteView;
 
 @interface SpokesRootViewController : UIViewController <UIActionSheetDelegate,MKMapViewDelegate,EventSubscriber> {
 	IBOutlet MKMapView *_mapView;
@@ -26,6 +26,7 @@
 	ReportTheftViewController *reportTheftViewController;
 	NSManagedObjectContext *managedObjectContext;
 	NSString *viewMode;
+	RouteView *routeView;
 	BOOL isInitialized;
 	BOOL isZoom;
 }
@@ -46,6 +47,7 @@
 
 @property (nonatomic, retain) IBOutlet MKMapView *mapView;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *mapTypeToggle;
+@property (nonatomic, retain) RouteView *routeView;
 @property (nonatomic, retain) RouteNavigationViewController *routeNavigationViewController;
 @property (nonatomic, retain) RouteCriteriaViewController *routeCriteriaViewController;
 @property (nonatomic, retain) NSManagedObjectContext *managedObjectContext;

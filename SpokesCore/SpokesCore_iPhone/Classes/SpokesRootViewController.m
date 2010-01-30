@@ -48,6 +48,7 @@
 
 @synthesize mapView							= _mapView;
 @synthesize mapTypeToggle					= mapTypeToggle;
+@synthesize routeView						= routeView;
 @synthesize managedObjectContext			= managedObjectContext;
 @synthesize routeCriteriaViewController		= routeCriteriaViewController;
 @synthesize routeNavigationViewController	= routeNavigationViewController;
@@ -479,7 +480,9 @@
 			[_mapView addAnnotation:[startPoint pointAnnotation]];
 			[_mapView addAnnotation:[endPoint pointAnnotation]];
 			[MapViewHelper focusToCenterOfPoints:[newRoute minAndMaxPoints] mapView:_mapView autoFit:NO];
-			[MapViewHelper removeRouteAnnotation:_mapView];
+			if(self.routeView.annotation != nil) {
+				[_mapView removeAnnotation:self.routeView.annotation];
+			}
 			[self showRouteView:newRoute];
 		}
 	}
@@ -489,7 +492,10 @@
 	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
 	[routeService deleteCurrentRoute];
 	[routeService release];
-	[MapViewHelper removeRouteAnnotation:_mapView];
+	if(self.routeView.annotation != nil) {
+		[_mapView removeAnnotation:self.routeView.annotation];
+	}
+	self.routeView = nil;
 }
 
 #pragma mark -
@@ -561,11 +567,12 @@
 	MKAnnotationView* annotationView = nil;
 	if([annotation isKindOfClass:[RouteAnnotation class]]) {
 		RouteAnnotation *routeAnnotation = (RouteAnnotation*)annotation;
-		if(![mapView viewForAnnotation:[MapViewHelper routeAnnotation:mapView]]) {
-			annotationView = [[[RouteView alloc] initWithFrame:CGRectMake(0, 0, mapView.frame.size.width, mapView.frame.size.height)] autorelease];
-			annotationView.annotation = routeAnnotation;
-			((RouteView*)annotationView).mapView = mapView;
+		if(self.routeView == nil) {
+			self.routeView = [[[RouteView alloc] initWithFrame:CGRectMake(0, 0, mapView.frame.size.width, mapView.frame.size.height)] autorelease];
+			self.routeView.annotation = routeAnnotation;
+			self.routeView.mapView = mapView;
 		}
+		annotationView = self.routeView;
 	} else if([annotation isKindOfClass:[PointAnnotation class]]) {
 		PointAnnotation* pointAnnotation = (PointAnnotation*)annotation;
 		NSString* identifier = [[NSNumber numberWithInt:pointAnnotation.annotationType] stringValue];
@@ -616,22 +623,21 @@
 
 - (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated {
 	if(isZoom) {
-		[mapView viewForAnnotation:[MapViewHelper routeAnnotation:mapView]].hidden = YES;
+		self.routeView.hidden = YES;
 	}
 }
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
-	RouteView *routeView = (RouteView*)[mapView viewForAnnotation:[MapViewHelper routeAnnotation:mapView]];
-	[routeView regionChanged];
+	[self.routeView regionChanged];
 	if(isZoom) {
-		routeView.hidden = NO;
+		self.routeView.hidden = NO;
 		isZoom = NO;
 	}
 	if(self.routeNavigationViewController.isLegTransition) {
 		[self.routeNavigationViewController performSelector:@selector(moveRoutePointer) withObject:nil afterDelay:0.2];
 		self.routeNavigationViewController.isLegTransition = NO;
 	}
-	[routeView checkRoutePointerView];
+	[self.routeView checkRoutePointerView];
 }
 
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal {
@@ -678,6 +684,7 @@
 	self.addRackViewController = nil;
 	self.addShopViewController = nil;
 	self.reportTheftViewController = nil;
+	self.routeView = nil;
 	[managedObjectContext release];
 	[viewMode release];
     [super dealloc];

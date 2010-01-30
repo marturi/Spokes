@@ -6,8 +6,6 @@
 //  Copyright 2009 8B Studio, Inc. All rights reserved.
 //
 
-@class RouteAnnotation;
-
 #import <MapKit/MapKit.h>
 #import "PointAnnotation.h"
 
@@ -19,8 +17,6 @@
 + (void) initUserLocationCallout:(NSDictionary*)params;
 + (void) removePointAnnotation:(PointAnnotation*)annotation mapView:(MKMapView*)mapView;
 + (void) removeAnnotationsOfType:(PointAnnotationType)annotationType mapView:(MKMapView*)mapView;
-+ (void) removeRouteAnnotation:(MKMapView*)mapView;
-+ (RouteAnnotation*) routeAnnotation:(MKMapView*)mapView;
 + (void) showRoutePoints:(NSArray*)routePoints mapView:(MKMapView*)mapView;
 + (BOOL) pointIsOutsideOfCurrentRegion:(CLLocationCoordinate2D)point mapView:(MKMapView*)mapView;
 + (void) focusToCenterOfPointsOnMainThread:(NSDictionary*)params;

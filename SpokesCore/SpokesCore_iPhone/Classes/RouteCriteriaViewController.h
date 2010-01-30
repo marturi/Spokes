@@ -16,6 +16,9 @@
 }
 
 - (id) initWithMapView:(MKMapView*)mapView;
+- (void) setTextFieldVisibility:(BOOL)visible;
+- (void) hideDirectionsNavBar:(id)sender;
+- (void) initAdresses;
 
 @property (nonatomic, retain) UITextField *startAddress;
 @property (nonatomic, retain) UITextField *endAddress;

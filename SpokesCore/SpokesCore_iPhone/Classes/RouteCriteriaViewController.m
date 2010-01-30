@@ -21,7 +21,6 @@
 - (void)initTextField:(UITextField*)textField;
 - (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type;
 - (void) initNavigationBar;
-- (void) initAdresses;
 - (BOOL) validateRouteCriteria;
 
 @end
@@ -90,6 +89,7 @@ static CGFloat const kHeight = 123.0;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+	[self initAdresses];
 }
 
 - (void)initTextField:(UITextField*)textField {
@@ -152,7 +152,9 @@ static CGFloat const kHeight = 123.0;
 	Route *currentRoute = [routeService fetchCurrentRoute];
 	[routeService release];
 	if(currentRoute != nil) {
-		[self showRouteView:currentRoute];
+		NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:currentRoute forKey:@"currentRoute"];
+		NSNotification *notification = [NSNotification notificationWithName:@"ShowRoute" object:nil userInfo:params];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
 	} else {
 		[(self.startAddress.editing ? self.startAddress : self.endAddress) resignFirstResponder];
 		CGRect viewFrame = self.view.frame;
@@ -188,7 +190,8 @@ static CGFloat const kHeight = 123.0;
 	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
 	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
-	[self expireRoute];
+	NSNotification *notification = [NSNotification notificationWithName:@"ExpireRoute" object:nil userInfo:nil];
+	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
 }
 
 - (void) swapValues {
@@ -208,11 +211,13 @@ static CGFloat const kHeight = 123.0;
 		[_mapView addAnnotation:[endPoint pointAnnotation]];
 	}
 	[self initAdresses];
-	[self expireRoute];
+	NSNotification *notification = [NSNotification notificationWithName:@"ExpireRoute" object:nil userInfo:nil];
+	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
 }
 
 - (void) handleFieldChange:(UITextField*)textField {
-	[self expireRoute];
+	NSNotification *notification = [NSNotification notificationWithName:@"ExpireRoute" object:nil userInfo:nil];
+	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
 	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 	if(textField.tag == 0) {
 		[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeStart mapView:_mapView];

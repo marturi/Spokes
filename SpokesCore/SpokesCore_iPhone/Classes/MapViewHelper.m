@@ -10,6 +10,7 @@
 #import "RoutePoint.h"
 #import "SpokesConstants.h"
 #import "SpokesAppDelegate.h"
+#import "RouteAnnotation.h"
 
 @implementation MapViewHelper
 
@@ -156,6 +157,29 @@
 		[mapView removeAnnotations:annotationsToRemove];
 	}
 	[annotationsToRemove release];
+}
+
++ (void) removeRouteAnnotation:(MKMapView*)mapView {
+	NSArray *annotations = mapView.annotations;
+	for(id <MKAnnotation> annotation in annotations) {
+		if([annotation isKindOfClass:[RouteAnnotation class]]) {
+			RouteAnnotation *rt = (RouteAnnotation*)annotation;
+			[mapView removeAnnotation:rt];
+			break;
+		}
+	}
+}
+
++ (RouteAnnotation*) routeAnnotation:(MKMapView*)mapView {
+	RouteAnnotation *routeAnnotation = nil;
+	NSArray *annotations = mapView.annotations;
+	for(id <MKAnnotation> annotation in annotations) {
+		if([annotation isKindOfClass:[RouteAnnotation class]]) {
+			routeAnnotation = (RouteAnnotation*)annotation;
+			break;
+		}
+	}
+	return routeAnnotation;
 }
 
 + (void) showRoutePoints:(NSArray*)routePoints mapView:(MKMapView*)mapView {

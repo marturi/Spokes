@@ -9,6 +9,7 @@
 #import "SpokesAppDelegate.h"
 #import "SpokesRootViewController.h"
 #import "RouteService.h"
+#import "EventDispatchingWindow.h"
 #import <MapKit/MapKit.h>
 
 @implementation SpokesAppDelegate
@@ -28,6 +29,7 @@
 	[locationManager release];
 
 	rootViewController.managedObjectContext = self.managedObjectContext;
+	[((EventDispatchingWindow*)window) addEventSubscriber:rootViewController];
 
 	if(getenv("NSZombieEnabled") || getenv("NSAutoreleaseFreedObjectCheckEnabled")) {
 		NSLog(@"NSZombieEnabled/NSAutoreleaseFreedObjectCheckEnabled enabled!");

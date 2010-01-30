@@ -13,6 +13,7 @@
 #import "RackPoint.h"
 #import "ShopPoint.h"
 #import "SpokesRootViewController.h"
+#import "RouteCriteriaViewController.h"
 #import "TheftService.h"
 
 @interface RoutePointDetailViewController()
@@ -196,7 +197,7 @@
 											 mapView:_viewController.mapView 
 											 context:_viewController.managedObjectContext];
 	[routePointService release];
-	[_viewController initAdresses];
+	[_viewController.routeCriteriaViewController initAdresses];
 	[_viewController expireRoute];
 	[self.navigationController popViewControllerAnimated:YES];
 }

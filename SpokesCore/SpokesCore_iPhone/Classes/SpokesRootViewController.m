@@ -9,6 +9,8 @@
 #import "SpokesRootViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import <CFNetwork/CFNetwork.h>
+#import "RouteCriteriaViewController.h"
+#import "RouteNavigationViewController.h"
 #import "RoutePointDetailViewController.h"
 #import "SpokesInfoViewController.h"
 #import "NoConnectionViewController.h"
@@ -16,8 +18,10 @@
 #import "AddShopViewController.h"
 #import "ReportTheftViewController.h"
 #import "Route.h"
-#import "Leg.h"
+#import "RouteView.h"
 #import "RoutePoint.h"
+#import "RackPoint.h"
+#import "ShopPoint.h"
 #import "RouteService.h"
 #import "RackService.h"
 #import "ShopService.h"
@@ -25,11 +29,7 @@
 #import "RouteAnnotation.h"
 #import "SpokesConstants.h"
 #import "MapViewHelper.h"
-#import "RouteCriteriaView.h"
-#import "RouteNavigationView.h"
 #import "GeocoderService.h"
-#import "RouteView.h"
-#import "SpokesMapDelegate.h"
 #import "RoutePointService.h"
 #import "SpokesAppDelegate.h"
 
@@ -40,8 +40,6 @@
 - (void) performToggleAnimations:(UIView*)viewToShow viewsToHide:(UIView*)viewToHide;
 - (void) sendRacksRequest:(NSDictionary*)param;
 - (void) sendShopsRequest:(NSDictionary*)param;
-- (void) sendRouteRequest:(NSDictionary*)params;
-- (void) moveRoutePointer;
 
 @end
 
@@ -51,15 +49,14 @@
 @synthesize mapView							= _mapView;
 @synthesize mapTypeToggle					= mapTypeToggle;
 @synthesize managedObjectContext			= managedObjectContext;
-@synthesize routeCriteriaView				= routeCriteriaView;
-@synthesize routeNavigationView				= routeNavigationView;
-@synthesize currentRouteView				= currentRouteView;
-@synthesize isLegTransition					= isLegTransition;
+@synthesize routeCriteriaViewController		= routeCriteriaViewController;
+@synthesize routeNavigationViewController	= routeNavigationViewController;
 @synthesize routePointDetailViewController	= routePointDetailViewController;
 @synthesize spokesInfoViewController		= spokesInfoViewController;
 @synthesize addRackViewController			= addRackViewController;
 @synthesize addShopViewController			= addShopViewController;
 @synthesize reportTheftViewController		= reportTheftViewController;
+@synthesize isZoom							= isZoom;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -69,6 +66,21 @@
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(handleNewRoute:)
 												 name:@"NewRoute" 
+											   object:nil];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(expireRoute)
+												 name:@"ExpireRoute" 
+											   object:nil];
+
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(handleShowRoute:)
+												 name:@"ShowRoute" 
+											   object:nil];
+	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(showRouteCriteriaView)
+												 name:@"ShowRouteCriteria" 
 											   object:nil];
 
 	[[NSNotificationCenter defaultCenter] addObserver:self
@@ -97,7 +109,7 @@
 		_mapView.mapType = MKMapTypeStandard;
 		self.mapTypeToggle.title = @"Hybrid";
 	}
-	_mapView.delegate = [[SpokesMapDelegate alloc] initWithViewController:self];
+	_mapView.delegate = self;
 	NSArray *pointsToShow = [RoutePointRepository fetchAllPoints:managedObjectContext];
 	[MapViewHelper showRoutePoints:pointsToShow mapView:_mapView];
 
@@ -141,15 +153,13 @@
 																  minCoordinate:currentRoute.minCoordinate
 																  maxCoordinate:currentRoute.maxCoordinate] autorelease];
 	[_mapView addAnnotation:routeAnnotation];
-	if(self.routeNavigationView == nil) {
-		RouteNavigationView *vc = [[RouteNavigationView alloc] initWithViewController:self];
-		[vc initRouteNavigator:currentRoute currentRouteView:self.currentRouteView];
-		[vc initRouteText:currentRoute];
-		self.routeNavigationView = vc;
+	if(self.routeNavigationViewController == nil) {
+		RouteNavigationViewController *vc = [[RouteNavigationViewController alloc] initWithMapView:_mapView];
+		self.routeNavigationViewController = vc;
 		[vc release];
 	}
-	[self performToggleAnimations:self.routeNavigationView viewsToHide:self.routeCriteriaView];
-	self.routeCriteriaView = nil;
+	[self performToggleAnimations:self.routeNavigationViewController.view viewsToHide:self.routeCriteriaViewController.view];
+	self.routeCriteriaViewController = nil;
 	self.routePointDetailViewController = nil;
 	self.spokesInfoViewController = nil;
 	self.addRackViewController = nil;
@@ -158,15 +168,14 @@
 }
 
 - (void) showRouteCriteriaView {
-	if(self.routeCriteriaView == nil) {
-		RouteCriteriaView *vc = [[RouteCriteriaView alloc] initWithViewController:self];
-		self.routeCriteriaView = vc;
+	if(self.routeCriteriaViewController == nil) {
+		RouteCriteriaViewController *vc = [[RouteCriteriaViewController alloc] initWithMapView:_mapView];
+		self.routeCriteriaViewController = vc;
 		[vc release];
-		[self initAdresses];
 	}
-	[self performToggleAnimations:self.routeCriteriaView viewsToHide:self.routeNavigationView];
-	[self.routeCriteriaView setTextFieldVisibility:YES];
-	self.routeNavigationView = nil;
+	[self performToggleAnimations:self.routeCriteriaViewController.view viewsToHide:self.routeNavigationViewController.view];
+	[self.routeCriteriaViewController setTextFieldVisibility:YES];
+	self.routeNavigationViewController = nil;
 	self.routePointDetailViewController = nil;
 	self.spokesInfoViewController = nil;
 	self.addRackViewController = nil;
@@ -180,7 +189,7 @@
 		self.routePointDetailViewController = rpdvc;
 		[rpdvc release];
 	}
-	[self.routeCriteriaView setTextFieldVisibility:NO];
+	[self.routeCriteriaViewController setTextFieldVisibility:NO];
 	[self.navigationController pushViewController:self.routePointDetailViewController animated:YES];
 	[self.navigationController setNavigationBarHidden:NO animated:YES];
 }
@@ -191,7 +200,7 @@
 		self.spokesInfoViewController = sivc;
 		[sivc release];
 	}
-	[self.routeCriteriaView setTextFieldVisibility:NO];
+	[self.routeCriteriaViewController setTextFieldVisibility:NO];
 	[self.navigationController pushViewController:self.spokesInfoViewController animated:YES];
 	[self.navigationController setNavigationBarHidden:NO animated:YES];
 }
@@ -202,7 +211,7 @@
 		self.addRackViewController = arvc;
 		[arvc release];
 	}
-	[self.routeCriteriaView setTextFieldVisibility:NO];
+	[self.routeCriteriaViewController setTextFieldVisibility:NO];
 	[self.navigationController pushViewController:self.addRackViewController animated:YES];
 	[self.navigationController setNavigationBarHidden:NO animated:YES];
 }
@@ -213,7 +222,7 @@
 		self.addShopViewController = asvc;
 		[asvc release];
 	}
-	[self.routeCriteriaView setTextFieldVisibility:NO];
+	[self.routeCriteriaViewController setTextFieldVisibility:NO];
 	[self.navigationController pushViewController:self.addShopViewController animated:YES];
 	[self.navigationController setNavigationBarHidden:NO animated:YES];
 }
@@ -224,7 +233,7 @@
 		self.reportTheftViewController = rtvc;
 		[rtvc release];
 	}
-	[self.routeCriteriaView setTextFieldVisibility:NO];
+	[self.routeCriteriaViewController setTextFieldVisibility:NO];
 	[self.navigationController pushViewController:self.reportTheftViewController animated:YES];
 	[self.navigationController setNavigationBarHidden:NO animated:YES];
 }
@@ -254,116 +263,11 @@
 }
 
 - (void)animationDidStart:(CAAnimation *)theAnimation {
-	[self.routeCriteriaView setTextFieldVisibility:YES];
-}
-
-#pragma mark -
-#pragma mark RouteCriteria management
-
-- (void) clearValues:(id)sender {
-	[self.routeCriteriaView clearValues];
-	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeStart mapView:_mapView];
-	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
-	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
-	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
-	[self expireRoute];
-}
-
-- (void) hideDirectionsNavBar:(id)sender {
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
-	Route *currentRoute = [routeService fetchCurrentRoute];
-	[routeService release];
-	if(currentRoute != nil) {
-		[self showRouteView:currentRoute];
-	} else {
-		[self.routeCriteriaView hideDirectionsNavBar];
-	}
-}
-
-- (void) swapValues {
-	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeStart mapView:_mapView];
-	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
-	NSArray *results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
-	RoutePoint *startPoint = (results.count > 0) ? [results objectAtIndex:0] : nil;
-	results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
-	RoutePoint *endPoint = (results.count > 0) ? [results objectAtIndex:0] : nil;
-	if(startPoint != nil) {
-		startPoint.type = [NSNumber numberWithInt:PointAnnotationTypeEnd];
-		[_mapView addAnnotation:[startPoint pointAnnotation]];
-	}
-	if(endPoint != nil) {
-		endPoint.type =[NSNumber numberWithInt:PointAnnotationTypeStart];
-		[_mapView addAnnotation:[endPoint pointAnnotation]];
-	}
-	[self initAdresses];
-	[self expireRoute];
-}
-
-- (void) initAdresses {
-	BOOL locationServicesEnabled = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).locationServicesEnabled;
-	NSString *otherField = (locationServicesEnabled && _mapView.showsUserLocation) ? @"Current Location" : nil;
-	NSArray *results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
-	UITextField *firstResponder = self.routeCriteriaView.startAddress;
-	if(results.count > 0) {
-		self.routeCriteriaView.startAddress.text = ((RoutePoint*)[results objectAtIndex:0]).address;
-	} else {
-		self.routeCriteriaView.startAddress.text = otherField;
-	}
-	results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
-	if(results.count > 0) {
-		self.routeCriteriaView.endAddress.text = ((RoutePoint*)[results objectAtIndex:0]).address;
-	} else {
-		if(![self.routeCriteriaView.startAddress.text isEqualToString:otherField]) {
-			self.routeCriteriaView.endAddress.text = otherField;
-		}
-		firstResponder = self.routeCriteriaView.endAddress;
-	}
-	[firstResponder becomeFirstResponder];
-}
-
-- (BOOL) validateRouteCriteria {
-	NSString* errorMsg = nil;
-	if(self.routeCriteriaView.startAddress.text == nil || [self.routeCriteriaView.startAddress.text length] == 0) {
-		errorMsg = @"Please enter a start address.";
-	} else if(self.routeCriteriaView.endAddress.text == nil) {
-		errorMsg = @"Please enter an end address.";
-	}
-	if(errorMsg != nil) {
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Forgot Something?" 
-														message:errorMsg 
-													   delegate:self 
-											  cancelButtonTitle:nil 
-											  otherButtonTitles:@"OK", nil];
-		[alert show];
-		[alert release];
-		return NO;
-	}
-	return YES;
-}
-
-- (void) handleFieldChange:(UITextField*)textField {
-	[self expireRoute];
-	if(textField.tag == 0) {
-		[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeStart mapView:_mapView];
-		[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
-	} else if(textField.tag == 1) {
-		[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
-		[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
-	}
+	[self.routeCriteriaViewController setTextFieldVisibility:YES];
 }
 
 #pragma mark -
 #pragma mark RoutePoint management
-
-- (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type {
-	NSArray *results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:type];
-	RoutePoint *routePt = (results.count > 0) ? [results objectAtIndex:0] : nil;
-	if(routePt == nil) {
-		NSString *addressText = (type == PointAnnotationTypeStart) ? self.routeCriteriaView.startAddress.text : self.routeCriteriaView.endAddress.text;
-		routePt = [self makeMapPoint:type addressText:addressText];
-	}
-	return routePt;
-}
 
 - (RoutePoint*) makeMapPoint:(PointAnnotationType)type addressText:(NSString*)addressText {
 	RoutePoint *routePt = nil;
@@ -505,16 +409,6 @@
 	[pool drain];
 }
 
-- (void) sendRouteRequest:(NSDictionary*)params {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	RoutePoint *startPoint = [params objectForKey:@"startPoint"];
-	RoutePoint *endPoint = [params objectForKey:@"endPoint"];
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
-	[routeService createRoute:startPoint endPoint:endPoint];
-	[routeService release];
-	[pool drain];
-}
-
 #pragma mark -
 #pragma mark Error Handling
 
@@ -558,71 +452,14 @@
 	[alert release];
 }
 
-
-
-#pragma mark -
-#pragma mark RouteNavigationView actions
-
-- (void) editRoute:(id)sender {
-	[self showRouteCriteriaView];
-}
-
-- (void) changeLeg:(id)sender {
-	[self performSelector:@selector(doChangeLeg:) withObject:sender afterDelay:0.01];
-}
-
-- (void) doChangeLeg:(id)sender {
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
-	Route *currentRoute = [routeService fetchCurrentRoute];
-	[routeService release];
-	[self.currentRouteView hideRoutePointerView];
-	int newLegIndex = [currentRoute.currentLegIndex intValue];
-	if(self.routeNavigationView.routeNavigator != nil && self.routeNavigationView.routeNavigator.selectedSegmentIndex > -1) {
-		if(self.routeNavigationView.routeNavigator.selectedSegmentIndex == 0) {
-			newLegIndex--;
-		} else {
-			newLegIndex++;
-		}
-		movePointerDirection = self.routeNavigationView.routeNavigator.selectedSegmentIndex;
-		isLegTransition = YES;
-	}
-	currentRoute.currentLegIndex = [NSNumber numberWithInt:newLegIndex];
-	if(newLegIndex == -1) {
-		[MapViewHelper focusToCenterOfPoints:[currentRoute startAndEndPoints] mapView:_mapView autoFit:NO];
-		isLegTransition = NO;
-	} else if(newLegIndex > -1 && newLegIndex < currentRoute.legs.count) {
-		Leg *currentLeg = [currentRoute legForIndex:[currentRoute.currentLegIndex intValue]];
-		[MapViewHelper focusToCenterOfPoints:[currentLeg startAndEndPoints] mapView:_mapView autoFit:YES];
-	} else if(newLegIndex == currentRoute.legs.count) {
-		[MapViewHelper focusToPoint:currentRoute.endCoordinate mapView:_mapView];
-	}
-	[self.routeNavigationView initRouteNavigator:currentRoute currentRouteView:self.currentRouteView];
-	[self.routeNavigationView initRouteText:currentRoute];
-}
-
-- (void) startNavigatingRoute:(id)sender {
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
-	Route *currentRoute = [routeService fetchCurrentRoute];
-	[routeService release];
-	movePointerDirection = 0;
-	isLegTransition = YES;
-	currentRoute.currentLegIndex = [NSNumber numberWithInt:0];
-	Leg *currentLeg = [currentRoute legForIndex:[currentRoute.currentLegIndex intValue]];
-	[MapViewHelper focusToCenterOfPoints:[currentLeg startAndEndPoints] mapView:_mapView autoFit:YES];
-	[self.routeNavigationView initRouteNavigator:currentRoute currentRouteView:self.currentRouteView];
-	[self.routeNavigationView initRouteText:currentRoute];
-}
-
-- (void) moveRoutePointer {
-	if(movePointerDirection > -1) {
-		[self.currentRouteView showRoutePointerView];
-		[self.currentRouteView moveRoutePointerView:[NSNumber numberWithInt:movePointerDirection]];
-		movePointerDirection = -1;
-	}
-}
-
 #pragma mark -
 #pragma mark Route management
+
+- (void) handleShowRoute:(NSNotification*)notification {
+	NSDictionary *params = [notification userInfo];
+	Route *currentRoute = [params objectForKey:@"currentRoute"];
+	[self showRouteView:currentRoute];
+}
 
 - (void) handleNewRoute:(NSNotification*)notification {
 	NSDictionary *params = [notification userInfo];
@@ -642,7 +479,7 @@
 			[_mapView addAnnotation:[startPoint pointAnnotation]];
 			[_mapView addAnnotation:[endPoint pointAnnotation]];
 			[MapViewHelper focusToCenterOfPoints:[newRoute minAndMaxPoints] mapView:_mapView autoFit:NO];
-			[self removeRouteAnnotations];
+			[MapViewHelper removeRouteAnnotation:_mapView];
 			[self showRouteView:newRoute];
 		}
 	}
@@ -652,7 +489,7 @@
 	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
 	[routeService deleteCurrentRoute];
 	[routeService release];
-	[self removeRouteAnnotations];
+	[MapViewHelper removeRouteAnnotation:_mapView];
 }
 
 #pragma mark -
@@ -667,7 +504,7 @@
 														 mapView:_mapView 
 														 context:managedObjectContext];
 				[routePointService release];
-				[self initAdresses];
+				[self.routeCriteriaViewController initAdresses];
 				[self expireRoute];
 			} else if(buttonIndex == 1) {
 				RoutePointService *routePointService = [[RoutePointService alloc] init];
@@ -675,10 +512,10 @@
 														 mapView:_mapView 
 														 context:managedObjectContext];
 				[routePointService release];
-				[self initAdresses];
+				[self.routeCriteriaViewController initAdresses];
 				[self expireRoute];
 			}
-			if(self.routeCriteriaView == nil) {
+			if(self.routeCriteriaViewController == nil) {
 				[self showRouteCriteriaView];
 			}
 		}
@@ -697,13 +534,120 @@
 }
 
 #pragma mark -
-#pragma mark MKAnnotation managment
+#pragma mark MKMapViewDelegate
 
-- (void) removeRouteAnnotations {
-	if(self.currentRouteView.annotation != nil) {
-		[_mapView removeAnnotation:self.currentRouteView.annotation];
+- (void) mapView:(MKMapView *)mapView annotationView:(MKAnnotationView *)view calloutAccessoryControlTapped:(UIControl *)control{
+	[self.routeCriteriaViewController hideDirectionsNavBar:nil];
+	PointAnnotation* pointAnnotation = (PointAnnotation*)view.annotation;
+	PointAnnotationType type = pointAnnotation.annotationType;
+	BOOL isRackOrShop = [pointAnnotation.routePoint isKindOfClass:[RackPoint class]] || [pointAnnotation.routePoint isKindOfClass:[ShopPoint class]];
+	if((type == PointAnnotationTypeEnd || type == PointAnnotationTypeStart) && !isRackOrShop) {
+		UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"Bike It"
+																 delegate:self 
+														cancelButtonTitle:@"Cancel" 
+												   destructiveButtonTitle:nil
+														otherButtonTitles:@"Bike To Here", @"Bike From Here", nil];
+		actionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+		actionSheet.cancelButtonIndex = 2;
+		actionSheet.tag = 1;
+		[actionSheet showInView:self.view];
+		[actionSheet release];
+	} else {
+		[self showRoutePointDetail];
 	}
-	self.currentRouteView = nil;
+}
+
+- (MKAnnotationView *) mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>) annotation {
+	MKAnnotationView* annotationView = nil;
+	if([annotation isKindOfClass:[RouteAnnotation class]]) {
+		RouteAnnotation *routeAnnotation = (RouteAnnotation*)annotation;
+		if(![mapView viewForAnnotation:[MapViewHelper routeAnnotation:mapView]]) {
+			annotationView = [[[RouteView alloc] initWithFrame:CGRectMake(0, 0, mapView.frame.size.width, mapView.frame.size.height)] autorelease];
+			annotationView.annotation = routeAnnotation;
+			((RouteView*)annotationView).mapView = mapView;
+		}
+	} else if([annotation isKindOfClass:[PointAnnotation class]]) {
+		PointAnnotation* pointAnnotation = (PointAnnotation*)annotation;
+		NSString* identifier = [[NSNumber numberWithInt:pointAnnotation.annotationType] stringValue];
+		MKPinAnnotationView* pin = (MKPinAnnotationView*)[mapView dequeueReusableAnnotationViewWithIdentifier:identifier];
+		if(nil == pin) {
+			pin = [[[MKPinAnnotationView alloc] initWithAnnotation:pointAnnotation reuseIdentifier:identifier]autorelease];
+		}
+		if(pointAnnotation.annotationType == PointAnnotationTypeStart) {
+			[pin setPinColor:MKPinAnnotationColorGreen];
+		} else if(pointAnnotation.annotationType == PointAnnotationTypeEnd) {
+			[pin setPinColor:MKPinAnnotationColorRed];
+		} else {
+			[pin setPinColor:MKPinAnnotationColorPurple];
+		}
+		annotationView = pin;
+		annotationView.rightCalloutAccessoryView = [UIButton buttonWithType:UIButtonTypeDetailDisclosure];
+		[annotationView setEnabled:YES];
+		[annotationView setCanShowCallout:YES];
+		[annotationView addObserver:pointAnnotation forKeyPath:@"selected" options:(NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew) context:nil];
+	}
+	return annotationView;
+}
+
+- (void) mapViewWillStartLoadingMap:(MKMapView*)mapView {
+	[self performSelectorOnMainThread:@selector(toggleNetworkActivityIndicator:) 
+						   withObject:[NSNumber numberWithInt:YES] 
+						waitUntilDone:NO];
+}
+
+- (void) mapViewDidFinishLoadingMap:(MKMapView *)mapView {
+	[self performSelectorOnMainThread:@selector(toggleNetworkActivityIndicator:) 
+						   withObject:[NSNumber numberWithInt:NO] 
+						waitUntilDone:NO];
+	for(id <MKAnnotation> annotation in mapView.annotations) {
+		if([annotation isKindOfClass:[PointAnnotation class]]) {
+			PointAnnotation* pointAnnotation = (PointAnnotation*)annotation;
+			if([pointAnnotation.routePoint.isSelected intValue] == 1) {
+				[mapView selectAnnotation:pointAnnotation animated:YES];
+			}
+		}
+	}
+	[self performSelector:@selector(centerMap:) withObject:mapView afterDelay:.5];
+}
+
+- (void) centerMap:(MKMapView*)mapView {
+	[mapView setCenterCoordinate:mapView.centerCoordinate animated:NO];
+}
+
+- (void)mapView:(MKMapView *)mapView regionWillChangeAnimated:(BOOL)animated {
+	if(isZoom) {
+		[mapView viewForAnnotation:[MapViewHelper routeAnnotation:mapView]].hidden = YES;
+	}
+}
+
+- (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
+	RouteView *routeView = (RouteView*)[mapView viewForAnnotation:[MapViewHelper routeAnnotation:mapView]];
+	[routeView regionChanged];
+	if(isZoom) {
+		routeView.hidden = NO;
+		isZoom = NO;
+	}
+	if(self.routeNavigationViewController.isLegTransition) {
+		[self.routeNavigationViewController performSelector:@selector(moveRoutePointer) withObject:nil afterDelay:0.2];
+		self.routeNavigationViewController.isLegTransition = NO;
+	}
+	[routeView checkRoutePointerView];
+}
+
+- (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal {
+	[UIApplication sharedApplication].networkActivityIndicatorVisible = [onOffVal intValue];
+}
+
+#pragma mark -
+#pragma mark EventSubscriber
+
+- (void) processEvent:(UIEvent*)event { //Hide route fix
+	if([event allTouches].count > 1) {
+		UITouch *touch = [[event allTouches] anyObject];
+		if(touch.phase == UITouchPhaseBegan) {
+			isZoom = YES;
+		}
+	}
 }
 
 #pragma mark -
@@ -725,9 +669,8 @@
 
 - (void)dealloc {
 	_mapView.delegate = nil;
-	self.routeCriteriaView = nil;
-	self.routeNavigationView = nil;
-	self.currentRouteView = nil;
+	self.routeCriteriaViewController = nil;
+	self.routeNavigationViewController = nil;
 	self.routePointDetailViewController = nil;
 	self.mapView = nil;
 	self.mapTypeToggle = nil;

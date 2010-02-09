@@ -108,9 +108,11 @@
 				}
 				context = UIGraphicsGetCurrentContext();
 				CGContextMoveToPoint(context, point.x, point.y);
-				CGContextSetLineWidth(context, 2.0);
-				CGContextSetStrokeColorWithColor(context, ccp.color.CGColor);
-				if(ccp.segType != nil)
+				CGContextSetLineWidth(context, 5.0);
+				CGColorRef cgColor = CGColorCreateCopyWithAlpha(ccp.color.CGColor, .7);
+				CGContextSetStrokeColorWithColor(context, cgColor);
+				CGColorRelease(cgColor);
+				if(ccp.segType != nil) 
 					[currType setString:ccp.segType];
 			}
 		}
@@ -196,21 +198,23 @@
 
 - (void) resetRoutePointerView {
 	RouteAnnotation *routeAnnotation = (RouteAnnotation*)self.annotation;
-	IndexedCoordinate *idxCoord = [routeAnnotation.points objectAtIndex:0];
-	CGPoint newPt;
-	int currentLegIndex = [idxCoord.leg.route.currentLegIndex intValue];
-	if(currentLegIndex > -1) {
-		if(currentLegIndex == idxCoord.leg.route.legs.count) {
-			Leg *currLeg = [idxCoord.leg.route legForIndex:currentLegIndex-1];
-			newPt = [self.mapView convertCoordinate:currLeg.endCoordinate toPointToView:self.mapView];
-			self.lastCoord = currLeg.endCoordinate;
-		} else {
-			Leg *currLeg = [idxCoord.leg.route legForIndex:currentLegIndex];
-			newPt = [self.mapView convertCoordinate:currLeg.startCoordinate toPointToView:self.mapView];
-			self.lastCoord = currLeg.startCoordinate;
+	if([routeAnnotation.points count]) {
+		IndexedCoordinate *idxCoord = [routeAnnotation.points objectAtIndex:0];
+		CGPoint newPt;
+		int currentLegIndex = [idxCoord.leg.route.currentLegIndex intValue];
+		if(currentLegIndex > -1) {
+			if(currentLegIndex == idxCoord.leg.route.legs.count) {
+				Leg *currLeg = [idxCoord.leg.route legForIndex:currentLegIndex-1];
+				newPt = [self.mapView convertCoordinate:currLeg.endCoordinate toPointToView:self.mapView];
+				self.lastCoord = currLeg.endCoordinate;
+			} else {
+				Leg *currLeg = [idxCoord.leg.route legForIndex:currentLegIndex];
+				newPt = [self.mapView convertCoordinate:currLeg.startCoordinate toPointToView:self.mapView];
+				self.lastCoord = currLeg.startCoordinate;
+			}
 		}
+		_internalRouteView.routePointerView.center = newPt;
 	}
-	_internalRouteView.routePointerView.center = newPt;
 }
 
 - (void) checkRoutePointerView {
@@ -221,50 +225,52 @@
 }
 
 - (void) moveRoutePointerView:(NSNumber*)pointerDirection {
-	int currentLegIndex = -1;
 	RouteAnnotation *routeAnnotation = (RouteAnnotation*)self.annotation;
-	IndexedCoordinate *idxCoord = [routeAnnotation.points objectAtIndex:0];
-	if(idxCoord != nil) {
-		currentLegIndex = [idxCoord.leg.route.currentLegIndex intValue];
-	}
-	if(currentLegIndex > -1) {
-		CALayer *routePointerLayer = _internalRouteView.routePointerView.layer;
-		CAKeyframeAnimation *routePointerAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
-		CGMutablePathRef thePath = CGPathCreateMutable();
-		CGPoint oldPt = [self.mapView convertCoordinate:lastCoord toPointToView:_mapView];
-		CGPathMoveToPoint(thePath, NULL, oldPt.x, oldPt.y);
-		CGPoint newPt;
-		Leg *currLeg = nil;
+	if([routeAnnotation.points count]) {
+		int currentLegIndex = -1;
+		IndexedCoordinate *idxCoord = [routeAnnotation.points objectAtIndex:0];
+		if(idxCoord != nil) {
+			currentLegIndex = [idxCoord.leg.route.currentLegIndex intValue];
+		}
 		if(currentLegIndex > -1) {
-			currLeg = [idxCoord.leg.route legForIndex:currentLegIndex-[pointerDirection intValue]];
-			if([pointerDirection intValue] == 0) {
-				newPt = [self.mapView convertCoordinate:currLeg.startCoordinate toPointToView:_mapView];
-				self.lastCoord = currLeg.startCoordinate;
-			} else {
-				newPt = [self.mapView convertCoordinate:currLeg.endCoordinate toPointToView:_mapView];
-				self.lastCoord = currLeg.endCoordinate;
-			}
-		}
-		_internalRouteView.routePointerView.center = newPt;
-		if(currLeg.coordinateSequence.count > 2) {
-			if([pointerDirection intValue] == 1) {
-				for(int idx = 1; idx < (currLeg.coordinateSequence.count-1); idx++) {
-					CGPoint midPt = [self.mapView convertCoordinate:[[currLeg coordinateForIndex:idx] asCLCoordinate] toPointToView:_mapView];
-					CGPathAddLineToPoint(thePath, NULL, midPt.x, midPt.y);
-				}
-			} else {
-				for(int idx = (currLeg.coordinateSequence.count-2); idx >= 0; idx--) {
-					CGPoint midPt = [self.mapView convertCoordinate:[[currLeg coordinateForIndex:idx] asCLCoordinate] toPointToView:_mapView];
-					CGPathAddLineToPoint(thePath, NULL, midPt.x, midPt.y);
+			CALayer *routePointerLayer = _internalRouteView.routePointerView.layer;
+			CAKeyframeAnimation *routePointerAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+			CGMutablePathRef thePath = CGPathCreateMutable();
+			CGPoint oldPt = [self.mapView convertCoordinate:lastCoord toPointToView:_mapView];
+			CGPathMoveToPoint(thePath, NULL, oldPt.x, oldPt.y);
+			CGPoint newPt;
+			Leg *currLeg = nil;
+			if(currentLegIndex > -1) {
+				currLeg = [idxCoord.leg.route legForIndex:currentLegIndex-[pointerDirection intValue]];
+				if([pointerDirection intValue] == 0) {
+					newPt = [self.mapView convertCoordinate:currLeg.startCoordinate toPointToView:_mapView];
+					self.lastCoord = currLeg.startCoordinate;
+				} else {
+					newPt = [self.mapView convertCoordinate:currLeg.endCoordinate toPointToView:_mapView];
+					self.lastCoord = currLeg.endCoordinate;
 				}
 			}
+			_internalRouteView.routePointerView.center = newPt;
+			if(currLeg.coordinateSequence.count > 2) {
+				if([pointerDirection intValue] == 1) {
+					for(int idx = 1; idx < (currLeg.coordinateSequence.count-1); idx++) {
+						CGPoint midPt = [self.mapView convertCoordinate:[[currLeg coordinateForIndex:idx] asCLCoordinate] toPointToView:_mapView];
+						CGPathAddLineToPoint(thePath, NULL, midPt.x, midPt.y);
+					}
+				} else {
+					for(int idx = (currLeg.coordinateSequence.count-2); idx >= 0; idx--) {
+						CGPoint midPt = [self.mapView convertCoordinate:[[currLeg coordinateForIndex:idx] asCLCoordinate] toPointToView:_mapView];
+						CGPathAddLineToPoint(thePath, NULL, midPt.x, midPt.y);
+					}
+				}
+			}
+			CGPathAddLineToPoint(thePath, NULL, newPt.x, newPt.y);
+			routePointerAnimation.path = thePath;
+			routePointerAnimation.duration = 0.5;
+			routePointerAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+			CGPathRelease(thePath);
+			[routePointerLayer addAnimation:routePointerAnimation forKey:@"routePointer"];
 		}
-		CGPathAddLineToPoint(thePath, NULL, newPt.x, newPt.y);
-		routePointerAnimation.path = thePath;
-		routePointerAnimation.duration = 0.5;
-		routePointerAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-		CGPathRelease(thePath);
-		[routePointerLayer addAnimation:routePointerAnimation forKey:@"routePointer"];
 	}
 }
 

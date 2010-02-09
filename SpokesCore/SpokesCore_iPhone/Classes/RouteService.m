@@ -16,7 +16,6 @@
 
 @implementation RouteService
 
-@synthesize currentElementValue = currentElementValue;
 @synthesize currentRoute		= currentRoute;
 @synthesize currentLeg			= currentLeg;
 
@@ -99,7 +98,7 @@
 			[parser release];
 			NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:self.faultMsg forKey:@"faultMessage"];
 			NSNotification *notification = [NSNotification notificationWithName:@"SpokesFault" object:nil userInfo:params];
-			[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+			[[NSNotificationCenter defaultCenter] postNotification:notification waitUntilDone:false];
 		}
 		self.currentElementValue = nil;
 		self.responseData = nil;

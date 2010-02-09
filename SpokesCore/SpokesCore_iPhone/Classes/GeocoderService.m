@@ -24,7 +24,6 @@
 
 @synthesize addressLocation = addressLocation;
 @synthesize accuracyLevel	= accuracyLevel;
-@synthesize done			= done;
 
 - (id) initWithMapView:(MKMapView*)mapView {
 	if ((self = [super init])) {

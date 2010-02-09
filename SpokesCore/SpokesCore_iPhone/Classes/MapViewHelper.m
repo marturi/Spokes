@@ -135,7 +135,7 @@
 	MKAnnotationView *observedView = [mapView viewForAnnotation:annotation];
 	observedView.selected = NO;
 	[observedView removeObserver:annotation forKeyPath:@"selected"];
-	[mapView removeAnnotations:annotationToRemove];
+	[mapView performSelectorOnMainThread:@selector(removeAnnotations:) withObject:annotationToRemove waitUntilDone:false];
 }
 
 + (void) removeAnnotationsOfType:(PointAnnotationType)annotationType mapView:(MKMapView*)mapView {
@@ -153,7 +153,7 @@
 		}
 	}
 	if(annotationsToRemove.count > 0) {
-		[mapView removeAnnotations:annotationsToRemove];
+		[mapView performSelectorOnMainThread:@selector(removeAnnotations:) withObject:annotationsToRemove waitUntilDone:false];
 	}
 	[annotationsToRemove release];
 }
@@ -162,7 +162,7 @@
 	for(RoutePoint * routePoint in routePoints) {
 		PointAnnotation *pa = [routePoint pointAnnotation];
 		if(pa != nil) {
-			[mapView addAnnotation:pa];
+			[mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:pa waitUntilDone:false];
 		}
 	}
 }

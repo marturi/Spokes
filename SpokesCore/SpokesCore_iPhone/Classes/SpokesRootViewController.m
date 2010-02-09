@@ -153,7 +153,7 @@
 	RouteAnnotation *routeAnnotation = [[[RouteAnnotation alloc] initWithPoints:[currentRoute routePoints] 
 																  minCoordinate:currentRoute.minCoordinate
 																  maxCoordinate:currentRoute.maxCoordinate] autorelease];
-	[_mapView addAnnotation:routeAnnotation];
+	[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:routeAnnotation waitUntilDone:YES];
 	if(self.routeNavigationViewController == nil) {
 		RouteNavigationViewController *vc = [[RouteNavigationViewController alloc] initWithMapView:_mapView];
 		self.routeNavigationViewController = vc;
@@ -338,6 +338,7 @@
 }
 
 - (void) handlePointsFound:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	if(params != nil) {
 		if([[params objectForKey:@"pointsFound"] isKindOfClass:[NSNull class]]) {
@@ -348,7 +349,7 @@
 														   delegate:self 
 												  cancelButtonTitle:nil 
 												  otherButtonTitles:@"OK", nil];
-			[alert show];
+			[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:false];
 			[alert release];
 		} else {
 			NSArray *points = [params objectForKey:@"pointsFound"];
@@ -368,6 +369,7 @@
 			[MapViewHelper showRoutePoints:points mapView:_mapView];
 		}
 	}
+	[pool drain];
 }
 
 - (IBAction) showInfoView:(id)sender {
@@ -414,6 +416,7 @@
 #pragma mark Error Handling
 
 - (void) handleSpokesFault:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSString *faultMessage = [params objectForKey:@"faultMessage"];
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Whoops!" 
@@ -421,23 +424,27 @@
 												   delegate:self 
 										  cancelButtonTitle:nil 
 										  otherButtonTitles:@"OK", nil];
-	[alert show];
+	[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
 	[alert release];
+	[pool drain];
 }
 
 - (void) handleServiceError:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSError *serviceError = [params objectForKey:@"serviceError"];
 	if ([serviceError code] == kCFURLErrorNotConnectedToInternet) {
 		NoConnectionViewController *ncvc = [[NoConnectionViewController alloc] initWithNibName:@"NoConnectionView" bundle:nil];
-		[self.navigationController presentModalViewController:ncvc animated:YES];
+		[self.navigationController performSelectorOnMainThread:@selector(presentModalViewController:) withObject:ncvc waitUntilDone:NO];
 		[ncvc release];
 	} else {
 		[self performSelectorOnMainThread:@selector(showErrorMsg:) withObject:serviceError waitUntilDone:NO];
 	}
+	[pool drain];
 }
 
 - (void) showErrorMsg:(NSError*)error {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *errorMessage = nil;
 	if(error != nil) {
 		errorMessage = [error localizedDescription];
@@ -449,8 +456,9 @@
 												   delegate:self 
 										  cancelButtonTitle:nil 
 										  otherButtonTitles:@"OK", nil];
-	[alert show];
+	[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
 	[alert release];
+	[pool drain];
 }
 
 #pragma mark -
@@ -463,6 +471,7 @@
 }
 
 - (void) handleNewRoute:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	if(params != nil) {
 		if([[params objectForKey:@"newRoute"] isKindOfClass:[NSNull class]]) {
@@ -471,31 +480,34 @@
 														   delegate:self 
 												  cancelButtonTitle:nil 
 												  otherButtonTitles:@"OK", nil];
-			[alert show];
+			[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
 			[alert release];
 		} else {
 			Route *newRoute = [params objectForKey:@"newRoute"];
 			RoutePoint *startPoint = [params objectForKey:@"startPoint"];
 			RoutePoint *endPoint = [params objectForKey:@"endPoint"];
-			[_mapView addAnnotation:[startPoint pointAnnotation]];
-			[_mapView addAnnotation:[endPoint pointAnnotation]];
+			[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:[startPoint pointAnnotation] waitUntilDone:NO];
+			[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:[endPoint pointAnnotation] waitUntilDone:NO];
 			[MapViewHelper focusToCenterOfPoints:[newRoute minAndMaxPoints] mapView:_mapView autoFit:NO];
 			if(self.routeView.annotation != nil) {
-				[_mapView removeAnnotation:self.routeView.annotation];
+				[_mapView performSelectorOnMainThread:@selector(removeAnnotation:) withObject:self.routeView.annotation waitUntilDone:NO];
 			}
-			[self showRouteView:newRoute];
+			[self performSelectorOnMainThread:@selector(showRouteView:) withObject:newRoute waitUntilDone:NO];
 		}
 	}
+	[pool drain];
 }
 
 - (void) expireRoute {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
 	[routeService deleteCurrentRoute];
 	[routeService release];
 	if(self.routeView.annotation != nil) {
-		[_mapView removeAnnotation:self.routeView.annotation];
+		[_mapView performSelectorOnMainThread:@selector(removeAnnotation:) withObject:self.routeView.annotation waitUntilDone:false];
 	}
 	self.routeView = nil;
+	[pool drain];
 }
 
 #pragma mark -
@@ -628,16 +640,16 @@
 }
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
-	[self.routeView regionChanged];
+	[self.routeView performSelectorOnMainThread:@selector(regionChanged) withObject:nil waitUntilDone:NO];
 	if(isZoom) {
 		self.routeView.hidden = NO;
 		isZoom = NO;
 	}
 	if(self.routeNavigationViewController.isLegTransition) {
-		[self.routeNavigationViewController performSelector:@selector(moveRoutePointer) withObject:nil afterDelay:0.2];
+		[self.routeNavigationViewController performSelectorOnMainThread:@selector(moveRoutePointer) withObject:nil waitUntilDone:NO];
 		self.routeNavigationViewController.isLegTransition = NO;
 	}
-	[self.routeView checkRoutePointerView];
+	[self.routeView performSelectorOnMainThread:@selector(checkRoutePointerView) withObject:nil waitUntilDone:NO];
 }
 
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal {

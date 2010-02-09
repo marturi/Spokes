@@ -14,7 +14,6 @@
 @implementation RackService
 
 @synthesize currentRackPoint	= currentRackPoint;
-@synthesize currentElementValue = currentElementValue;
 @synthesize racks				= racks;
 
 - (id) initWithManagedObjectContext:(NSManagedObjectContext*)managedObjectContext {
@@ -43,7 +42,7 @@
 		params = [NSMutableDictionary dictionaryWithObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+		[[NSNotificationCenter defaultCenter] postNotification:notification];
 	} else {
 		if(self.racks != nil) {
 			params = [NSMutableDictionary dictionaryWithObject:self.racks forKey:@"pointsFound"];
@@ -52,7 +51,7 @@
 		}
 		[params setObject:@"racks" forKey:@"pointType"];
 		NSNotification *notification = [NSNotification notificationWithName:@"PointsFound" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];		
+		[[NSNotificationCenter defaultCenter] postNotification:notification];		
 	}
 }
 

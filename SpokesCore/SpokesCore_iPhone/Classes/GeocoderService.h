@@ -28,6 +28,5 @@
 
 @property (nonatomic, retain) CLLocation *addressLocation;
 @property (nonatomic, retain) NSString *accuracyLevel;
-@property (readonly) BOOL done;
 
 @end

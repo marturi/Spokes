@@ -27,5 +27,6 @@
 @property (nonatomic, retain) NSHTTPURLResponse *response;
 @property (nonatomic, retain) NSString *faultMsg;
 @property (nonatomic, retain) NSMutableString *currentElementValue;
+@property (readonly) BOOL done;
 
 @end

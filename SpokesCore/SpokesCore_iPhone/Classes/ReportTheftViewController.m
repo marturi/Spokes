@@ -88,7 +88,7 @@
 	} else if([self.comments.text length] > 140) {
 		self.comments.text = [self.comments.text substringWithRange:NSMakeRange(0,140)];
 	} else {
-		[self performSelector:@selector(doReportTheft) withObject:nil afterDelay:0.01];
+		[NSThread detachNewThreadSelector:@selector(doReportTheft) toTarget:self withObject:nil];
 	}
 }
 
@@ -101,6 +101,7 @@
 }
 
 - (void) doReportTheft {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	GeocoderService *geocoderService = [[GeocoderService alloc] initWithMapView:_viewController.mapView];
 	[geocoderService addressLocation:self.theftLocation.text];
 	do {
@@ -108,7 +109,7 @@
 	if(geocoderService.addressLocation != nil) {
 		if(![geocoderService validateCoordinate:geocoderService.addressLocation.coordinate]) {
 			NSString *errorMsg = @"Whoops! The address entered is either invalid or lies outside of city limits.";
-			[self showMsg:errorMsg];
+			[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 		} else {
 			TheftService* theftService = [[TheftService alloc] init];
 			[theftService reportTheft:geocoderService.addressLocation.coordinate comments:self.comments.text];
@@ -120,10 +121,11 @@
 		}
 	} else {
 		NSString *errorMsg = @"Whoops! The address entered is either invalid or lies outside of city limits.";
-		[self showMsg:errorMsg];
+		[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 	}
 
 	[geocoderService release];
+	[pool drain];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {

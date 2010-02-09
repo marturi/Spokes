@@ -16,6 +16,7 @@
 @synthesize response			= _response;
 @synthesize faultMsg			= faultMsg;
 @synthesize currentElementValue	= currentElementValue;
+@synthesize done				= done;
 
 - (void) downloadAndParse:(NSURLRequest*)request {
 	done = NO;

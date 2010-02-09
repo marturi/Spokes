@@ -53,10 +53,11 @@
 }
 
 - (IBAction) addRack:(id)sender {
-	[self performSelector:@selector(doAddRack) withObject:nil afterDelay:0.01];
+	[NSThread detachNewThreadSelector:@selector(doAddRack) toTarget:self withObject:nil];
 }
 
 - (void) doAddRack {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	GeocoderService *geocoderService = [[GeocoderService alloc] initWithMapView:_viewController.mapView];
 	[geocoderService addressLocation:self.rackLocation.text];
 	do {
@@ -64,7 +65,7 @@
 	if(geocoderService.addressLocation != nil) {
 		if(![geocoderService validateCoordinate:geocoderService.addressLocation.coordinate]) {
 			NSString *errorMsg = @"Whoops! The address entered is either invalid or lies outside of city limits.";
-			[self showMsg:errorMsg];
+			[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 		} else {
 			RackService* rackService = [[RackService alloc] initWithManagedObjectContext:_viewController.managedObjectContext];
 			[rackService addRack:self.rackLocation.text 
@@ -77,9 +78,10 @@
 		}
 	} else {
 		NSString *errorMsg = @"Whoops! The address entered is either invalid or lies outside of city limits.";
-		[self showMsg:errorMsg];
+		[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 	}
 	[geocoderService release];
+	[pool drain];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {

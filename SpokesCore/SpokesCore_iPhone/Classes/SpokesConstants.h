@@ -8,13 +8,12 @@
 
 #import <CoreLocation/CoreLocation.h>
 
+#define kMaxAddressesSaved 2
 #define kRouteTimeout 20.0
 #define kRacksTimeout 10.0
 #define kShopsTimeout 10.0
 #define kTheftsTimeout 10.0
 #define kGeocoderTimeout 5.0
-
-//#define kSpokesBaseURL @"http://spokesnyc.8bstudio.net/iCycle_Web/icycle/"
 
 #define kSpokesDateFormat @"MM-dd-yyyy"
 

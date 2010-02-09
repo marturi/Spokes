@@ -8,7 +8,7 @@
 
 #import <CoreLocation/CoreLocation.h>
 
-#define kMaxAddressesSaved 2
+#define kMaxAddressesSaved 50
 #define kRouteTimeout 20.0
 #define kRacksTimeout 10.0
 #define kShopsTimeout 10.0

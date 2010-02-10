@@ -14,6 +14,7 @@
 	IBOutlet UITextView *comments;
 	IBOutlet UIButton *doneButton;
 	UIButton *msgButton;
+	NSString *theftLocationStr;
 }
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController;

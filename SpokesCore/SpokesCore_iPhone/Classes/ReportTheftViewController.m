@@ -57,7 +57,7 @@
 												 name:@"TheftServiceError" 
 											   object:nil];
 	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleRackAdded:)
+											 selector:@selector(handleTheftReported:)
 												 name:@"TheftReported" 
 											   object:nil];
 }
@@ -88,7 +88,8 @@
 	} else if([self.comments.text length] > 140) {
 		self.comments.text = [self.comments.text substringWithRange:NSMakeRange(0,140)];
 	} else {
-		[NSThread detachNewThreadSelector:@selector(doReportTheft) toTarget:self withObject:nil];
+		NSArray *params = [NSArray arrayWithObjects:self.theftLocation.text,self.comments.text,nil];
+		[NSThread detachNewThreadSelector:@selector(doReportTheft:) toTarget:self withObject:params];
 	}
 }
 
@@ -100,10 +101,11 @@
 	return isValid;
 }
 
-- (void) doReportTheft {
+- (void) doReportTheft:(NSArray*)params {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	GeocoderService *geocoderService = [[GeocoderService alloc] initWithMapView:_viewController.mapView];
-	[geocoderService addressLocation:self.theftLocation.text];
+	theftLocationStr = [params objectAtIndex:0];
+	[geocoderService addressLocation:theftLocationStr];
 	do {
 	} while (!geocoderService.done);
 	if(geocoderService.addressLocation != nil) {
@@ -112,8 +114,7 @@
 			[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 		} else {
 			TheftService* theftService = [[TheftService alloc] init];
-			[theftService reportTheft:geocoderService.addressLocation.coordinate comments:self.comments.text];
-			
+			[theftService reportTheft:geocoderService.addressLocation.coordinate comments:[params objectAtIndex:1]];
 			if(theftService.faultMsg != nil) {
 				[self performSelectorOnMainThread:@selector(showMsg:) withObject:theftService.faultMsg waitUntilDone:NO];
 			}
@@ -137,26 +138,34 @@
 }
 
 - (void) handleServiceError:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSError *serviceError = [params objectForKey:@"serviceError"];
 	if ([serviceError code] == kCFURLErrorNotConnectedToInternet) {
-		NoConnectionViewController *ncvc = [[NoConnectionViewController alloc] initWithNibName:@"NoConnectionView" bundle:nil];
-		[self.navigationController presentModalViewController:ncvc animated:YES];
-		[ncvc release];
+		[self performSelectorOnMainThread:@selector(showNoConnectionView) withObject:nil waitUntilDone:NO];
 	} else {
 		NSString *errorMsg = [NSString stringWithFormat:@"Whoops! %@", [serviceError localizedDescription]];
 		[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 	}
+	[pool drain];
 }
 
-- (void) handleRackAdded:(NSNotification*)notification {
+- (void) showNoConnectionView {
+	NoConnectionViewController *ncvc = [[NoConnectionViewController alloc] initWithNibName:@"NoConnectionView" bundle:nil];
+	[self.navigationController presentModalViewController:ncvc animated:YES];
+	[ncvc release];
+}
+
+- (void) handleTheftReported:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSString *resourceCreated = [params objectForKey:@"resourceCreated"];
 	NSString *msg = @"We had trouble reporting the theft.  Please try again.";
 	if([resourceCreated isEqualToString:@"YES"]) {
-		msg = [NSString stringWithFormat:@"Thanks! You successfully reported the theft at %@", self.theftLocation.text];
+		msg = [NSString stringWithFormat:@"Thanks! You successfully reported the theft at %@", theftLocationStr];
 	}
 	[self performSelectorOnMainThread:@selector(showMsg:) withObject:msg waitUntilDone:NO];
+	[pool drain];
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {

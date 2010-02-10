@@ -10,7 +10,7 @@
 
 @implementation AutocompleteEntry
 
-@synthesize name, coord;
+@synthesize name, coord, accuracyLevel;
 @dynamic aux, auxlabel, valueForSearching;
 
 - (NSComparisonResult) compareEntry:(AutocompleteEntry*)e {
@@ -26,6 +26,7 @@
 }
 
 - (void) dealloc {
+	[accuracyLevel release];
 	[name release];
 	[aux release];
 	[super dealloc];

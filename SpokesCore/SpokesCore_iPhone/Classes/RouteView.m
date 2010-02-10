@@ -85,6 +85,43 @@
 @synthesize routeView			= _routeView;
 @synthesize routePointerView	= routePointerView;
 
+//-(void) drawRect:(CGRect) rect {
+//	if(!isInited) {
+//		[self initCoordinateColorPairs];
+//		[self placeRoutePointerView];
+//		isInited = YES;
+//	}
+//	if(nil != coordinateColorPairs && coordinateColorPairs.count > 0) {
+//		CGContextRef context = UIGraphicsGetCurrentContext();
+//		NSMutableString *currType = [[NSMutableString alloc] init];
+//		int lastStroke = 0;
+//		for(int idx = 0; idx < coordinateColorPairs.count; idx++) {
+//			CoordinateColorPair *ccp = [coordinateColorPairs objectAtIndex:idx];
+//			CGPoint point = [self.routeView.mapView convertCoordinate:ccp.coord toPointToView:self];
+//			if(idx > 0) {
+//				CGContextAddLineToPoint(context, point.x, point.y);
+//			}
+//			if(ccp.segType != nil && ![currType isEqualToString:ccp.segType]) {
+//				if(idx > 0) {
+//					CGContextStrokePath(context);
+//					lastStroke = idx;
+//				}
+//				CGContextMoveToPoint(context, point.x, point.y);
+//				CGContextSetLineWidth(context, 5.0);
+//				CGColorRef cgColor = CGColorCreateCopyWithAlpha(ccp.color.CGColor, .7);
+//				CGContextSetStrokeColorWithColor(context, cgColor);
+//				CGColorRelease(cgColor);
+//				if(ccp.segType != nil) 
+//					[currType setString:ccp.segType];
+//			}
+//		}
+//		if(lastStroke < (coordinateColorPairs.count-1)) {
+//			CGContextStrokePath(context);
+//		}
+//		[currType release];
+//	}
+//}
+
 -(void) drawRect:(CGRect) rect {
 	if(!isInited) {
 		[self initCoordinateColorPairs];
@@ -92,21 +129,22 @@
 		isInited = YES;
 	}
 	if(nil != coordinateColorPairs && coordinateColorPairs.count > 0) {
-		CGContextRef context = nil;
+		CGContextRef context = UIGraphicsGetCurrentContext();
+		CGContextSetLineCap(context, kCGLineCapRound);
 		NSMutableString *currType = [[NSMutableString alloc] init];
 		int lastStroke = 0;
 		for(int idx = 0; idx < coordinateColorPairs.count; idx++) {
 			CoordinateColorPair *ccp = [coordinateColorPairs objectAtIndex:idx];
 			CGPoint point = [self.routeView.mapView convertCoordinate:ccp.coord toPointToView:self];
-			if(context != nil) {
+			if(idx > 0) {
 				CGContextAddLineToPoint(context, point.x, point.y);
 			}
 			if(ccp.segType != nil && ![currType isEqualToString:ccp.segType]) {
-				if(context != nil) {
+				if(idx > 0) {
 					CGContextStrokePath(context);
 					lastStroke = idx;
+					//CGContextFillEllipseInRect(context, CGRectMake(point.x, point.y, 10.0, 10.0));
 				}
-				context = UIGraphicsGetCurrentContext();
 				CGContextMoveToPoint(context, point.x, point.y);
 				CGContextSetLineWidth(context, 5.0);
 				CGColorRef cgColor = CGColorCreateCopyWithAlpha(ccp.color.CGColor, .7);
@@ -118,6 +156,7 @@
 		}
 		if(lastStroke < (coordinateColorPairs.count-1)) {
 			CGContextStrokePath(context);
+			CGContextFillPath(context);
 		}
 		[currType release];
 	}

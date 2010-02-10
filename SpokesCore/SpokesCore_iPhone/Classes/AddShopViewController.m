@@ -61,7 +61,15 @@
 
 - (IBAction) addShop:(id)sender {
 	if([self validateShopInput]) {
-		[NSThread detachNewThreadSelector:@selector(doAddShop) toTarget:self withObject:nil];
+		NSString *hasRentalsStr = @"";
+		if(self.hasRentals.selectedSegmentIndex == 0) {
+			hasRentalsStr = @"Y";
+		} else if(self.hasRentals.selectedSegmentIndex == 1) {
+			hasRentalsStr = @"N";
+		}
+		NSArray *params = [NSArray arrayWithObjects:self.shopAddress.text,[self formatPhoneNumber],
+						   self.shopName.text,hasRentalsStr,nil];
+		[NSThread detachNewThreadSelector:@selector(doAddShop:) toTarget:self withObject:params];
 	}
 }
 
@@ -76,10 +84,11 @@
 	return YES;
 }
 
-- (void) doAddShop {
+- (void) doAddShop:(NSArray*)params {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	shopAddressStr = [params objectAtIndex:0];
 	GeocoderService *geocoderService = [[GeocoderService alloc] initWithMapView:_viewController.mapView];
-	[geocoderService addressLocation:self.shopAddress.text];
+	[geocoderService addressLocation:[params objectAtIndex:0]];
 	do {
 	} while (!geocoderService.done);
 	if(geocoderService.addressLocation != nil) {
@@ -87,17 +96,12 @@
 			NSString *errorMsg = @"Whoops! The address entered is either invalid or lies outside of city limits.";
 			[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 		} else {
-			NSString *hasRentalsStr = @"";
-			if(self.hasRentals.selectedSegmentIndex == 0) {
-				hasRentalsStr = @"Y";
-			} else if(self.hasRentals.selectedSegmentIndex == 1) {
-				hasRentalsStr = @"N";
-			}
+			
 			ShopService* shopService = [[ShopService alloc] initWithManagedObjectContext:_viewController.managedObjectContext];
-			[shopService addShop:self.shopAddress.text 
-						shopName:self.shopName.text
-					  hasRentals:hasRentalsStr 
-					   shopPhone:[self formatPhoneNumber] 
+			[shopService addShop:[params objectAtIndex:0] 
+						shopName:[params objectAtIndex:2]
+					  hasRentals:[params objectAtIndex:3] 
+					   shopPhone:[params objectAtIndex:1] 
 				  shopCoordinate:geocoderService.addressLocation.coordinate];
 			if(shopService.faultMsg != nil) {
 				[self performSelectorOnMainThread:@selector(showMsg:) withObject:shopService.faultMsg waitUntilDone:NO];
@@ -196,26 +200,34 @@
 }
 
 - (void) handleServiceError:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSError *serviceError = [params objectForKey:@"serviceError"];
 	if ([serviceError code] == kCFURLErrorNotConnectedToInternet) {
-		NoConnectionViewController *ncvc = [[NoConnectionViewController alloc] initWithNibName:@"NoConnectionView" bundle:nil];
-		[self.navigationController presentModalViewController:ncvc animated:YES];
-		[ncvc release];
+		[self performSelectorOnMainThread:@selector(showNoConnectionView) withObject:nil waitUntilDone:NO];
 	} else {
 		NSString *errorMsg = [NSString stringWithFormat:@"Whoops! %@", [serviceError localizedDescription]];
 		[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 	}
+	[pool drain];
 }
 
 - (void) handleShopAdded:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSString *resourceCreated = [params objectForKey:@"resourceCreated"];
 	NSString *msg = @"We had trouble adding the new shop.  Please try again.";
 	if([resourceCreated isEqualToString:@"YES"]) {
-		msg = [NSString stringWithFormat:@"Thanks! You successfully added a new shop at %@", self.shopAddress.text];
+		msg = [NSString stringWithFormat:@"Thanks! You successfully added a new shop at %@", shopAddressStr];
 	}
 	[self performSelectorOnMainThread:@selector(showMsg:) withObject:msg waitUntilDone:NO];
+	[pool drain];
+}
+
+- (void) showNoConnectionView {
+	NoConnectionViewController *ncvc = [[NoConnectionViewController alloc] initWithNibName:@"NoConnectionView" bundle:nil];
+	[self.navigationController presentModalViewController:ncvc animated:YES];
+	[ncvc release];
 }
 
 - (void) showMsg:(NSString*)msg {

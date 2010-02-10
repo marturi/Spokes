@@ -14,12 +14,14 @@
     NSString *auxlabel;
     NSString *valueForSearching;
 	CLLocationCoordinate2D coord;
+	NSString *accuracyLevel;
 }
 
 @property (copy) NSString *name;
 @property (copy) NSString *auxlabel;
 @property (copy) NSString *aux;
 @property CLLocationCoordinate2D coord;
+@property (nonatomic, retain) NSString *accuracyLevel;
 
 @property (readonly) NSString *valueForSearching;
 

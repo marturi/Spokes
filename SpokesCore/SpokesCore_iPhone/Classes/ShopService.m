@@ -42,7 +42,7 @@
 		params = [NSMutableDictionary dictionaryWithObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+		[[NSNotificationCenter defaultCenter] postNotification:notification];
 	} else {
 		if(self.shops != nil) {
 			params = [NSMutableDictionary dictionaryWithObject:self.shops forKey:@"pointsFound"];
@@ -51,7 +51,7 @@
 		}
 		[params setObject:@"shops" forKey:@"pointType"];
 		NSNotification *notification = [NSNotification notificationWithName:@"PointsFound" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];		
+		[[NSNotificationCenter defaultCenter] postNotification:notification];		
 	}
 }
 
@@ -81,7 +81,7 @@
 		[params setObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"ShopServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+		[[NSNotificationCenter defaultCenter] postNotification:notification];
 	} else {
 		if([self.response statusCode] == 201) {
 			[params setObject:@"YES" forKey:@"resourceCreated"];
@@ -89,7 +89,7 @@
 			[params setObject:@"NO" forKey:@"resourceCreated"];
 		}
 		NSNotification *notification = [NSNotification notificationWithName:@"ShopAdded" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+		[[NSNotificationCenter defaultCenter] postNotification:notification];
 	}
 }
 

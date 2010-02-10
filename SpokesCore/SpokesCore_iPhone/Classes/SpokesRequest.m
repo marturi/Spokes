@@ -54,16 +54,20 @@
 	[urlString appendString:[NSString stringWithFormat:@"%f", [startPoint coordinate].longitude]];
 	[urlString appendString:@","];
 	[urlString appendString:[NSString stringWithFormat:@"%f", [startPoint coordinate].latitude]];
-	[urlString appendString:@"("];
-	[urlString appendString:startPoint.accuracyLevel];
-	[urlString appendString:@")"];
+	if(startPoint.accuracyLevel) {
+		[urlString appendString:@"("];
+		[urlString appendString:startPoint.accuracyLevel];
+		[urlString appendString:@")"];
+	}
 	[urlString appendString:@"_"];
 	[urlString appendString:[NSString stringWithFormat:@"%f", [endPoint coordinate].longitude]];
 	[urlString appendString:@","];
 	[urlString appendString:[NSString stringWithFormat:@"%f", [endPoint coordinate].latitude]];
-	[urlString appendString:@"("];
-	[urlString appendString:endPoint.accuracyLevel];
-	[urlString appendString:@")"];
+	if(endPoint.accuracyLevel) {
+		[urlString appendString:@"("];
+		[urlString appendString:endPoint.accuracyLevel];
+		[urlString appendString:@")"];
+	}
 	[urlString appendString:@"/"];
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];

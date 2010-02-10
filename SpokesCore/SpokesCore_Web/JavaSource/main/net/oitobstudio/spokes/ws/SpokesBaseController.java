@@ -27,7 +27,7 @@ public abstract class SpokesBaseController {
     }
 
     @ExceptionHandler(Exception.class)
-    public ModelAndView handleException(Exception ex) {
+    public ModelAndView handleException(Exception ex, HttpServletResponse response) {
     	ModelAndView mav = new ModelAndView("marshaller");
     	SpokesFault fault = new SpokesFault("An unexpected error occured.  Please try again.");
     	mav.addObject("SpokesResult", fault);
@@ -38,6 +38,7 @@ public abstract class SpokesBaseController {
     		((NestedRuntimeException)ex).getRootCause().printStackTrace(printWriter);
     		log.error(exceptionMsg.toString());
     	}
+    	addFaultHeader(response);
         return mav;
     }
 

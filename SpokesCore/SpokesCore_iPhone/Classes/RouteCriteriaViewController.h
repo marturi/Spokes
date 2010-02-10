@@ -13,6 +13,8 @@
 @interface RouteCriteriaViewController : UIViewController <UITextFieldDelegate> {
 	CLLocation *cachedStartCoord;
 	CLLocation *cachedEndCoord;
+	NSString *cachedStartAccuracyLevel;
+	NSString *cachedEndAccuracyLevel;
 	UITextField *startAddress;
 	UITextField *endAddress;
 	MKMapView *_mapView;
@@ -27,6 +29,8 @@
 
 @property (nonatomic, retain) CLLocation *cachedStartCoord;
 @property (nonatomic, retain) CLLocation *cachedEndCoord;
+@property (nonatomic, retain) NSString *cachedStartAccuracyLevel;
+@property (nonatomic, retain) NSString *cachedEndAccuracyLevel;
 @property (nonatomic, retain) UITextField *startAddress;
 @property (nonatomic, retain) UITextField *endAddress;
 @property (nonatomic, retain) AutoCompleteViewController *autoCompleteViewController;

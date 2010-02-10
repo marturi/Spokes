@@ -187,7 +187,7 @@
 	Person *currentEntry = [autocompleteEntries objectAtIndex:indexPath.row];
 	NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:currentEntry forKey:@"selectedAddress"];
 	NSNotification *notification = [NSNotification notificationWithName:@"AutocompleteSelected" object:nil userInfo:params];
-	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	[[NSNotificationCenter defaultCenter] postNotification:notification];
 	[autocompleteEntries removeAllObjects];
 	[((UITableView*)self.view) reloadData];
     ((UITableView*)self.view).hidden = YES;

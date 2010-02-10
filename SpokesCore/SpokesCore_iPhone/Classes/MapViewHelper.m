@@ -47,8 +47,7 @@
 				min = a.coordinate;
 				max = a.coordinate;
 				minMaxInitialized = YES;
-			}
-			else {
+			} else {
 				min.latitude = MIN( min.latitude, a.coordinate.latitude );
 				min.longitude = MIN( min.longitude, a.coordinate.longitude );
 				
@@ -85,7 +84,9 @@
 	CLLocationDistance latMeters = [locSouthEast getDistanceFrom:locNorthEast];
 	CLLocationDistance lonMeters = [locSouthEast getDistanceFrom:locSouthWest];
 	MKCoordinateRegion region = MKCoordinateRegionMakeWithDistance(regionCenter, latMeters, lonMeters);
-	if([MapViewHelper validateCoordinate:region.center]) {
+	if(region.center.latitude >= -180 && region.center.latitude <= 180
+		&& region.center.longitude >= -90 && region.center.longitude <= 90
+		&& region.span.latitudeDelta > 0 && region.span.longitudeDelta > 0) {
 		if(autoFit) {
 			MKCoordinateRegion fitRegion = [mapView regionThatFits:region];
 			if(fitRegion.span.latitudeDelta < 150) {

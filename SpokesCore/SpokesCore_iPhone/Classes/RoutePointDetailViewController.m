@@ -175,7 +175,7 @@
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 	if(buttonIndex == 1) {
-		[self performSelector:@selector(sendReportTheftRequest) withObject:nil afterDelay:0.01];
+		[NSThread detachNewThreadSelector:@selector(sendReportTheftRequest) toTarget:self withObject:nil];
 	}
 }
 
@@ -210,7 +210,7 @@
 		int numThefts = [((RackPoint*)routePoint).thefts intValue];
 		numThefts++;
 		[(RackPoint*)routePoint setThefts:[NSNumber numberWithInt:numThefts]];
-		[self updateNumberOfThefts];
+		[self performSelectorOnMainThread:@selector(updateNumberOfThefts) withObject:nil waitUntilDone:NO];
 	} else {
 		msg = @"We could not process your bike theft.  Please try again.";
 	}
@@ -219,7 +219,7 @@
 												   delegate:self 
 										  cancelButtonTitle:nil 
 										  otherButtonTitles:@"OK", nil];
-	[alert show];
+	[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
 	[alert release];
 }
 

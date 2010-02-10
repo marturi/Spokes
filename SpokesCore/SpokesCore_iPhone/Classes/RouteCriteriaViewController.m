@@ -22,7 +22,7 @@
 @interface RouteCriteriaViewController()
 
 - (void)initTextField:(UITextField*)textField;
-- (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type;
+- (RoutePoint*) makeStartOrEndRoutePoint:(NSDictionary*)params;
 - (void) initNavigationBar;
 - (BOOL) validateRouteCriteria;
 - (void) showAutoCompleteView;
@@ -38,6 +38,8 @@
 @synthesize autoCompleteViewController	= autoCompleteViewController;
 @synthesize cachedEndCoord				= cachedEndCoord;
 @synthesize cachedStartCoord			= cachedStartCoord;
+@synthesize cachedStartAccuracyLevel	= cachedStartAccuracyLevel;
+@synthesize cachedEndAccuracyLevel		= cachedEndAccuracyLevel;
 
 static CGFloat const kOriginX = 0.0;
 static CGFloat const kOriginY = -43.0;
@@ -175,7 +177,7 @@ static CGFloat const kHeight = 123.0;
 	if(currentRoute != nil) {
 		NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:currentRoute forKey:@"currentRoute"];
 		NSNotification *notification = [NSNotification notificationWithName:@"ShowRoute" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+		[[NSNotificationCenter defaultCenter] postNotification:notification];
 	} else {
 		[(self.startAddress.editing ? self.startAddress : self.endAddress) resignFirstResponder];
 		CGRect viewFrame = self.view.frame;
@@ -213,7 +215,7 @@ static CGFloat const kHeight = 123.0;
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
 	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
 	NSNotification *notification = [NSNotification notificationWithName:@"ExpireRoute" object:nil userInfo:nil];
-	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	[[NSNotificationCenter defaultCenter] postNotification:notification];
 }
 
 - (void) swapValues {
@@ -248,7 +250,7 @@ static CGFloat const kHeight = 123.0;
 
 - (void) handleFieldChange:(UITextField*)textField {
 	NSNotification *notification = [NSNotification notificationWithName:@"ExpireRoute" object:nil userInfo:nil];
-	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	[[NSNotificationCenter defaultCenter] postNotification:notification];
 	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 	if(textField.tag == 0) {
 		[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeStart mapView:_mapView];
@@ -260,30 +262,34 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (void) handleAutocompleteSelected:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	SpokesConstants *constants = [((SpokesAppDelegate*)[UIApplication sharedApplication].delegate) spokesConstants];
 	NSDictionary *params = [notification userInfo];
 	Person *selectedAddress = [params objectForKey:@"selectedAddress"];
 	if(self.startAddress.editing) {
 		if(selectedAddress.address) {
-			self.startAddress.text = selectedAddress.address;
+			[self.startAddress performSelectorOnMainThread:@selector(setText:) withObject:selectedAddress.address waitUntilDone:NO];
 		} else if(selectedAddress.name) {
-			self.startAddress.text = selectedAddress.name;
+			[self.startAddress performSelectorOnMainThread:@selector(setText:) withObject:selectedAddress.name waitUntilDone:NO];
 			if(selectedAddress.coord.latitude > [constants minCoordinate].latitude 
 			   && selectedAddress.coord.longitude > [constants minCoordinate].longitude) {
 				self.cachedStartCoord = [[[CLLocation alloc] initWithLatitude:selectedAddress.coord.latitude longitude:selectedAddress.coord.longitude] autorelease];
+				self.cachedStartAccuracyLevel = selectedAddress.accuracyLevel;
 			}
 		}
 	} else {
 		if(selectedAddress.address) {
-			self.endAddress.text = selectedAddress.address;
+			[self.endAddress performSelectorOnMainThread:@selector(setText:) withObject:selectedAddress.address waitUntilDone:NO];
 		} else if(selectedAddress.name) {
-			self.endAddress.text = selectedAddress.name;
+			[self.endAddress performSelectorOnMainThread:@selector(setText:) withObject:selectedAddress.name waitUntilDone:NO];
 			if(selectedAddress.coord.latitude > [constants minCoordinate].latitude 
 			   && selectedAddress.coord.longitude > [constants minCoordinate].longitude) {
 				self.cachedEndCoord = [[[CLLocation alloc] initWithLatitude:selectedAddress.coord.latitude longitude:selectedAddress.coord.longitude] autorelease];
+				self.cachedEndAccuracyLevel = selectedAddress.accuracyLevel;
 			}
 		}
 	}
+	[pool drain];
 }
 
 - (void) showAutoCompleteView {
@@ -307,7 +313,9 @@ static CGFloat const kHeight = 123.0;
 
 - (BOOL) textFieldShouldReturn:(UITextField *)textField {
 	if([self validateRouteCriteria]) {
-		[NSThread detachNewThreadSelector:@selector(submitRoute) toTarget:self withObject:nil];
+		NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:self.startAddress.text,@"startAddress",
+									   self.endAddress.text,@"endAddress",nil];
+		[NSThread detachNewThreadSelector:@selector(submitRoute:) toTarget:self withObject:params];
 		[self hideDirectionsNavBar:nil];
 		return YES;
 	}
@@ -344,13 +352,15 @@ static CGFloat const kHeight = 123.0;
 #pragma mark -
 #pragma mark Route submission
 
-- (void) submitRoute {
+- (void) submitRoute:(NSMutableDictionary*)params {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	RoutePoint *startPt = nil;
 	RoutePoint *endPt = nil;
-	startPt = [self makeStartOrEndRoutePoint:PointAnnotationTypeStart];
+	[params setObject:[NSNumber numberWithInt:PointAnnotationTypeStart] forKey:@"type"];
+	startPt = [self makeStartOrEndRoutePoint:params];
 	if(startPt != nil) {
-		endPt = [self makeStartOrEndRoutePoint:PointAnnotationTypeEnd];
+		[params setObject:[NSNumber numberWithInt:PointAnnotationTypeEnd] forKey:@"type"];
+		endPt = [self makeStartOrEndRoutePoint:params];
 		if(endPt != nil) {
 			NSDictionary *params = nil;
 			if(startPt != nil && endPt != nil) {
@@ -365,8 +375,8 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (void) sendRouteRequest:(NSDictionary*)params {
-	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 	RoutePoint *startPoint = [params objectForKey:@"startPoint"];
 	RoutePoint *endPoint = [params objectForKey:@"endPoint"];
 	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
@@ -382,8 +392,8 @@ static CGFloat const kHeight = 123.0;
 	NSMutableArray *addresses = [NSMutableArray arrayWithArray:[defaults arrayForKey:@"addresses"]];
 	NSEnumerator *enumerator = [params objectEnumerator];
 	RoutePoint *pt = nil;
-	BOOL alreadySaved = NO;
 	while((pt = (RoutePoint*)[enumerator nextObject])) {
+		BOOL alreadySaved = NO;
 		for(NSString *address in addresses) {
 			if([address rangeOfString:pt.address options:NSCaseInsensitiveSearch].location != NSNotFound) {
 				alreadySaved = YES;
@@ -394,7 +404,7 @@ static CGFloat const kHeight = 123.0;
 			if([addresses count] == kMaxAddressesSaved) {
 				[addresses removeObjectAtIndex:0];
 			}
-			[addresses addObject:[NSString stringWithFormat:@"%@,%@,%@", pt.address, [pt.latitude stringValue], [pt.longitude stringValue]]];
+			[addresses addObject:[NSString stringWithFormat:@"%@,%@,%@,%@", pt.address, [pt.latitude stringValue], [pt.longitude stringValue], pt.accuracyLevel]];
 		}
 	}
 	[defaults setObject:addresses forKey:@"addresses"];
@@ -424,21 +434,26 @@ static CGFloat const kHeight = 123.0;
 	[firstResponder becomeFirstResponder];
 }
 
-- (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type {
+- (RoutePoint*) makeStartOrEndRoutePoint:(NSDictionary*)params {
+	PointAnnotationType type = [[params objectForKey:@"type"] intValue];
 	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 	NSArray *results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:type];
 	RoutePoint *routePt = (results.count > 0) ? [results objectAtIndex:0] : nil;
 	if(routePt == nil) {
-		NSString *addressText = (type == PointAnnotationTypeStart) ? self.startAddress.text : self.endAddress.text;
+		NSString *addressText = (type == PointAnnotationTypeStart) ? [params objectForKey:@"startAddress"] : [params objectForKey:@"endAddress"];
 		CLLocation *cachedCoord = (type == PointAnnotationTypeStart) ? self.cachedStartCoord : self.cachedEndCoord;
+		NSString *accuracyLevel = (type == PointAnnotationTypeStart) ? self.cachedStartAccuracyLevel : self.cachedEndAccuracyLevel;
 		if(cachedCoord) {
 			routePt = [RoutePoint routePointWithCoordinate:[cachedCoord coordinate] context:managedObjectContext];
 			routePt.type = [NSNumber numberWithInt:type];
 			routePt.address = addressText;
+			routePt.accuracyLevel = accuracyLevel;
 			if(type == PointAnnotationTypeStart) {
 				self.cachedStartCoord = nil;
+				self.cachedStartAccuracyLevel = nil;
 			} else {
 				self.cachedEndCoord = nil;
+				self.cachedEndAccuracyLevel = nil;
 			}
 		} else {
 			GeocoderService *geocoderService = [[GeocoderService alloc] initWithMapView:_mapView];
@@ -485,6 +500,8 @@ static CGFloat const kHeight = 123.0;
 - (void)dealloc {
 	self.cachedEndCoord = nil;
 	self.cachedStartCoord = nil;
+	self.cachedStartAccuracyLevel = nil;
+	self.cachedEndAccuracyLevel = nil;
 	self.startAddress = nil;
 	self.endAddress = nil;
 	self.autoCompleteViewController = nil;

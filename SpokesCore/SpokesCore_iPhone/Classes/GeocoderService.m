@@ -45,7 +45,7 @@
 		NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+		[[NSNotificationCenter defaultCenter] postNotification:notification];
 	} else {
 		if(self.addressLocation != nil) {
 			if([self validateCoordinate:[self.addressLocation coordinate]]) {

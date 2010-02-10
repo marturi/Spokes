@@ -10,9 +10,10 @@
 
 @interface AddRackViewController : UIViewController <UITextFieldDelegate> {
 	SpokesRootViewController *_viewController;
-	IBOutlet UITextField* rackLocation;
-	IBOutlet UISegmentedControl* rackType;
+	IBOutlet UITextField *rackLocation;
+	IBOutlet UISegmentedControl *rackType;
 	UIButton *msgButton;
+	NSString *rackLocationStr;
 }
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController;

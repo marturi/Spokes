@@ -53,13 +53,16 @@
 }
 
 - (IBAction) addRack:(id)sender {
-	[NSThread detachNewThreadSelector:@selector(doAddRack) toTarget:self withObject:nil];
+	NSArray *params = [NSArray arrayWithObjects:self.rackLocation.text,
+					   [NSNumber numberWithInt:self.rackType.selectedSegmentIndex],nil];
+	[NSThread detachNewThreadSelector:@selector(doAddRack:) toTarget:self withObject:params];
 }
 
-- (void) doAddRack {
+- (void) doAddRack:(NSArray*)params {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	rackLocationStr = [params objectAtIndex:0];
 	GeocoderService *geocoderService = [[GeocoderService alloc] initWithMapView:_viewController.mapView];
-	[geocoderService addressLocation:self.rackLocation.text];
+	[geocoderService addressLocation:[params objectAtIndex:0]];
 	do {
 	} while (!geocoderService.done);
 	if(geocoderService.addressLocation != nil) {
@@ -68,8 +71,8 @@
 			[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 		} else {
 			RackService* rackService = [[RackService alloc] initWithManagedObjectContext:_viewController.managedObjectContext];
-			[rackService addRack:self.rackLocation.text 
-						rackType:self.rackType.selectedSegmentIndex
+			[rackService addRack:[params objectAtIndex:0] 
+						rackType:[[params objectAtIndex:0] intValue]
 				  rackCoordinate:geocoderService.addressLocation.coordinate];
 			if(rackService.faultMsg != nil) {
 				[self performSelectorOnMainThread:@selector(showMsg:) withObject:rackService.faultMsg waitUntilDone:NO];
@@ -90,26 +93,34 @@
 }
 
 - (void) handleServiceError:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSError *serviceError = [params objectForKey:@"serviceError"];
 	if ([serviceError code] == kCFURLErrorNotConnectedToInternet) {
-		NoConnectionViewController *ncvc = [[NoConnectionViewController alloc] initWithNibName:@"NoConnectionView" bundle:nil];
-		[self.navigationController presentModalViewController:ncvc animated:YES];
-		[ncvc release];
+		[self performSelectorOnMainThread:@selector(showNoConnectionView) withObject:nil waitUntilDone:NO];
 	} else {
 		NSString *errorMsg = [NSString stringWithFormat:@"Whoops! %@", [serviceError localizedDescription]];
 		[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
 	}
+	[pool drain];
+}
+
+- (void) showNoConnectionView {
+	NoConnectionViewController *ncvc = [[NoConnectionViewController alloc] initWithNibName:@"NoConnectionView" bundle:nil];
+	[self.navigationController presentModalViewController:ncvc animated:YES];
+	[ncvc release];
 }
 
 - (void) handleRackAdded:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSString *resourceCreated = [params objectForKey:@"resourceCreated"];
 	NSString *msg = @"We had trouble adding the new bike rack.  Please try again.";
 	if([resourceCreated isEqualToString:@"YES"]) {
-		msg = [NSString stringWithFormat:@"Thanks! You successfully added a new rack at %@", self.rackLocation.text];
+		msg = [NSString stringWithFormat:@"Thanks! You successfully added a new rack at %@", rackLocationStr];
 	}
 	[self performSelectorOnMainThread:@selector(showMsg:) withObject:msg waitUntilDone:NO];
+	[pool drain];
 }
 
 - (void) showMsg:(NSString*)msg {

@@ -298,7 +298,7 @@ static CGFloat const kHeight = 94.0;
 
 - (void) editRoute:(id)sender {
 	NSNotification *notification = [NSNotification notificationWithName:@"ShowRouteCriteria" object:nil userInfo:nil];
-	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:false];
+	[[NSNotificationCenter defaultCenter] postNotification:notification];
 }
 
 - (void) changeLeg:(id)sender {

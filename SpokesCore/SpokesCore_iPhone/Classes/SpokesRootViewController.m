@@ -80,7 +80,7 @@
 											   object:nil];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(showRouteCriteriaView)
+											 selector:@selector(handleShowRouteCriteria)
 												 name:@"ShowRouteCriteria" 
 											   object:nil];
 
@@ -166,6 +166,12 @@
 	self.addRackViewController = nil;
 	self.addShopViewController = nil;
 	self.reportTheftViewController = nil;
+}
+
+- (void) handleShowRouteCriteria {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	[self performSelectorOnMainThread:@selector(showRouteCriteriaView) withObject:nil waitUntilDone:NO];
+	[pool drain];
 }
 
 - (void) showRouteCriteriaView {
@@ -301,7 +307,21 @@
 }
 
 - (IBAction) showRoutePoints:(id)sender {
-	[self performSelector:@selector(doShowRoutePoints:) withObject:sender afterDelay:0.01];
+	CLLocationCoordinate2D tl = [_mapView convertPoint:CGPointMake(0.0,0.0) toCoordinateFromView:_mapView];
+	CLLocation *topLeft = [[CLLocation alloc] initWithLatitude:tl.latitude longitude:tl.longitude];
+	CLLocationCoordinate2D br = [_mapView convertPoint:CGPointMake(_mapView.frame.size.width,_mapView.frame.size.height) 
+								  toCoordinateFromView:_mapView];
+	CLLocation *bottomRight = [[CLLocation alloc] initWithLatitude:br.latitude longitude:br.longitude];
+	NSDictionary *params = nil;
+	if(topLeft != nil && bottomRight != nil) {
+		UISegmentedControl *racksOrShopsControl = (UISegmentedControl*)sender;
+		NSNumber *num = [NSNumber numberWithInt:racksOrShopsControl.selectedSegmentIndex];
+		params = [NSDictionary dictionaryWithObjectsAndKeys:topLeft,@"topLeft",bottomRight,@"bottomRight",
+				  num,@"racksOrShopsControl",nil];
+	}
+	[topLeft release];
+	[bottomRight release];
+	[NSThread detachNewThreadSelector:@selector(doShowRoutePoints:) toTarget:self withObject:params];
 }
 
 - (SEL) routePointsCall:(int)selectedIndex {
@@ -316,25 +336,15 @@
 	return ptsCall;
 }
 
-- (void) doShowRoutePoints:(id)sender {
-	UISegmentedControl *racksOrShopsControl = (UISegmentedControl*)sender;
-	int selectedIndex = racksOrShopsControl.selectedSegmentIndex;
+- (void) doShowRoutePoints:(NSDictionary*)params {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	int selectedIndex = [[params objectForKey:@"racksOrShopsControl"] intValue];
 	SEL pointsCall = [self routePointsCall:selectedIndex];
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeRack mapView:_mapView];
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeShop mapView:_mapView];
 	[RoutePointRepository deleteNonRoutePoints:managedObjectContext];
-	CLLocationCoordinate2D tl = [_mapView convertPoint:CGPointMake(0.0,0.0) toCoordinateFromView:_mapView];
-	CLLocation *topLeft = [[CLLocation alloc] initWithLatitude:tl.latitude longitude:tl.longitude];
-	CLLocationCoordinate2D br = [_mapView convertPoint:CGPointMake(_mapView.frame.size.width,_mapView.frame.size.height) 
-								  toCoordinateFromView:_mapView];
-	CLLocation *bottomRight = [[CLLocation alloc] initWithLatitude:br.latitude longitude:br.longitude];
-	NSDictionary *params = nil;
-	if(topLeft != nil && bottomRight != nil) {
-		params = [NSDictionary dictionaryWithObjectsAndKeys:topLeft,@"topLeft",bottomRight,@"bottomRight",nil];
-	}
-	[topLeft release];
-	[bottomRight release];
 	[NSThread detachNewThreadSelector:pointsCall toTarget:self withObject:params];
+	[pool drain];
 }
 
 - (void) handlePointsFound:(NSNotification*)notification {
@@ -465,9 +475,11 @@
 #pragma mark Route management
 
 - (void) handleShowRoute:(NSNotification*)notification {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	Route *currentRoute = [params objectForKey:@"currentRoute"];
-	[self showRouteView:currentRoute];
+	[self performSelectorOnMainThread:@selector(showRouteView:) withObject:currentRoute waitUntilDone:NO];
+	[pool drain];
 }
 
 - (void) handleNewRoute:(NSNotification*)notification {

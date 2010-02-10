@@ -17,6 +17,7 @@
 	IBOutlet UITextField *phoneSuffix;
 	IBOutlet UISegmentedControl *hasRentals;
 	UIButton *msgButton;
+	NSString *shopAddressStr;
 }
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController;

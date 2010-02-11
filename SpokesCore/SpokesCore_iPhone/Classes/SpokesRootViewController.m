@@ -150,14 +150,16 @@
 #pragma mark Multi-view management
 
 - (void) showRouteView:(Route*)currentRoute {
-	RouteAnnotation *routeAnnotation = [[[RouteAnnotation alloc] initWithPoints:[currentRoute routePoints] 
-																  minCoordinate:currentRoute.minCoordinate
-																  maxCoordinate:currentRoute.maxCoordinate] autorelease];
-	[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:routeAnnotation waitUntilDone:YES];
 	if(self.routeNavigationViewController == nil) {
 		RouteNavigationViewController *vc = [[RouteNavigationViewController alloc] initWithMapView:_mapView];
 		self.routeNavigationViewController = vc;
 		[vc release];
+	}
+	if(self.routeView.annotation == nil) {
+		RouteAnnotation *routeAnnotation = [[[RouteAnnotation alloc] initWithPoints:[currentRoute routePoints] 
+																	  minCoordinate:currentRoute.minCoordinate
+																	  maxCoordinate:currentRoute.maxCoordinate] autorelease];
+		[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:routeAnnotation waitUntilDone:NO];
 	}
 	[self performToggleAnimations:self.routeNavigationViewController.view viewsToHide:self.routeCriteriaViewController.view];
 	self.routeCriteriaViewController = nil;
@@ -269,8 +271,14 @@
 	}
 }
 
-- (void)animationDidStart:(CAAnimation *)theAnimation {
-	[self.routeCriteriaViewController setTextFieldVisibility:YES];
+- (void) animationDidStart:(CAAnimation*)theAnimation {
+	if(self.routeCriteriaViewController)
+		[self.routeCriteriaViewController setTextFieldVisibility:YES];
+}
+
+- (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
+	if(self.routeCriteriaViewController)
+		[self.routeCriteriaViewController.endAddress becomeFirstResponder];
 }
 
 #pragma mark -
@@ -504,6 +512,10 @@
 			if(self.routeView.annotation != nil) {
 				[_mapView performSelectorOnMainThread:@selector(removeAnnotation:) withObject:self.routeView.annotation waitUntilDone:NO];
 			}
+			RouteAnnotation *routeAnnotation = [[[RouteAnnotation alloc] initWithPoints:[newRoute routePoints] 
+																		  minCoordinate:newRoute.minCoordinate
+																		  maxCoordinate:newRoute.maxCoordinate] autorelease];
+			[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:routeAnnotation waitUntilDone:NO];
 			[self performSelectorOnMainThread:@selector(showRouteView:) withObject:newRoute waitUntilDone:NO];
 		}
 	}

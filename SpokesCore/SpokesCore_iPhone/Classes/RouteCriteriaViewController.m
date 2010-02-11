@@ -416,7 +416,7 @@ static CGFloat const kHeight = 123.0;
 	BOOL locationServicesEnabled = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).locationServicesEnabled;
 	NSString *otherField = (locationServicesEnabled && _mapView.showsUserLocation) ? @"Current Location" : nil;
 	NSArray *results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
-	UITextField *firstResponder = self.startAddress;
+	//UITextField *firstResponder = self.startAddress;
 	if(results.count > 0) {
 		self.startAddress.text = ((RoutePoint*)[results objectAtIndex:0]).address;
 	} else {
@@ -429,9 +429,9 @@ static CGFloat const kHeight = 123.0;
 		if(![self.startAddress.text isEqualToString:otherField]) {
 			self.endAddress.text = otherField;
 		}
-		firstResponder = self.endAddress;
+		//firstResponder = self.endAddress;
 	}
-	[firstResponder becomeFirstResponder];
+	//[firstResponder performSelector:@selector(becomeFirstResponder) withObject:nil afterDelay:.25];
 }
 
 - (RoutePoint*) makeStartOrEndRoutePoint:(NSDictionary*)params {

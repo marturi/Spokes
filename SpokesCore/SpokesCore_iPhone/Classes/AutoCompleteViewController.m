@@ -44,7 +44,7 @@
 }
 
 - (void)searchAutocompleteEntriesWithSubstring:(NSString*)substring {
-	if ([substring length] > autocompleteThreshold) {
+	if ([substring length] >= autocompleteThreshold) {
 		[self searchSavedAddressesWithSubstring:substring];
 		[self searchContactsWithSubstring:substring];
 	} else {

@@ -19,8 +19,7 @@
 }
 
 - (id) initWithManagedObjectContext:(NSManagedObjectContext*)managedObjectContext;
-- (void) findClosestRacks:(CLLocationCoordinate2D)topLeftCoordinate 
-		bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
+- (void) findClosestRacks:(NSDictionary*)params;
 - (void) addRack:(NSString*)rackLocation rackType:(int)rackType rackCoordinate:(CLLocationCoordinate2D)rackCoordinate;
 
 @property (nonatomic, retain) RackPoint *currentRackPoint;

@@ -64,8 +64,13 @@
 	NSFetchRequest *request = [[NSFetchRequest alloc] init];
 	[request setEntity:entityDescription];
 	[request setIncludesSubentities:YES];
+	NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"type" ascending:YES];
+	NSArray *sortDescriptors = [[NSArray alloc] initWithObjects:&sortDescriptor count:1];
+	[request setSortDescriptors:sortDescriptors];
 	NSArray *results = [context executeFetchRequest:request error:&error];
 	[request release];
+	[sortDescriptor release];
+	[sortDescriptors release];
 	return results;
 }
 

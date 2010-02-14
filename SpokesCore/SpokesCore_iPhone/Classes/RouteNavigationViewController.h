@@ -8,6 +8,8 @@
 
 #import <MapKit/MapKit.h>
 
+@class Route;
+
 @interface RouteNavigationViewController : UIViewController {
 	int movePointerDirection;
 	BOOL isLegTransition;
@@ -18,12 +20,14 @@
 	UIView *surfaceTypePanel;
 	UINavigationBar *navBar;
 	MKMapView *_mapView;
+	Route *currentRoute;
 }
 
 - (id) initWithMapView:(MKMapView*)mapView;
 - (void) startNavigatingRoute:(id)sender;
 - (void) editRoute:(id)sender;
 - (void) changeLeg:(id)sender;
+- (void) moveRoutePointer;
 
 @property BOOL isLegTransition;
 @property (nonatomic, retain) UINavigationItem *routeCaption;

@@ -40,6 +40,7 @@
 - (void) performToggleAnimations:(UIView*)viewToShow viewsToHide:(UIView*)viewToHide;
 - (void) sendRacksRequest:(NSDictionary*)param;
 - (void) sendShopsRequest:(NSDictionary*)param;
+- (void) showErrorMsg:(NSError*)error;
 
 @end
 
@@ -80,7 +81,7 @@
 											   object:nil];
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(handleShowRouteCriteria)
+											 selector:@selector(showRouteCriteriaView)
 												 name:@"ShowRouteCriteria" 
 											   object:nil];
 
@@ -110,7 +111,6 @@
 		_mapView.mapType = MKMapTypeStandard;
 		self.mapTypeToggle.title = @"Hybrid";
 	}
-	_mapView.delegate = self;
 	NSArray *pointsToShow = [RoutePointRepository fetchAllPoints:managedObjectContext];
 	[MapViewHelper showRoutePoints:pointsToShow mapView:_mapView];
 
@@ -159,7 +159,7 @@
 		RouteAnnotation *routeAnnotation = [[[RouteAnnotation alloc] initWithPoints:[currentRoute routePoints] 
 																	  minCoordinate:currentRoute.minCoordinate
 																	  maxCoordinate:currentRoute.maxCoordinate] autorelease];
-		[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:routeAnnotation waitUntilDone:NO];
+		[_mapView addAnnotation:routeAnnotation];
 	}
 	[self performToggleAnimations:self.routeNavigationViewController.view viewsToHide:self.routeCriteriaViewController.view];
 	self.routeCriteriaViewController = nil;
@@ -168,12 +168,6 @@
 	self.addRackViewController = nil;
 	self.addShopViewController = nil;
 	self.reportTheftViewController = nil;
-}
-
-- (void) handleShowRouteCriteria {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[self performSelectorOnMainThread:@selector(showRouteCriteriaView) withObject:nil waitUntilDone:NO];
-	[pool drain];
 }
 
 - (void) showRouteCriteriaView {
@@ -322,14 +316,15 @@
 	CLLocation *bottomRight = [[CLLocation alloc] initWithLatitude:br.latitude longitude:br.longitude];
 	NSDictionary *params = nil;
 	if(topLeft != nil && bottomRight != nil) {
-		UISegmentedControl *racksOrShopsControl = (UISegmentedControl*)sender;
-		NSNumber *num = [NSNumber numberWithInt:racksOrShopsControl.selectedSegmentIndex];
-		params = [NSDictionary dictionaryWithObjectsAndKeys:topLeft,@"topLeft",bottomRight,@"bottomRight",
-				  num,@"racksOrShopsControl",nil];
+		params = [NSDictionary dictionaryWithObjectsAndKeys:topLeft,@"topLeft",bottomRight,@"bottomRight",nil];
 	}
 	[topLeft release];
 	[bottomRight release];
-	[NSThread detachNewThreadSelector:@selector(doShowRoutePoints:) toTarget:self withObject:params];
+	SEL pointsCall = [self routePointsCall:((UISegmentedControl*)sender).selectedSegmentIndex];
+	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeRack mapView:_mapView];
+	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeShop mapView:_mapView];
+	[RoutePointRepository deleteNonRoutePoints:managedObjectContext];
+	[self performSelector:pointsCall withObject:params afterDelay:01];
 }
 
 - (SEL) routePointsCall:(int)selectedIndex {
@@ -344,19 +339,7 @@
 	return ptsCall;
 }
 
-- (void) doShowRoutePoints:(NSDictionary*)params {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	int selectedIndex = [[params objectForKey:@"racksOrShopsControl"] intValue];
-	SEL pointsCall = [self routePointsCall:selectedIndex];
-	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeRack mapView:_mapView];
-	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeShop mapView:_mapView];
-	[RoutePointRepository deleteNonRoutePoints:managedObjectContext];
-	[NSThread detachNewThreadSelector:pointsCall toTarget:self withObject:params];
-	[pool drain];
-}
-
 - (void) handlePointsFound:(NSNotification*)notification {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	if(params != nil) {
 		if([[params objectForKey:@"pointsFound"] isKindOfClass:[NSNull class]]) {
@@ -367,7 +350,7 @@
 														   delegate:self 
 												  cancelButtonTitle:nil 
 												  otherButtonTitles:@"OK", nil];
-			[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:false];
+			[alert show];
 			[alert release];
 		} else {
 			NSArray *points = [params objectForKey:@"pointsFound"];
@@ -387,7 +370,6 @@
 			[MapViewHelper showRoutePoints:points mapView:_mapView];
 		}
 	}
-	[pool drain];
 }
 
 - (IBAction) showInfoView:(id)sender {
@@ -411,30 +393,21 @@
 #pragma mark GET Requests
 
 - (void) sendRacksRequest:(NSDictionary*)param {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	CLLocation *tl = [param objectForKey:@"topLeft"];
-	CLLocation *br = [param objectForKey:@"bottomRight"];
 	RackService *rackService = (RackService*)[[RackService alloc] initWithManagedObjectContext:managedObjectContext];
-	[rackService findClosestRacks:tl.coordinate bottomRightCoordinate:br.coordinate];
+	[NSThread detachNewThreadSelector:@selector(findClosestRacks:) toTarget:rackService withObject:param];
 	[rackService release];
-	[pool drain];
 }
 
 - (void) sendShopsRequest:(NSDictionary*)param {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	CLLocation *tl = [param objectForKey:@"topLeft"];
-	CLLocation *br = [param objectForKey:@"bottomRight"];
 	ShopService *shopService = (ShopService*)[[ShopService alloc] initWithManagedObjectContext:managedObjectContext];
-	[shopService findClosestShops:tl.coordinate bottomRightCoordinate:br.coordinate];
+	[NSThread detachNewThreadSelector:@selector(findClosestShops:) toTarget:shopService withObject:param];
 	[shopService release];
-	[pool drain];
 }
 
 #pragma mark -
 #pragma mark Error Handling
 
 - (void) handleSpokesFault:(NSNotification*)notification {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSString *faultMessage = [params objectForKey:@"faultMessage"];
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Whoops!" 
@@ -442,27 +415,23 @@
 												   delegate:self 
 										  cancelButtonTitle:nil 
 										  otherButtonTitles:@"OK", nil];
-	[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
+	[alert show];
 	[alert release];
-	[pool drain];
 }
 
 - (void) handleServiceError:(NSNotification*)notification {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSError *serviceError = [params objectForKey:@"serviceError"];
 	if ([serviceError code] == kCFURLErrorNotConnectedToInternet) {
 		NoConnectionViewController *ncvc = [[NoConnectionViewController alloc] initWithNibName:@"NoConnectionView" bundle:nil];
-		[self.navigationController performSelectorOnMainThread:@selector(presentModalViewController:) withObject:ncvc waitUntilDone:NO];
+		[self.navigationController presentModalViewController:ncvc animated:YES];
 		[ncvc release];
 	} else {
-		[self performSelectorOnMainThread:@selector(showErrorMsg:) withObject:serviceError waitUntilDone:NO];
+		[self showErrorMsg:serviceError];
 	}
-	[pool drain];
 }
 
 - (void) showErrorMsg:(NSError*)error {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSString *errorMessage = nil;
 	if(error != nil) {
 		errorMessage = [error localizedDescription];
@@ -474,24 +443,20 @@
 												   delegate:self 
 										  cancelButtonTitle:nil 
 										  otherButtonTitles:@"OK", nil];
-	[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
+	[alert show];
 	[alert release];
-	[pool drain];
 }
 
 #pragma mark -
 #pragma mark Route management
 
 - (void) handleShowRoute:(NSNotification*)notification {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	Route *currentRoute = [params objectForKey:@"currentRoute"];
-	[self performSelectorOnMainThread:@selector(showRouteView:) withObject:currentRoute waitUntilDone:NO];
-	[pool drain];
+	[self showRouteView:currentRoute];
 }
 
 - (void) handleNewRoute:(NSNotification*)notification {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	if(params != nil) {
 		if([[params objectForKey:@"newRoute"] isKindOfClass:[NSNull class]]) {
@@ -500,38 +465,35 @@
 														   delegate:self 
 												  cancelButtonTitle:nil 
 												  otherButtonTitles:@"OK", nil];
-			[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
+			[alert show];
 			[alert release];
 		} else {
 			Route *newRoute = [params objectForKey:@"newRoute"];
 			RoutePoint *startPoint = [params objectForKey:@"startPoint"];
 			RoutePoint *endPoint = [params objectForKey:@"endPoint"];
-			[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:[startPoint pointAnnotation] waitUntilDone:NO];
-			[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:[endPoint pointAnnotation] waitUntilDone:NO];
+			[_mapView addAnnotation:[startPoint pointAnnotation]];
+			[_mapView addAnnotation:[endPoint pointAnnotation]];
 			[MapViewHelper focusToCenterOfPoints:[newRoute minAndMaxPoints] mapView:_mapView autoFit:NO];
 			if(self.routeView.annotation != nil) {
-				[_mapView performSelectorOnMainThread:@selector(removeAnnotation:) withObject:self.routeView.annotation waitUntilDone:NO];
+				[_mapView removeAnnotation:self.routeView.annotation];
 			}
 			RouteAnnotation *routeAnnotation = [[[RouteAnnotation alloc] initWithPoints:[newRoute routePoints] 
 																		  minCoordinate:newRoute.minCoordinate
 																		  maxCoordinate:newRoute.maxCoordinate] autorelease];
-			[_mapView performSelectorOnMainThread:@selector(addAnnotation:) withObject:routeAnnotation waitUntilDone:NO];
-			[self performSelectorOnMainThread:@selector(showRouteView:) withObject:newRoute waitUntilDone:NO];
+			[_mapView addAnnotation:routeAnnotation];
+			[self showRouteView:newRoute];
 		}
 	}
-	[pool drain];
 }
 
 - (void) expireRoute {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
 	[routeService deleteCurrentRoute];
 	[routeService release];
 	if(self.routeView.annotation != nil) {
-		[_mapView performSelectorOnMainThread:@selector(removeAnnotation:) withObject:self.routeView.annotation waitUntilDone:false];
+		[_mapView removeAnnotation:self.routeView.annotation];
 	}
 	self.routeView = nil;
-	[pool drain];
 }
 
 #pragma mark -
@@ -664,16 +626,16 @@
 }
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
-	[self.routeView performSelectorOnMainThread:@selector(regionChanged) withObject:nil waitUntilDone:NO];
+	[self.routeView regionChanged];
 	if(isZoom) {
 		self.routeView.hidden = NO;
 		isZoom = NO;
 	}
 	if(self.routeNavigationViewController.isLegTransition) {
-		[self.routeNavigationViewController performSelectorOnMainThread:@selector(moveRoutePointer) withObject:nil waitUntilDone:NO];
+		[self.routeNavigationViewController moveRoutePointer];
 		self.routeNavigationViewController.isLegTransition = NO;
 	}
-	[self.routeView performSelectorOnMainThread:@selector(checkRoutePointerView) withObject:nil waitUntilDone:NO];
+	[self.routeView checkRoutePointerView];
 }
 
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal {

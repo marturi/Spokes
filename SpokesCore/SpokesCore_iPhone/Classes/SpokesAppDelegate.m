@@ -35,7 +35,6 @@
 		NSLog(@"NSZombieEnabled/NSAutoreleaseFreedObjectCheckEnabled enabled!");
 	}
 
-	[window addSubview:rootViewController.view];
 	[window addSubview:navController.view];
 	[window makeKeyAndVisible];
 

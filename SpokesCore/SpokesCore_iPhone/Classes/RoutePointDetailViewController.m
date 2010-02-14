@@ -210,7 +210,7 @@
 		int numThefts = [((RackPoint*)routePoint).thefts intValue];
 		numThefts++;
 		[(RackPoint*)routePoint setThefts:[NSNumber numberWithInt:numThefts]];
-		[self performSelectorOnMainThread:@selector(updateNumberOfThefts) withObject:nil waitUntilDone:NO];
+		[self updateNumberOfThefts];
 	} else {
 		msg = @"We could not process your bike theft.  Please try again.";
 	}
@@ -219,7 +219,7 @@
 												   delegate:self 
 										  cancelButtonTitle:nil 
 										  otherButtonTitles:@"OK", nil];
-	[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
+	[alert show];
 	[alert release];
 }
 

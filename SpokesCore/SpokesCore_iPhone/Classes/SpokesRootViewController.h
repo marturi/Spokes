@@ -42,7 +42,6 @@
 - (void) showReportTheftView;
 - (RoutePoint*) makeMapPoint:(PointAnnotationType)type addressText:(NSString*)addressText;
 - (void) expireRoute;
-- (void) doShowRoutePoints:(id)sender;
 - (SEL) routePointsCall:(int)selectedIndex;
 
 @property (nonatomic, retain) IBOutlet MKMapView *mapView;

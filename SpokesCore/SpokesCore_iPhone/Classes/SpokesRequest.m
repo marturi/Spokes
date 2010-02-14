@@ -39,6 +39,8 @@
 	[urlString appendString:kGoogleMapsAPIKey];
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
+	[[NSURLCache sharedURLCache] setMemoryCapacity:0];
+	[[NSURLCache sharedURLCache] setDiskCapacity:0];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kGeocoderTimeout] autorelease];
@@ -71,6 +73,8 @@
 	[urlString appendString:@"/"];
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
+	[[NSURLCache sharedURLCache] setMemoryCapacity:0];
+	[[NSURLCache sharedURLCache] setDiskCapacity:0];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kRouteTimeout] autorelease];
@@ -96,6 +100,8 @@
 	[urlString appendString:@"/"];
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
+	[[NSURLCache sharedURLCache] setMemoryCapacity:0];
+	[[NSURLCache sharedURLCache] setDiskCapacity:0];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kRacksTimeout] autorelease];
@@ -121,6 +127,8 @@
 	[urlString appendString:@"/"];
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
+	[[NSURLCache sharedURLCache] setMemoryCapacity:0];
+	[[NSURLCache sharedURLCache] setDiskCapacity:0];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kShopsTimeout] autorelease];
@@ -150,6 +158,8 @@
 
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
+	[[NSURLCache sharedURLCache] setMemoryCapacity:0];
+	[[NSURLCache sharedURLCache] setDiskCapacity:0];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kTheftsTimeout] autorelease];
@@ -183,6 +193,8 @@
 	
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
+	[[NSURLCache sharedURLCache] setMemoryCapacity:0];
+	[[NSURLCache sharedURLCache] setDiskCapacity:0];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kTheftsTimeout] autorelease];
@@ -212,6 +224,8 @@
 	
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
+	[[NSURLCache sharedURLCache] setMemoryCapacity:0];
+	[[NSURLCache sharedURLCache] setDiskCapacity:0];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kRacksTimeout] autorelease];
@@ -243,6 +257,8 @@
 	
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
+	[[NSURLCache sharedURLCache] setMemoryCapacity:0];
+	[[NSURLCache sharedURLCache] setDiskCapacity:0];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 
 															 cachePolicy:NSURLRequestUseProtocolCachePolicy 
 														 timeoutInterval:kShopsTimeout] autorelease];

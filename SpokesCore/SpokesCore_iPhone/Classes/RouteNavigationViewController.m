@@ -21,7 +21,6 @@
 
 @interface RouteNavigationViewController()
 
-- (void) moveRoutePointer;
 - (void) initRouteText;
 - (void) initRouteNavigator;
 - (void) initNavigationBar;
@@ -50,6 +49,10 @@ static CGFloat const kHeight = 94.0;
 - (id) initWithMapView:(MKMapView*)mapView {
 	if (self = [super init]) {
 		_mapView = [mapView retain];
+		NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
+		RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
+		currentRoute = [[routeService fetchCurrentRoute] retain];
+		[routeService release];
 	}
 	return self;
 }
@@ -111,10 +114,6 @@ static CGFloat const kHeight = 94.0;
 }
 
 - (void) initRouteText {
-	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
-	Route *currentRoute = [routeService fetchCurrentRoute];
-	[routeService release];
 	NSMutableString *legText = [[NSMutableString alloc] initWithString:@""];
 	Leg *currentLeg = [currentRoute legForIndex:[currentRoute.currentLegIndex intValue]];
 	int currLegIdx = [currentRoute.currentLegIndex intValue];
@@ -230,9 +229,7 @@ static CGFloat const kHeight = 94.0;
 		self.routeNavigator = [[UISegmentedControl alloc] initWithItems:imgs];
 		self.routeNavigator.segmentedControlStyle = UISegmentedControlStyleBar;
 		self.routeNavigator.momentary = YES;
-		[self.routeNavigator addTarget:self
-		 action:@selector(changeLeg:) 
-		 forControlEvents:UIControlEventValueChanged];
+		[self.routeNavigator addTarget:self action:@selector(changeLeg:) forControlEvents:UIControlEventValueChanged];
 	}
 	UIBarButtonItem *routeNavigatorItem = [[UIBarButtonItem alloc] initWithCustomView:routeNavigator];
 	[navBar.topItem setRightBarButtonItem:routeNavigatorItem animated:YES];
@@ -241,10 +238,6 @@ static CGFloat const kHeight = 94.0;
 
 - (void) initRouteNavigator {
 	RouteView *currentRouteView = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).rootViewController.routeView;
-	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
-	Route *currentRoute = [routeService fetchCurrentRoute];
-	[routeService release];
 	int currLegIdx = [currentRoute.currentLegIndex intValue];
 	if(currLegIdx == -1) {
 		if(startRouteButton == nil) {
@@ -302,17 +295,8 @@ static CGFloat const kHeight = 94.0;
 }
 
 - (void) changeLeg:(id)sender {
-	[NSThread detachNewThreadSelector:@selector(doChangeLeg:) toTarget:self withObject:sender];
-}
-
-- (void) doChangeLeg:(id)sender {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	RouteView *currentRouteView = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).rootViewController.routeView;
-	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
-	Route *currentRoute = [routeService fetchCurrentRoute];
-	[routeService release];
-	[currentRouteView performSelectorOnMainThread:@selector(hideRoutePointerView) withObject:nil waitUntilDone:NO];
+	[currentRouteView hideRoutePointerView];
 	int newLegIndex = [currentRoute.currentLegIndex intValue];
 	if(self.routeNavigator != nil && self.routeNavigator.selectedSegmentIndex > -1) {
 		if(self.routeNavigator.selectedSegmentIndex == 0) {
@@ -333,29 +317,18 @@ static CGFloat const kHeight = 94.0;
 	} else if(newLegIndex == currentRoute.legs.count) {
 		[MapViewHelper focusToPoint:currentRoute.endCoordinate mapView:_mapView];
 	}
-	[self performSelectorOnMainThread:@selector(initRouteNavigator) withObject:nil waitUntilDone:NO];
-	[self performSelectorOnMainThread:@selector(initRouteText) withObject:nil waitUntilDone:NO];
-	[pool drain];
+	[self initRouteNavigator];
+	[self initRouteText];
 }
 
 - (void) startNavigatingRoute:(id)sender {
-	[NSThread detachNewThreadSelector:@selector(doStartNavigatingRoute) toTarget:self withObject:nil];
-}
-
-- (void) doStartNavigatingRoute {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
-	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
-	Route *currentRoute = [routeService fetchCurrentRoute];
-	[routeService release];
 	movePointerDirection = 0;
 	isLegTransition = YES;
 	currentRoute.currentLegIndex = [NSNumber numberWithInt:0];
 	Leg *currentLeg = [currentRoute legForIndex:[currentRoute.currentLegIndex intValue]];
 	[MapViewHelper focusToCenterOfPoints:[currentLeg startAndEndPoints] mapView:_mapView autoFit:YES];
-	[self performSelectorOnMainThread:@selector(initRouteNavigator) withObject:nil waitUntilDone:NO];
-	[self performSelectorOnMainThread:@selector(initRouteText) withObject:nil waitUntilDone:NO];
-	[pool drain];
+	[self initRouteNavigator];
+	[self initRouteText];
 }
 
 - (void) moveRoutePointer {
@@ -381,6 +354,7 @@ static CGFloat const kHeight = 94.0;
 	self.surfaceTypePanel = nil;
 	self.routeNavigator = nil;
 	self.startRouteButton = nil;
+	[currentRoute release];
 	[_mapView release];
     [super dealloc];
 }

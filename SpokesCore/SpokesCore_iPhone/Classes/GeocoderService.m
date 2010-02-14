@@ -15,6 +15,7 @@
 @interface GeocoderService()
 
 - (void) showOutOfBoundsError;
+- (void) showLocationServicesError;
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal;
 
 @end
@@ -45,7 +46,7 @@
 		NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	} else {
 		if(self.addressLocation != nil) {
 			if([self validateCoordinate:[self.addressLocation coordinate]]) {
@@ -72,20 +73,24 @@
 	[alert release];
 }
 
+- (void) showLocationServicesError {
+	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Can't Find You" 
+													message:@"We can't determine your current location.  Please enter an address instead."
+												   delegate:self 
+										  cancelButtonTitle:nil 
+										  otherButtonTitles:@"OK", nil];
+	[alert show];
+	[alert release];
+}
+
 - (void) addressLocation:(NSString*)addressText {
-	if([addressText isEqualToString:@"Current Location"]) {
+	if([addressText rangeOfString:@"current location" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 		BOOL locationServicesEnabled = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).locationServicesEnabled;
 		if(_mapView.showsUserLocation && locationServicesEnabled) {
 			self.addressLocation = _mapView.userLocation.location;
 			done = YES;
 		} else {
-			UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Can't Find You" 
-															message:@"We can't determine your current location.  Please enter an address instead."
-														   delegate:self 
-												  cancelButtonTitle:nil 
-												  otherButtonTitles:@"OK", nil];
-			[alert performSelectorOnMainThread:@selector(show) withObject:nil waitUntilDone:NO];
-			[alert release];
+			[self performSelectorOnMainThread:@selector(showLocationServicesError) withObject:nil waitUntilDone:NO];
 			done = YES;
 		}
 	} else {

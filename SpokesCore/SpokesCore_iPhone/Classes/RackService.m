@@ -23,8 +23,12 @@
 	return self;
 }
 
-- (void) findClosestRacks:(CLLocationCoordinate2D)topLeftCoordinate 
-		bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate {
+- (void) findClosestRacks:(NSDictionary*)params {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	CLLocation *tl = [params objectForKey:@"topLeft"];
+	CLLocationCoordinate2D topLeftCoordinate = tl.coordinate;
+	CLLocation *br = [params objectForKey:@"bottomRight"];
+	CLLocationCoordinate2D bottomRightCoordinate = br.coordinate;
 	SpokesRequest *racksRequest = [[SpokesRequest alloc] init];
 	NSURLRequest *racksURLRequest = [racksRequest createRacksRequest:topLeftCoordinate 
 											   bottomRightCoordinate:bottomRightCoordinate];
@@ -37,22 +41,23 @@
     }
 	self.spokesConnection = nil;
 	self.responseData = nil;
-	NSMutableDictionary *params = nil;
+	NSMutableDictionary *param = nil;
 	if(self.connectionError != nil) {
-		params = [NSMutableDictionary dictionaryWithObject:self.connectionError forKey:@"serviceError"];
+		param = [NSMutableDictionary dictionaryWithObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
-		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:param];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	} else {
 		if(self.racks != nil) {
-			params = [NSMutableDictionary dictionaryWithObject:self.racks forKey:@"pointsFound"];
+			param = [NSMutableDictionary dictionaryWithObject:self.racks forKey:@"pointsFound"];
 		} else {
-			params = [NSMutableDictionary dictionaryWithObject:[NSNull null] forKey:@"pointsFound"];
+			param = [NSMutableDictionary dictionaryWithObject:[NSNull null] forKey:@"pointsFound"];
 		}
-		[params setObject:@"racks" forKey:@"pointType"];
-		NSNotification *notification = [NSNotification notificationWithName:@"PointsFound" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];		
+		[param setObject:@"racks" forKey:@"pointType"];
+		NSNotification *notification = [NSNotification notificationWithName:@"PointsFound" object:nil userInfo:param];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	}
+	[pool release];
 }
 
 - (void) addRack:(NSString*)rackLocation 
@@ -66,8 +71,8 @@
 	}
 	SpokesRequest *addRackRequest = [[SpokesRequest alloc] init];
 	NSURLRequest *addRackURLRequest = [addRackRequest createAddRackRequest:rackCoordinate
-															newRackLocation:rackLocation 
-																newRackType:rackTypeStr];
+														   newRackLocation:rackLocation 
+															   newRackType:rackTypeStr];
 	[addRackRequest release];
 	[self downloadAndParse:addRackURLRequest];
 	if(self.spokesConnection != nil) {
@@ -82,7 +87,7 @@
 		[params setObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"RackServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	} else {
 		if([self.response statusCode] == 201) {
 			[params setObject:@"YES" forKey:@"resourceCreated"];
@@ -90,7 +95,7 @@
 			[params setObject:@"NO" forKey:@"resourceCreated"];
 		}
 		NSNotification *notification = [NSNotification notificationWithName:@"RackAdded" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	}
 }
 
@@ -109,8 +114,9 @@
     self.currentElementValue = nil;
 	//NSLog(@"%@", [[[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding] autorelease]);
     self.responseData = nil;
+	NSNumber *toggle = [NSNumber numberWithInt:NO];
 	[self performSelectorOnMainThread:@selector(toggleNetworkActivityIndicator:) 
-						   withObject:[NSNumber numberWithInt:NO] 
+						   withObject:toggle
 						waitUntilDone:NO];
 	done = YES;
 }

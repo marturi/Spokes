@@ -19,6 +19,7 @@
 - (NSString*) formatPhoneNumber;
 - (BOOL) validateShopInput;
 - (void) animateTextField:(UITextField*)textField up:(BOOL)up;
+- (void) showNoConnectionView;
 
 @end
 
@@ -200,28 +201,24 @@
 }
 
 - (void) handleServiceError:(NSNotification*)notification {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSError *serviceError = [params objectForKey:@"serviceError"];
 	if ([serviceError code] == kCFURLErrorNotConnectedToInternet) {
-		[self performSelectorOnMainThread:@selector(showNoConnectionView) withObject:nil waitUntilDone:NO];
+		[self showNoConnectionView];
 	} else {
 		NSString *errorMsg = [NSString stringWithFormat:@"Whoops! %@", [serviceError localizedDescription]];
-		[self performSelectorOnMainThread:@selector(showMsg:) withObject:errorMsg waitUntilDone:NO];
+		[self showMsg:errorMsg];
 	}
-	[pool drain];
 }
 
 - (void) handleShopAdded:(NSNotification*)notification {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *params = [notification userInfo];
 	NSString *resourceCreated = [params objectForKey:@"resourceCreated"];
 	NSString *msg = @"We had trouble adding the new shop.  Please try again.";
 	if([resourceCreated isEqualToString:@"YES"]) {
 		msg = [NSString stringWithFormat:@"Thanks! You successfully added a new shop at %@", shopAddressStr];
 	}
-	[self performSelectorOnMainThread:@selector(showMsg:) withObject:msg waitUntilDone:NO];
-	[pool drain];
+	[self showMsg:msg];
 }
 
 - (void) showNoConnectionView {

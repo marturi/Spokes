@@ -29,7 +29,7 @@
 		[params setObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	} else {
 		if([self.response statusCode] == 201) {
 			[params setObject:@"YES" forKey:@"resourceCreated"];
@@ -37,7 +37,7 @@
 			[params setObject:@"NO" forKey:@"resourceCreated"];
 		}
 		NSNotification *notification = [NSNotification notificationWithName:@"TheftReported" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	}
 }
 
@@ -58,7 +58,7 @@
 		[params setObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"TheftServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	} else {
 		if([self.response statusCode] == 201) {
 			[params setObject:@"YES" forKey:@"resourceCreated"];
@@ -66,7 +66,7 @@
 			[params setObject:@"NO" forKey:@"resourceCreated"];
 		}
 		NSNotification *notification = [NSNotification notificationWithName:@"TheftReported" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	}
 }
 

@@ -19,8 +19,7 @@
 }
 
 - (id) initWithManagedObjectContext:(NSManagedObjectContext*)managedObjectContext;
-- (void) findClosestShops:(CLLocationCoordinate2D)topLeftCoordinate 
-		bottomRightCoordinate:(CLLocationCoordinate2D)bottomRightCoordinate;
+- (void) findClosestShops:(NSDictionary*)params;
 - (void) addShop:(NSString*)shopAddress 
 		shopName:(NSString*)shopName
 	  hasRentals:(NSString*)hasRentals 

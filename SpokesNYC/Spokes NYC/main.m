@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "SpokesRootViewController.h"
 #import "EventDispatchingWindow.h"
-#import "AdWhirlAdapterAdMob.h"
 #import "Route.h"
 #import "IndexedCoordinate.h"
 #import "Leg.h"
@@ -22,7 +21,6 @@ int main(int argc, char *argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 	[SpokesRootViewController description];
 	[EventDispatchingWindow description];
-	[AdWhirlAdapterAdMob description];
 	[Route description];
 	[IndexedCoordinate description];
 	[Leg description];

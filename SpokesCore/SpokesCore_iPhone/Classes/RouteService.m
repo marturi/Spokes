@@ -62,7 +62,7 @@
 		params = [NSMutableDictionary dictionaryWithObject:self.connectionError forKey:@"serviceError"];
 		self.connectionError = nil;
 		NSNotification *notification = [NSNotification notificationWithName:@"ServiceError" object:nil userInfo:params];
-		[[NSNotificationCenter defaultCenter] postNotification:notification];
+		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	} else {
 		if(!isFault) {
 			if(self.currentRoute != nil) {
@@ -73,7 +73,7 @@
 				params = [NSMutableDictionary dictionaryWithObject:[NSNull null] forKey:@"newRoute"];
 			}
 			NSNotification *notification = [NSNotification notificationWithName:@"NewRoute" object:nil userInfo:params];
-			[[NSNotificationCenter defaultCenter] postNotification:notification];
+			[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 		}
 	}
 }
@@ -98,7 +98,7 @@
 			[parser release];
 			NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObject:self.faultMsg forKey:@"faultMessage"];
 			NSNotification *notification = [NSNotification notificationWithName:@"SpokesFault" object:nil userInfo:params];
-			[[NSNotificationCenter defaultCenter] postNotification:notification];
+			[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 		}
 		self.currentElementValue = nil;
 		self.responseData = nil;

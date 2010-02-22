@@ -25,10 +25,16 @@
 		self.autocompleteThreshold = 1;
 		autocompleteEntriesLoading = [[NSMutableArray alloc] init];
 		[autocompleteEntriesLoading removeAllObjects];
-		
+
 		addressBook = ABAddressBookCreate();
 	}
 	return self;
+}
+
+- (void) loadAddressBook {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	addressBook = ABAddressBookCreate();
+	[pool drain];
 }
 
 - (void)loadView {
@@ -61,26 +67,43 @@
 		ABRecordRef record = [[addresses objectAtIndex:i] retain];
 		ABMultiValueRef streets = ABRecordCopyValue(record, kABPersonAddressProperty);
 		if(ABMultiValueGetCount(streets) > 0) {
+			NSMutableString *str = [[NSMutableString alloc] init];
 			for (CFIndex j = 0; j < ABMultiValueGetCount(streets); j++) {
-				NSString *fName = (NSString*)ABRecordCopyValue(record, kABPersonFirstNameProperty);
-				NSString *lName = (NSString*)ABRecordCopyValue(record, kABPersonLastNameProperty);
 				CFDictionaryRef dict = ABMultiValueCopyValueAtIndex(streets, j);
 				NSString *street = [(NSString*)CFDictionaryGetValue(dict, kABPersonAddressStreetKey) copy];
-                NSString *city = [(NSString*)CFDictionaryGetValue(dict, kABPersonAddressCityKey) copy];
-				Person *pers = [[Person alloc] init];
-				pers.name = [NSString stringWithFormat: @"%@ %@", fName, lName];
-				pers.address = [NSString stringWithFormat:@"%@, %@", street, city];
-				CFStringRef typeTmp = ABMultiValueCopyLabelAtIndex(streets, j);
-				pers.type = (NSString*)ABAddressBookCopyLocalizedLabel(typeTmp);
-				CFRelease(typeTmp);
-				[list addObject:pers];
-				[pers release];
+				if(street) {
+					NSString *fName = (NSString*)ABRecordCopyValue(record, kABPersonFirstNameProperty);
+					NSString *lName = (NSString*)ABRecordCopyValue(record, kABPersonLastNameProperty);
+					NSString *city = [(NSString*)CFDictionaryGetValue(dict, kABPersonAddressCityKey) copy];
+					Person *pers = [[Person alloc] init];
+					if(fName) {
+						[str setString:fName];
+					}
+					if(fName && lName) {
+						[str appendString:@" "];
+					}
+					if(lName) {
+						[str appendString:lName];
+					}
+					pers.name = str;
+					[str setString:street];
+					if(city) {
+						[str appendString:[NSString stringWithFormat:@", %@", city]];
+					}
+					pers.address = str;
+					CFStringRef typeTmp = ABMultiValueCopyLabelAtIndex(streets, j);
+					pers.type = (NSString*)ABAddressBookCopyLocalizedLabel(typeTmp);
+					CFRelease(typeTmp);
+					[list addObject:pers];
+					[pers release];
+					[city release];
+					[fName release];
+					[lName release];
+				}
 				CFRelease(dict);
 				[street release];
-				[city release];
-				[fName release];
-				[lName release];
 			}
+			[str release];
 		}
 		CFRelease(streets);
 		CFRelease(record);
@@ -95,10 +118,10 @@
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	NSMutableArray *addresses = [NSMutableArray arrayWithArray:[defaults arrayForKey:@"addresses"]];
 	for(NSString *address in addresses) {
-		NSArray *listItems = [address componentsSeparatedByString:@","];
+		NSArray *listItems = [address componentsSeparatedByString:@"|"];
 		int cnt = [listItems count];
 		if(cnt > 0) {
-			if([[listItems objectAtIndex:0] rangeOfString:substring options:NSCaseInsensitiveSearch].location != NSNotFound) {
+			if([[listItems objectAtIndex:0] rangeOfString:substring options:NSCaseInsensitiveSearch].location == 0) {
 				Person *pers = [[Person alloc] init];
 				pers.name = [listItems objectAtIndex:0];
 				if(cnt == 3) {
@@ -210,7 +233,9 @@
 - (void)viewDidUnload {
 	CFRelease(addressBook);
 	[autocompleteEntriesLoading release];
+	autocompleteEntriesLoading = nil;
 	[autocompleteEntries release];
+	autocompleteEntries = nil;
 }
 
 - (void)dealloc {

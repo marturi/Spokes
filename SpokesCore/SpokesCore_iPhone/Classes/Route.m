@@ -93,31 +93,35 @@
 }
 
 - (Leg*) legForIndex:(NSInteger)index {
-	NSMutableDictionary *indexedLegs = [[NSMutableDictionary alloc] initWithCapacity:[self.legs count]];
-	NSEnumerator *enumerator = [self.legs objectEnumerator];
-	id leg;
-	while ((leg = [enumerator nextObject])) {
-		[indexedLegs setObject:leg forKey:((Leg*)leg).index];
+	if(!indexedLegs) {
+		indexedLegs = [[NSMutableDictionary alloc] initWithCapacity:[self.legs count]];
+		NSEnumerator *enumerator = [self.legs objectEnumerator];
+		id leg;
+		while ((leg = [enumerator nextObject])) {
+			[indexedLegs setObject:leg forKey:((Leg*)leg).index];
+		}
 	}
 	Leg *retLeg = [indexedLegs objectForKey:[NSNumber numberWithInt:index]];
-	[indexedLegs release];
 	return retLeg;
 }
 
 - (SegmentType*) segmentTypeForIndex:(NSString*)index {
-	NSMutableDictionary *indexedSegmentTypes = [[NSMutableDictionary alloc] initWithCapacity:[self.segmentTypes count]];
-	NSEnumerator *enumerator = [self.segmentTypes objectEnumerator];
-	id segmentType;
-	while ((segmentType = [enumerator nextObject])) {
-		[indexedSegmentTypes setObject:segmentType forKey:((SegmentType*)segmentType).changeIndex];
+	if(!indexedSegmentTypes) {
+		indexedSegmentTypes = [[NSMutableDictionary alloc] initWithCapacity:[self.segmentTypes count]];
+		NSEnumerator *enumerator = [self.segmentTypes objectEnumerator];
+		id segmentType;
+		while ((segmentType = [enumerator nextObject])) {
+			[indexedSegmentTypes setObject:segmentType forKey:((SegmentType*)segmentType).changeIndex];
+		}
 	}
 	SegmentType *retSegmentType = [indexedSegmentTypes objectForKey:index];
-	[indexedSegmentTypes release];
 	return retSegmentType;
 }
 
 - (void) didTurnIntoFault {
 	[super didTurnIntoFault];
+	[indexedSegmentTypes release];
+	[indexedLegs release];
 }
 
 @end

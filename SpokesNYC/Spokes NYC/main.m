@@ -19,15 +19,15 @@
 
 int main(int argc, char *argv[]) {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	[SpokesRootViewController description];
-	[EventDispatchingWindow description];
-	[Route description];
-	[IndexedCoordinate description];
-	[Leg description];
-	[SegmentType description];
-	[RackPoint description];
-	[RoutePoint description];
-	[ShopPoint description];
+	[SpokesRootViewController class];
+	[EventDispatchingWindow class];
+	[Route class];
+	[IndexedCoordinate class];
+	[Leg class];
+	[SegmentType class];
+	[RackPoint class];
+	[RoutePoint class];
+	[ShopPoint class];
     int retVal = UIApplicationMain(argc, argv, nil, nil);
     [pool release];
     return retVal;

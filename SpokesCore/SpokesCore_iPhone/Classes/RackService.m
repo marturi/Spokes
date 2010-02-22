@@ -24,7 +24,6 @@
 }
 
 - (void) findClosestRacks:(NSDictionary*)params {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	CLLocation *tl = [params objectForKey:@"topLeft"];
 	CLLocationCoordinate2D topLeftCoordinate = tl.coordinate;
 	CLLocation *br = [params objectForKey:@"bottomRight"];
@@ -57,7 +56,6 @@
 		NSNotification *notification = [NSNotification notificationWithName:@"PointsFound" object:nil userInfo:param];
 		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	}
-	[pool release];
 }
 
 - (void) addRack:(NSString*)rackLocation 

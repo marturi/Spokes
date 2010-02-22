@@ -119,24 +119,27 @@
 
 - (NSString*) formatPhoneNumber {
 	NSMutableString *phoneNumber = [[[NSMutableString alloc] init] autorelease];
-	if(self.phoneAreaCode.text != nil && [self.phoneAreaCode.text length] >= 3) {
+	NSString *areaCode = self.phoneAreaCode.text;
+	if([areaCode length] >= 3) {
 		NSRange ar = {0,3};
 		[phoneNumber appendString:@"("];
-		[phoneNumber appendString:[self.phoneAreaCode.text substringWithRange:ar]];
+		[phoneNumber appendString:[areaCode substringWithRange:ar]];
 		[phoneNumber appendString:@") "];
 	} else {
 		[phoneNumber setString:@""];
 	}
-	if(self.phonePrefix.text != nil && [self.phonePrefix.text length] >= 3 && [phoneNumber length] > 0) {
+	NSString *prefix = self.phonePrefix.text;
+	if([prefix length] >= 3 && [phoneNumber length] > 0) {
 		NSRange ar = {0,3};
-		[phoneNumber appendString:[self.phonePrefix.text substringWithRange:ar]];
+		[phoneNumber appendString:[prefix substringWithRange:ar]];
 		[phoneNumber appendString:@"-"];
 	} else {
 		[phoneNumber setString:@""];
 	}
-	if(self.phoneSuffix.text != nil && [self.phoneSuffix.text length] >= 4 && [phoneNumber length] > 0) {
+	NSString *suffix = self.phoneSuffix.text;
+	if([suffix length] >= 4 && [phoneNumber length] > 0) {
 		NSRange ar = {0,4};
-		[phoneNumber appendString:[self.phoneSuffix.text substringWithRange:ar]];
+		[phoneNumber appendString:[suffix substringWithRange:ar]];
 	} else {
 		[phoneNumber setString:@""];
 	}
@@ -182,15 +185,15 @@
 		limit = 4;
 	}
 	if (sender == self.phoneAreaCode) {
-		if (self.phoneAreaCode.text && [self.phoneAreaCode.text length] == limit) {
+		if ([self.phoneAreaCode.text length] == limit) {
 			[self.phonePrefix becomeFirstResponder];
 		}
 	} else if (sender == self.phonePrefix) {
-		if (self.phonePrefix.text && [self.phonePrefix.text length] == limit) {
+		if ([self.phonePrefix.text length] == limit) {
 			[self.phoneSuffix becomeFirstResponder];
 		}
 	} else if (sender == self.phoneSuffix) {
-		if (self.phoneSuffix.text && [self.phoneSuffix.text length] == limit) {
+		if ([self.phoneSuffix.text length] == limit) {
 			[self.phoneSuffix resignFirstResponder];
 		}
 	}

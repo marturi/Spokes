@@ -50,7 +50,7 @@ static CGFloat const kHeight = 123.0;
 - (id) initWithMapView:(MKMapView*)mapView {
 	if (self = [super init]) {
 		_mapView = [mapView retain];
-		[NSThread detachNewThreadSelector:@selector(loadAutoCompleteViewController) toTarget:self withObject:nil];
+		self.autoCompleteViewController = [[[AutoCompleteViewController alloc] init] autorelease];
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(handleAutocompleteSelected:)
 													 name:@"AutocompleteSelected" 
@@ -58,12 +58,6 @@ static CGFloat const kHeight = 123.0;
 		autocompleteHidden = YES;
 	}
 	return self;
-}
-
-- (void) loadAutoCompleteViewController {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	self.autoCompleteViewController = [[[AutoCompleteViewController alloc] init] autorelease];
-	[pool drain];
 }
 
 - (void)loadView {
@@ -80,7 +74,7 @@ static CGFloat const kHeight = 123.0;
 																	  target:self 
 																	  action:@selector(swapValues)];
 	swapButtonItem.width = 30.0;
-	
+
 	UITextField *startTF = [[UITextField alloc] initWithFrame:CGRectMake(0.0, 8.0, 270.0, 30.0)];
 	self.startAddress = startTF;
 	[startTF release];
@@ -392,7 +386,7 @@ static CGFloat const kHeight = 123.0;
 			if([addresses count] == kMaxAddressesSaved) {
 				[addresses removeObjectAtIndex:0];
 			}
-			[addresses addObject:[NSString stringWithFormat:@"%@,%@,%@,%@", pt.address, [pt.latitude stringValue], [pt.longitude stringValue], pt.accuracyLevel]];
+			[addresses addObject:[NSString stringWithFormat:@"%@|%@|%@|%@", pt.address, [pt.latitude stringValue], [pt.longitude stringValue], pt.accuracyLevel]];
 		}
 	}
 	[defaults setObject:addresses forKey:@"addresses"];
@@ -403,7 +397,6 @@ static CGFloat const kHeight = 123.0;
 	BOOL locationServicesEnabled = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).locationServicesEnabled;
 	NSString *otherField = (locationServicesEnabled && _mapView.showsUserLocation) ? @"Current Location" : nil;
 	NSArray *results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
-	//UITextField *firstResponder = self.startAddress;
 	if(results.count > 0) {
 		self.startAddress.text = ((RoutePoint*)[results objectAtIndex:0]).address;
 	} else {
@@ -416,9 +409,8 @@ static CGFloat const kHeight = 123.0;
 		if(![self.startAddress.text isEqualToString:otherField]) {
 			self.endAddress.text = otherField;
 		}
-		//firstResponder = self.endAddress;
 	}
-	//[firstResponder performSelector:@selector(becomeFirstResponder) withObject:nil afterDelay:.25];
+	[self.endAddress becomeFirstResponder];
 }
 
 - (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type addressText:(NSString*)addressText {

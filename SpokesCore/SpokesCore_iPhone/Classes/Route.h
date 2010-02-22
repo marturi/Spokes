@@ -16,6 +16,8 @@
 	CLLocationCoordinate2D endCoordinate;
 	CLLocationCoordinate2D minCoordinate;
 	CLLocationCoordinate2D maxCoordinate;
+	NSMutableDictionary *indexedSegmentTypes;
+	NSMutableDictionary *indexedLegs;
 }
 
 @property (nonatomic, retain) NSString * startAddress;

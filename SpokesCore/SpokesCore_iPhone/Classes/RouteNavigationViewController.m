@@ -322,7 +322,7 @@ static CGFloat const kHeight = 94.0;
 }
 
 - (void) startNavigatingRoute:(id)sender {
-	movePointerDirection = 0;
+	movePointerDirection = 1;
 	isLegTransition = YES;
 	currentRoute.currentLegIndex = [NSNumber numberWithInt:0];
 	Leg *currentLeg = [currentRoute legForIndex:[currentRoute.currentLegIndex intValue]];
@@ -335,7 +335,10 @@ static CGFloat const kHeight = 94.0;
 	RouteView *currentRouteView = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).rootViewController.routeView;
 	if(movePointerDirection > -1) {
 		[currentRouteView showRoutePointerView];
-		[currentRouteView moveRoutePointerView:[NSNumber numberWithInt:movePointerDirection]];
+		int currentLegIndex = [currentRoute.currentLegIndex intValue];
+		if(currentLegIndex > 0 || (currentLegIndex == 0 && movePointerDirection == 0)) {
+			[currentRouteView moveRoutePointerView:[NSNumber numberWithInt:movePointerDirection]];
+		}
 		movePointerDirection = -1;
 	}
 }

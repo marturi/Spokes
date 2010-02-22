@@ -270,9 +270,7 @@
 		[self.routeCriteriaViewController setTextFieldVisibility:YES];
 }
 
-- (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag {
-	if(self.routeCriteriaViewController)
-		[self.routeCriteriaViewController.endAddress becomeFirstResponder];
+- (void) animationDidStop:(BOOL)finished {
 }
 
 #pragma mark -
@@ -324,7 +322,7 @@
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeRack mapView:_mapView];
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeShop mapView:_mapView];
 	[RoutePointRepository deleteNonRoutePoints:managedObjectContext];
-	[self performSelector:pointsCall withObject:params afterDelay:01];
+	[NSThread detachNewThreadSelector:pointsCall toTarget:self withObject:params];
 }
 
 - (SEL) routePointsCall:(int)selectedIndex {
@@ -393,15 +391,19 @@
 #pragma mark GET Requests
 
 - (void) sendRacksRequest:(NSDictionary*)param {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	RackService *rackService = (RackService*)[[RackService alloc] initWithManagedObjectContext:managedObjectContext];
-	[NSThread detachNewThreadSelector:@selector(findClosestRacks:) toTarget:rackService withObject:param];
+	[rackService findClosestRacks:param];
 	[rackService release];
+	[pool drain];
 }
 
 - (void) sendShopsRequest:(NSDictionary*)param {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	ShopService *shopService = (ShopService*)[[ShopService alloc] initWithManagedObjectContext:managedObjectContext];
-	[NSThread detachNewThreadSelector:@selector(findClosestShops:) toTarget:shopService withObject:param];
+	[shopService findClosestShops:param];
 	[shopService release];
+	[pool drain];
 }
 
 #pragma mark -

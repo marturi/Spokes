@@ -13,7 +13,7 @@
 #define maxLatitude 40.920104
 #define minLatitude 40.492856
 
-//#define kSpokesBaseURL @"http://localhost:8080/iCycle_Web/icycle/"
+//#define kSpokesBaseURL @"http://198.18.43.208:8080/iCycle_Web/icycle/"
 #define kSpokesBaseURL @"http://spokesnyc.8bstudio.net/iCycle_Web/icycle/"
 
 #define kAdWhirlApplicationKey @"b4eab3fc0faa102dada5b193ce4f21b9"

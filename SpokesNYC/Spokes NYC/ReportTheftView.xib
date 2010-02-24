@@ -103,7 +103,7 @@
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 						<int key="IBUITag">1</int>
 						<int key="IBUIContentVerticalAlignment">0</int>
-						<string key="IBUIText"/>
+						<string key="IBUIText">Current Location</string>
 						<int key="IBUIBorderStyle">3</int>
 						<string key="IBUIPlaceholder">Theft Location</string>
 						<object class="NSColor" key="IBUITextColor">
@@ -491,7 +491,7 @@ ZYAAAAAAAAAAAAAAAAAAAAAAdGV4dAAAAABDb3B5cmlnaHQgQXBwbGUsIEluYy4sIDIwMTAAA</bytes
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>ReportTheftViewController</string>
 					<string>UIResponder</string>
-					<string>{{154, 230}, {320, 480}}</string>
+					<string>{{337, 222}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>

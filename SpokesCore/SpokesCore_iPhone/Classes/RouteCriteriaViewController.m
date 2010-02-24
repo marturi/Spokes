@@ -320,7 +320,8 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (BOOL) textFieldShouldBeginEditing:(UITextField*)textField {
-	return [self.autoCompleteViewController textFieldShouldBeginEditing:textField];
+	[self.autoCompleteViewController textFieldShouldBeginEditing:textField];
+	return YES;
 }
 
 - (void) textFieldDidBeginEditing:(UITextField *)textField {
@@ -469,9 +470,17 @@ static CGFloat const kHeight = 123.0;
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
+	self.autoCompleteViewController = nil;
 }
 
 - (void)viewDidUnload {
+	self.cachedEndCoord = nil;
+	self.cachedStartCoord = nil;
+	self.cachedStartAccuracyLevel = nil;
+	self.cachedEndAccuracyLevel = nil;
+	self.startAddress = nil;
+	self.endAddress = nil;
+	self.autoCompleteViewController = nil;
 }
 
 - (void)dealloc {

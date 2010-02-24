@@ -254,6 +254,20 @@
 	[_viewController.mapView setCenterCoordinate:_viewController.mapView.centerCoordinate animated:NO];
 }
 
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+- (void)viewDidUnload {
+	self.hasRentals = nil;
+	self.msgButton = nil;
+	self.shopAddress = nil;
+	self.shopName = nil;
+	self.phoneAreaCode = nil;
+	self.phonePrefix = nil;
+	self.phoneSuffix = nil;
+}
+
 - (void)dealloc {
 	self.hasRentals = nil;
 	self.msgButton = nil;

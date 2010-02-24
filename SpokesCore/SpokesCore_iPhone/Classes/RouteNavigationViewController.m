@@ -348,6 +348,12 @@ static CGFloat const kHeight = 94.0;
 }
 
 - (void)viewDidUnload {
+	self.routeText = nil;
+	self.navBar = nil;
+	self.routeCaption = nil;
+	self.surfaceTypePanel = nil;
+	self.routeNavigator = nil;
+	self.startRouteButton = nil;
 }
 
 - (void)dealloc {

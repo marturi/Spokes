@@ -8,6 +8,8 @@
 		<string key="IBDocument.HIToolboxVersion">353.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
+			<integer value="88"/>
+			<integer value="61"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -223,15 +225,16 @@ ZYAAAAAAAAAAAAAAAAAAAAAAdGV4dAAAAABDb3B5cmlnaHQgQXBwbGUsIEluYy4sIDIwMTAAA</bytes
 				<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 			</object>
 			<object class="IBUIView" id="724769055">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">292</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="IBUIImageView" id="513578427">
 						<reference key="NSNextResponder" ref="724769055"/>
 						<int key="NSvFlags">274</int>
-						<string key="NSFrame">{{20, 29}, {280, 104}}</string>
+						<string key="NSFrame">{{20, 29}, {280, 175}}</string>
 						<reference key="NSSuperview" ref="724769055"/>
+						<reference key="NSWindow"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 						<int key="IBUIContentMode">4</int>
@@ -246,6 +249,7 @@ ZYAAAAAAAAAAAAAAAAAAAAAAdGV4dAAAAABDb3B5cmlnaHQgQXBwbGUsIEluYy4sIDIwMTAAA</bytes
 						<int key="NSvFlags">292</int>
 						<string key="NSFrame">{{20, 0}, {280, 21}}</string>
 						<reference key="NSSuperview" ref="724769055"/>
+						<reference key="NSWindow"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
@@ -259,8 +263,9 @@ ZYAAAAAAAAAAAAAAAAAAAAAAdGV4dAAAAABDb3B5cmlnaHQgQXBwbGUsIEluYy4sIDIwMTAAA</bytes
 					<object class="IBUIButton" id="197217254">
 						<reference key="NSNextResponder" ref="724769055"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 140}, {280, 69}}</string>
+						<string key="NSFrame">{{20, 212}, {280, 115}}</string>
 						<reference key="NSSuperview" ref="724769055"/>
+						<reference key="NSWindow"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 						<bool key="IBUIEnabled">NO</bool>
@@ -278,13 +283,18 @@ ZYAAAAAAAAAAAAAAAAAAAAAAdGV4dAAAAABDb3B5cmlnaHQgQXBwbGUsIEluYy4sIDIwMTAAA</bytes
 					<object class="IBUILabel" id="706839060">
 						<reference key="NSNextResponder" ref="724769055"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{25, 140}, {270, 70}}</string>
+						<string key="NSFrame">{{25, 213}, {270, 112}}</string>
 						<reference key="NSSuperview" ref="724769055"/>
+						<reference key="NSWindow"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
 						<string type="base64-UTF8" key="IBUIText">Q3JlYXRpbmcgYSByb3V0ZSBpcyBlYXN5LiAgSnVzdCBlbnRlciBzdGFydCBhbmQgZW5kIGxvY2F0aW9u
-cyBhbmQgaGl0IHRoZSAnUm91dGUnIGJ1dHRvbiBvbiB0aGUga2V5Ym9hcmQuA</string>
+cyBhbmQgaGl0IHRoZSAnUm91dGUnIGJ1dHRvbiBvbiB0aGUga2V5Ym9hcmQuICBBcyB5b3UgdHlwZSwg
+U3Bva2VzIHdpbGwgbG9vayBpbiB5b3VyIGNvbnRhY3RzIGFuZC9vciB0aGUgbGFzdCA1MCBhZGRyZXNz
+ZXMgZW50ZXJlZCBmb3IgcG9zc2libGUgbWF0Y2hlcy4gIElmIHlvdSBzZWUgdGhlIGFkZHJlc3MgeW91
+IGFyZSBsb29raW5nIGZvciwganVzdCB0YXAgaXQgYW5kIHRoZSBmaWVsZCB3aWxsIGJlIGF1dG9jb21w
+bGV0ZWQuA</string>
 						<reference key="IBUIFont" ref="1044975092"/>
 						<reference key="IBUITextColor" ref="1066137588"/>
 						<nil key="IBUIHighlightedColor"/>
@@ -293,7 +303,9 @@ cyBhbmQgaGl0IHRoZSAnUm91dGUnIGJ1dHRvbiBvbiB0aGUga2V5Ym9hcmQuA</string>
 						<int key="IBUINumberOfLines">0</int>
 					</object>
 				</object>
-				<string key="NSFrameSize">{320, 230}</string>
+				<string key="NSFrameSize">{320, 345}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
 				<reference key="IBUIBackgroundColor" ref="391090592"/>
 				<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 			</object>
@@ -372,7 +384,7 @@ cyBhbmQgaGl0IHRoZSAnUm91dGUnIGJ1dHRvbiBvbiB0aGUga2V5Ym9hcmQuA</string>
 				<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 			</object>
 			<object class="IBUIView" id="480799720">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">292</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -408,7 +420,7 @@ cyBhbmQgaGl0IHRoZSAnUm91dGUnIGJ1dHRvbiBvbiB0aGUga2V5Ym9hcmQuA</string>
 					<object class="IBUIButton" id="590430684">
 						<reference key="NSNextResponder" ref="480799720"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 69}, {280, 161}}</string>
+						<string key="NSFrame">{{20, 69}, {280, 206}}</string>
 						<reference key="NSSuperview" ref="480799720"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
@@ -427,7 +439,7 @@ cyBhbmQgaGl0IHRoZSAnUm91dGUnIGJ1dHRvbiBvbiB0aGUga2V5Ym9hcmQuA</string>
 					<object class="IBUILabel" id="157720354">
 						<reference key="NSNextResponder" ref="480799720"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{25, 76}, {270, 144}}</string>
+						<string key="NSFrame">{{25, 76}, {270, 192}}</string>
 						<reference key="NSSuperview" ref="480799720"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -436,8 +448,10 @@ cyBhbmQgaGl0IHRoZSAnUm91dGUnIGJ1dHRvbiBvbiB0aGUga2V5Ym9hcmQuA</string>
 bnQgbG9jYXRpb24gKGlmIHlvdSBoYXZlIGxvY2F0aW9uIHNlcnZpY2VzIGVuYWJsZWQpLuKAqOKAqFRv
 IGZpbmQgYmlrZSByYWNrcyB3aXRoaW4gdGhlIHJlZ2lvbiBjdXJyZW50bHkgdmlld2VkIG9uIHRoZSBt
 YXAsIGhpdCB0aGUgJ1JhY2tzJyBidXR0b24uICBUaGUgJ1Nob3BzIGJ1dHRvbiBkb2VzIHRoZSBzYW1l
-IGZvciBiaWtlIHNob3BzLuKAqOKAqFRoZSAnU3RyZWV0L0h5YnJpZCcgYnV0dG9uIHRvZ2dsZXMgdGhl
-IG1hcCB2aWV3IHR5cGUgYmV0d2VlbiBoeWJyaWQgYW5kIHN0cmVldC4</string>
+IGZvciBiaWtlIHNob3BzLuKAqOKAqFRvIGFkZCBhIGJpa2UgcmFjayBvciBiaWtlIHNob3Agb3IgdG8g
+cmVwb3J0IGEgdGhlZnQsIHRhcCB0aGUgKyBidXR0b24gYW5kIHNlbGVjdCB3aGljaCBhY3Rpb24geW91
+J2QgbGlrZSB0byBwZXJmb3JtLuKAqOKAqFRoZSAnU3RyZWV0L0h5YnJpZCcgYnV0dG9uIHRvZ2dsZXMg
+dGhlIG1hcCB2aWV3IHR5cGUgYmV0d2VlbiBoeWJyaWQgYW5kIHN0cmVldC4</string>
 						<reference key="IBUIFont" ref="1044975092"/>
 						<reference key="IBUITextColor" ref="1066137588"/>
 						<nil key="IBUIHighlightedColor"/>
@@ -446,7 +460,8 @@ IG1hcCB2aWV3IHR5cGUgYmV0d2VlbiBoeWJyaWQgYW5kIHN0cmVldC4</string>
 						<int key="IBUINumberOfLines">0</int>
 					</object>
 				</object>
-				<string key="NSFrameSize">{320, 250}</string>
+				<string key="NSFrameSize">{320, 295}</string>
+				<reference key="NSSuperview"/>
 				<reference key="IBUIBackgroundColor" ref="391090592"/>
 				<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 			</object>
@@ -599,7 +614,7 @@ IG1hcCB2aWV3IHR5cGUgYmV0d2VlbiBoeWJyaWQgYW5kIHN0cmVldC4</string>
 				<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 			</object>
 			<object class="IBUIView" id="202282932">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">292</int>
 				<object class="NSMutableArray" key="NSSubviews">
 					<bool key="EncodedWithXMLCoder">YES</bool>
@@ -644,10 +659,10 @@ IG1hcCB2aWV3IHR5cGUgYmV0d2VlbiBoeWJyaWQgYW5kIHN0cmVldC4</string>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
 						<bool key="IBUIUserInteractionEnabled">NO</bool>
-						<string type="base64-UTF8" key="IBUIText">U3Bva2VzIE5ZQyB3YW50cyB0byBrbm93IHdoZW4gYSBjeWNsaXN0J3MgYmlrZSBpcyBzdG9sZW4gZnJv
-bSBhIGJpa2UgcmFjay4gIFdoaWxlIHdlIHdvbnQgYWN0dWFsbHkgcmVwb3J0IHRoZSB0aGVmdCB0byB0
-aGUgcG9saWNlLCB3ZSBob3BlIHRoYXQgdGhlIGluZm9ybWF0aW9uIHdpbGwgaGVscCBjeWNsaXN0cyB0
-byBmaW5kIHRoZSBzYWZlc3QgcGxhY2UgdG8gcGFyayB0aGVpciBiaWtlcy4</string>
+						<string type="base64-UTF8" key="IBUIText">U3Bva2VzIE5ZQyB3YW50cyB0byBrbm93IHdoZW4gYSBjeWNsaXN0J3MgYmlrZSBpcyBzdG9sZW4uICBX
+aGlsZSB3ZSB3b250IGFjdHVhbGx5IHJlcG9ydCB0aGUgdGhlZnQgdG8gdGhlIHBvbGljZSwgd2UgaG9w
+ZSB0aGF0IHRoZSBpbmZvcm1hdGlvbiB3aWxsIGhlbHAgY3ljbGlzdHMgdG8gZmluZCB0aGUgc2FmZXN0
+IHBsYWNlIHRvIHBhcmsgdGhlaXIgYmlrZXMuA</string>
 						<reference key="IBUIFont" ref="1044975092"/>
 						<reference key="IBUITextColor" ref="1066137588"/>
 						<nil key="IBUIHighlightedColor"/>
@@ -658,6 +673,7 @@ byBmaW5kIHRoZSBzYWZlc3QgcGxhY2UgdG8gcGFyayB0aGVpciBiaWtlcy4</string>
 					</object>
 				</object>
 				<string key="NSFrameSize">{320, 150}</string>
+				<reference key="NSSuperview"/>
 				<reference key="IBUIBackgroundColor" ref="391090592"/>
 				<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 			</object>
@@ -1216,13 +1232,13 @@ byBmaW5kIHRoZSBzYWZlc3QgcGxhY2UgdG8gcGFyayB0aGVpciBiaWtlcy4</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>{{42, 538}, {320, 150}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<string>{{295, 446}, {320, 220}}</string>
+					<string>{{676, 421}, {320, 220}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<string>{{398, 412}, {320, 230}}</string>
+					<string>{{530, 223}, {320, 383}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1236,7 +1252,7 @@ byBmaW5kIHRoZSBzYWZlc3QgcGxhY2UgdG8gcGFyayB0aGVpciBiaWtlcy4</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<string>{{398, 395}, {320, 250}}</string>
+					<string>{{612, 354}, {320, 295}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -1265,7 +1281,7 @@ byBmaW5kIHRoZSBzYWZlc3QgcGxhY2UgdG8gcGFyayB0aGVpciBiaWtlcy4</string>
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">102</int>
+			<int key="maxID">105</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptionsV3.1+">

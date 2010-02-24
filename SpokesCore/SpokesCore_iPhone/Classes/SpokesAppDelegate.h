@@ -32,6 +32,7 @@
 - (NSString*) applicationDocumentsDirectory;
 - (void) startupAnimationDone:(NSString*)animationID finished:(NSNumber*)finished context:(void*)context;
 - (SpokesConstants*) spokesConstants;
+- (void) saveData;
 
 @end
 

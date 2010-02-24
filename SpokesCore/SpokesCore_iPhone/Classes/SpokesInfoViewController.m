@@ -86,6 +86,14 @@
 }
 
 - (void)viewDidUnload {
+	self.scrollView = nil;
+	self.aboutView = nil;
+	self.creatingRouteView = nil;
+	self.navigatingRouteView = nil;
+	self.mapLegendView = nil;
+	self.toolbarView = nil;
+	self.reportingTheftsView = nil;
+	self.feedbackView = nil;
 }
 
 - (void)dealloc {

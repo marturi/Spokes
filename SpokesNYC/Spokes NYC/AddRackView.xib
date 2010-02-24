@@ -104,6 +104,7 @@
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<string key="IBUIText">Current Location</string>
 						<int key="IBUIBorderStyle">3</int>
+						<string key="IBUIPlaceholder">Rack Location</string>
 						<object class="NSColor" key="IBUITextColor">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MAA</bytes>
@@ -443,7 +444,7 @@ ZYAAAAAAAAAAAAAAAAAAAAAAdGV4dAAAAABDb3B5cmlnaHQgQXBwbGUsIEluYy4sIDIwMTAAA</bytes
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>AddRackViewController</string>
 					<string>UIResponder</string>
-					<string>{{94, 208}, {320, 480}}</string>
+					<string>{{468, 180}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -517,7 +518,7 @@ ZYAAAAAAAAAAAAAAAAAAAAAAdGV4dAAAAABDb3B5cmlnaHQgQXBwbGUsIEluYy4sIDIwMTAAA</bytes
 			</object>
 		</object>
 		<int key="IBDocument.localizationMode">0</int>
-		<string key="IBDocument.LastKnownRelativeProjectPath">Spokes DC.xcodeproj</string>
+		<string key="IBDocument.LastKnownRelativeProjectPath">Spokes.xcodeproj</string>
 		<int key="IBDocument.defaultPropertyAccessControl">3</int>
 		<string key="IBCocoaTouchPluginVersion">3.1</string>
 	</data>

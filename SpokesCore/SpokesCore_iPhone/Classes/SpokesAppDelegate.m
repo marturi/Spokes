@@ -10,6 +10,7 @@
 #import "SpokesRootViewController.h"
 #import "RouteService.h"
 #import "EventDispatchingWindow.h"
+#import "MapViewHelper.h"
 #import <MapKit/MapKit.h>
 
 @implementation SpokesAppDelegate
@@ -58,6 +59,9 @@
 	[splashView release];
 }
 
+- (void) applicationDidReceiveMemoryWarning:(UIApplication *)application {
+}
+
 - (void)applicationWillTerminate:(UIApplication *)application {
 	[[NSNotificationCenter defaultCenter] removeObserver:rootViewController];
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -72,6 +76,10 @@
 	NSString *mapType = (rootViewController.mapView.mapType == MKMapTypeHybrid) ? @"MKMapTypeHybrid" : @"MKMapTypeStandard";
 	[defaults setObject:mapType forKey:@"mapType"];
 
+	[self saveData];
+}
+
+- (void) saveData {
 	NSError *error;
 	BOOL saveSuccessful = [self.managedObjectContext save:&error];
 	if([self.managedObjectContext hasChanges] && !saveSuccessful) {
@@ -87,7 +95,7 @@
  Returns the managed object context for the application.
  If the context doesn't already exist, it is created and bound to the persistent store coordinator for the application.
  */
-- (NSManagedObjectContext *) managedObjectContext {
+- (NSManagedObjectContext*) managedObjectContext {
     if (managedObjectContext != nil) {
 		return managedObjectContext;
     }
@@ -105,7 +113,7 @@
  Returns the managed object model for the application.
  If the model doesn't already exist, it is created by merging all of the models found in the application bundle.
  */
-- (NSManagedObjectModel *)managedObjectModel {
+- (NSManagedObjectModel*)managedObjectModel {
 	
     if (managedObjectModel != nil) {
         return managedObjectModel;
@@ -118,7 +126,7 @@
  Returns the persistent store coordinator for the application.
  If the coordinator doesn't already exist, it is created and the application's store added to it.
  */
-- (NSPersistentStoreCoordinator *)persistentStoreCoordinator {
+- (NSPersistentStoreCoordinator*)persistentStoreCoordinator {
 	
     if (persistentStoreCoordinator != nil) {
         return persistentStoreCoordinator;
@@ -138,13 +146,13 @@
 /**
  Returns the path to the application's documents directory.
  */
-- (NSString *)applicationDocumentsDirectory {
+- (NSString*)applicationDocumentsDirectory {
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
     return basePath;
 }
 
-- (void)dealloc {
+- (void) dealloc {
 	[managedObjectContext release];
     [managedObjectModel release];
     [persistentStoreCoordinator release];

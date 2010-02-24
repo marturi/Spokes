@@ -32,6 +32,7 @@
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController {
 	_viewController = [viewController retain];
+	routePoint = [[RoutePointRepository fetchSelectedPoint:_viewController.managedObjectContext] retain];
 	return [self initWithNibName:@"RoutePointDetailView" bundle:nil];
 }
 
@@ -48,8 +49,6 @@
 - (void)viewWillAppear:(BOOL)animated {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	[defaults setObject:@"pointDetail" forKey:@"viewMode"];
-
-	routePoint = [[RoutePointRepository fetchSelectedPoint:_viewController.managedObjectContext] retain];
 
 	CGPoint initialPoint = CGPointMake(20.0, 20.0);
 

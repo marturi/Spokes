@@ -23,5 +23,6 @@
 + (void) focusToPointOnMainThread:(NSDictionary*)params;
 + (void) initMapState:(MKMapView*)mapView;
 + (BOOL) validateCoordinate:(CLLocationCoordinate2D)coord;
++ (void) removeAllAnnotations:(MKMapView*)mapView;
 
 @end

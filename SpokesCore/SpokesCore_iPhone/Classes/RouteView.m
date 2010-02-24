@@ -214,6 +214,10 @@
 				newPt = [self.mapView convertCoordinate:currLeg.startCoordinate toPointToView:self.mapView];
 				self.lastCoord = currLeg.startCoordinate;
 			}
+		} else {
+			CLLocationCoordinate2D crd = [idxCoord asCLCoordinate];
+			self.lastCoord = crd;
+			newPt = [self.mapView convertCoordinate:crd toPointToView:self.mapView];
 		}
 		_internalRouteView.routePointerView.center = newPt;
 	}

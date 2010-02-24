@@ -159,6 +159,19 @@
 	[annotationsToRemove release];
 }
 
++ (void) removeAllAnnotations:(MKMapView*)mapView {
+	NSArray *annotations = mapView.annotations;
+	for(id <MKAnnotation> annotation in annotations) {
+		if([annotation isKindOfClass:[PointAnnotation class]]) {
+			PointAnnotation *pt = (PointAnnotation*)annotation;
+			MKAnnotationView *observedView = [mapView viewForAnnotation:pt];
+			observedView.selected = NO;
+			[observedView removeObserver:pt forKeyPath:@"selected"];
+		}
+	}
+	[mapView removeAnnotations:annotations];
+}
+
 + (void) showRoutePoints:(NSArray*)routePoints mapView:(MKMapView*)mapView {
 	for(RoutePoint * routePoint in routePoints) {
 		PointAnnotation *pa = [routePoint pointAnnotation];

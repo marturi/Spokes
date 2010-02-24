@@ -199,6 +199,17 @@
 	[_viewController.mapView setCenterCoordinate:_viewController.mapView.centerCoordinate animated:NO];
 }
 
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+- (void)viewDidUnload {
+	self.msgButton = nil;
+	self.doneButton = nil;
+	self.comments = nil;
+	self.theftLocation = nil;
+}
+
 - (void)dealloc {
 	self.msgButton = nil;
 	self.doneButton = nil;

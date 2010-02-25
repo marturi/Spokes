@@ -53,6 +53,7 @@ static CGFloat const kHeight = 94.0;
 		RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
 		currentRoute = [[routeService fetchCurrentRoute] retain];
 		[routeService release];
+		movePointerDirection = -1;
 	}
 	return self;
 }
@@ -202,7 +203,7 @@ static CGFloat const kHeight = 94.0;
 		surfaceTypeLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:11.0];
 		surfaceTypeLabel.shadowColor = routeText.shadowColor;
 		surfaceTypeLabel.textColor = [UIColor whiteColor];
-		if([st.segmentType isEqualToString:@"X"] || [st.segmentType isEqualToString:@"C"]) {
+		if([st.segmentType isEqualToString:@"X"] || [st.segmentType isEqualToString:@"C"] || [st.segmentType isEqualToString:@"A"]) {
 			surfaceTypeLabel.text = @"Street";
 			surfaceTypeLabel.backgroundColor = [UIColor redColor];
 		} else if([st.segmentType isEqualToString:@"S"]) {

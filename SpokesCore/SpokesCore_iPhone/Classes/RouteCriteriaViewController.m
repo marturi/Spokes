@@ -470,7 +470,6 @@ static CGFloat const kHeight = 123.0;
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-	self.autoCompleteViewController = nil;
 }
 
 - (void)viewDidUnload {

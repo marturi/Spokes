@@ -156,6 +156,9 @@
 		[vc release];
 	}
 	if(self.routeView.annotation == nil) {
+		RouteView *rv = [[RouteView alloc] initWithFrame:CGRectMake(0, 0, _mapView.frame.size.width, _mapView.frame.size.height)];
+		self.routeView = rv;
+		[rv release];
 		RouteAnnotation *routeAnnotation = [[[RouteAnnotation alloc] initWithPoints:[currentRoute routePoints] 
 																	  minCoordinate:currentRoute.minCoordinate
 																	  maxCoordinate:currentRoute.maxCoordinate] autorelease];
@@ -567,15 +570,12 @@
 	MKAnnotationView* annotationView = nil;
 	if([annotation isKindOfClass:[RouteAnnotation class]]) {
 		RouteAnnotation *routeAnnotation = (RouteAnnotation*)annotation;
-		if(self.routeView == nil) {
-			self.routeView = [[[RouteView alloc] initWithFrame:CGRectMake(0, 0, mapView.frame.size.width, mapView.frame.size.height)] autorelease];
-			self.routeView.annotation = routeAnnotation;
-			self.routeView.mapView = mapView;
-		}
+		self.routeView.annotation = routeAnnotation;
+		self.routeView.mapView = mapView;
 		annotationView = self.routeView;
 	} else if([annotation isKindOfClass:[PointAnnotation class]]) {
 		PointAnnotation* pointAnnotation = (PointAnnotation*)annotation;
-		NSString* identifier = [[NSNumber numberWithInt:pointAnnotation.annotationType] stringValue];
+		static NSString* identifier = @"pin";
 		MKPinAnnotationView* pin = (MKPinAnnotationView*)[mapView dequeueReusableAnnotationViewWithIdentifier:identifier];
 		if(nil == pin) {
 			pin = [[[MKPinAnnotationView alloc] initWithAnnotation:pointAnnotation reuseIdentifier:identifier]autorelease];

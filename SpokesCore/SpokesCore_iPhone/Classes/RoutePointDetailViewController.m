@@ -106,7 +106,7 @@
 			newY += 31.0;
 		}
 		[self createLabelForText:@"Rentals" withFrame:CGRectMake(20.0, newY, 68.0, 21.0)];
-		[self createBubbleForText:(((ShopPoint*)routePoint).hasRentals ? @"Yes" : @"No")
+		[self createBubbleForText:([((ShopPoint*)routePoint).hasRentals intValue] ? @"Yes" : @"No")
 						withFrame:CGRectMake(100.0, newY, 200.0, 21.0)
 						  enabled:NO
 						   action:nil

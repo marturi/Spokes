@@ -54,9 +54,64 @@
 }
 
 - (IBAction) addRack:(id)sender {
-	NSArray *params = [NSArray arrayWithObjects:self.rackLocation.text,
-					   [NSNumber numberWithInt:self.rackType.selectedSegmentIndex],nil];
-	[NSThread detachNewThreadSelector:@selector(doAddRack:) toTarget:self withObject:params];
+	if([self.rackLocation.text rangeOfString:@"current location" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+		[self performSelector:@selector(doReverseGeocode) withObject:nil afterDelay:01];
+	} else {
+		NSArray *params = [NSArray arrayWithObjects:self.rackLocation.text,
+						   [NSNumber numberWithInt:self.rackType.selectedSegmentIndex],nil];
+		[NSThread detachNewThreadSelector:@selector(doAddRack:) toTarget:self withObject:params];
+	}
+}
+
+- (void) doReverseGeocode {
+	[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+	GeocoderService *geocoderService = [[GeocoderService alloc] initWithMapView:_viewController.mapView];
+	[geocoderService addressLocation:self.rackLocation.text];
+	do {
+	} while (!geocoderService.done);
+	if([geocoderService validateCoordinate:geocoderService.addressLocation.coordinate]) {
+		if(!_geocoder) {
+			_geocoder = [[MKReverseGeocoder alloc] initWithCoordinate:geocoderService.addressLocation.coordinate];
+		}
+		_geocoder.delegate = self;
+		[_geocoder start];
+	} else {
+		[self showMsg:@"Whoops! Looks like you are outside of city limits right now."];
+	}
+	[geocoderService release];
+}
+
+- (void)reverseGeocoder:(MKReverseGeocoder*)geocoder didFailWithError:(NSError*)error{
+	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+	[self showMsg:@"Whoops!  We had trouble getting info about your location.  Please try again."];
+	[_geocoder release];
+	_geocoder = nil;
+}
+
+- (void)reverseGeocoder:(MKReverseGeocoder*)geocoder didFindPlacemark:(MKPlacemark*)placemark {
+	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+	CLLocation *coord = [[CLLocation alloc] initWithLatitude:placemark.coordinate.latitude 
+												   longitude:placemark.coordinate.longitude];
+	NSArray *params = [NSArray arrayWithObjects:[NSString stringWithFormat:@"%@ %@", placemark.subThoroughfare, placemark.thoroughfare],
+					   [NSNumber numberWithInt:self.rackType.selectedSegmentIndex], coord, nil];
+	[coord release];
+	[_geocoder release];
+	_geocoder = nil;
+	[NSThread detachNewThreadSelector:@selector(doAddRackForCurrentLocation:) toTarget:self withObject:params];
+}
+
+- (void) doAddRackForCurrentLocation:(NSArray*)params {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	rackLocationStr = [params objectAtIndex:0];
+	RackService* rackService = [[RackService alloc] initWithManagedObjectContext:_viewController.managedObjectContext];
+	[rackService addRack:[params objectAtIndex:0] 
+				rackType:[[params objectAtIndex:1] intValue]
+		  rackCoordinate:((CLLocation*)[params objectAtIndex:2]).coordinate];
+	if(rackService.faultMsg != nil) {
+		[self performSelectorOnMainThread:@selector(showMsg:) withObject:rackService.faultMsg waitUntilDone:NO];
+	}
+	[rackService release];
+	[pool drain];
 }
 
 - (void) doAddRack:(NSArray*)params {
@@ -73,7 +128,7 @@
 		} else {
 			RackService* rackService = [[RackService alloc] initWithManagedObjectContext:_viewController.managedObjectContext];
 			[rackService addRack:[params objectAtIndex:0] 
-						rackType:[[params objectAtIndex:0] intValue]
+						rackType:[[params objectAtIndex:1] intValue]
 				  rackCoordinate:geocoderService.addressLocation.coordinate];
 			if(rackService.faultMsg != nil) {
 				[self performSelectorOnMainThread:@selector(showMsg:) withObject:rackService.faultMsg waitUntilDone:NO];
@@ -157,6 +212,7 @@
 	self.msgButton = nil;
 	self.rackType = nil;
 	self.rackLocation = nil;
+	[_geocoder release];
 	[_viewController release];
     [super dealloc];
 }

@@ -482,10 +482,6 @@
 			if(self.routeView.annotation != nil) {
 				[_mapView removeAnnotation:self.routeView.annotation];
 			}
-			RouteAnnotation *routeAnnotation = [[[RouteAnnotation alloc] initWithPoints:[newRoute routePoints] 
-																		  minCoordinate:newRoute.minCoordinate
-																		  maxCoordinate:newRoute.maxCoordinate] autorelease];
-			[_mapView addAnnotation:routeAnnotation];
 			[self showRouteView:newRoute];
 		}
 	}

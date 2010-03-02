@@ -52,6 +52,8 @@
 			_color = [UIColor redColor];
 		} else if([self.segType isEqualToString:@"X"]) {
 			_color = [UIColor redColor];
+		} else if([self.segType isEqualToString:@"A"]) {
+			_color = [UIColor redColor];
 		}
 	}
 	return _color;

@@ -6,14 +6,17 @@
 //  Copyright 2010 8B Studio, Inc. All rights reserved.
 //
 
+#import <MapKit/MapKit.h>
+
 @class SpokesRootViewController;
 
-@interface AddRackViewController : UIViewController <UITextFieldDelegate> {
+@interface AddRackViewController : UIViewController <UITextFieldDelegate,MKReverseGeocoderDelegate> {
 	SpokesRootViewController *_viewController;
 	IBOutlet UITextField *rackLocation;
 	IBOutlet UISegmentedControl *rackType;
 	UIButton *msgButton;
 	NSString *rackLocationStr;
+	MKReverseGeocoder *_geocoder;
 }
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController;

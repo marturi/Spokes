@@ -41,9 +41,8 @@ public class RouteServiceTest{
 	@Test
 	public void testGetClosestEdge() throws Exception{
 		//Coordinate startPoint = new Coordinate(-73.9808921,40.7534881);-73.9520084,40.8516544
-		Coordinate startPoint = new Coordinate(-73.952008, 40.851654);
+		Coordinate startPoint = new Coordinate(-74.00298013270896,40.72691965167061);
 		List<BookendRouteSegment> closestEdges = routeSegmentRepository.findClosestEdges(startPoint);
-		System.out.println(closestEdges);
 		//System.out.println(closestEdges.get(0).getStreet());
 	}
 
@@ -56,8 +55,8 @@ public class RouteServiceTest{
 	@Test
 	public void testGetShortestPathRoute() throws Exception{
 		//-73.983911,40.674180  -73.983237,40.672976
-		String startCoord = "-73.9520084,40.8516544";
-		String endCoord = "-74.0006328,40.6042563";
+		String startCoord = "-74.00298013270896,40.726920";
+		String endCoord = "-74.002070,40.728059";
 		Map<String, String> options = null;
 		RouteCriteria criteria = new RouteCriteria(startCoord, endCoord, options);
 		Route route = routeService.getShortestPathRoute(criteria);

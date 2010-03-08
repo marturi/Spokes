@@ -45,7 +45,7 @@
 - (void)searchAutocompleteEntriesWithSubstring:(NSString*)substring {
 	if ([substring length] >= autocompleteThreshold) {
 		[self searchSavedAddressesWithSubstring:substring];
-		[self searchContactsWithSubstring:substring];
+		[self searchContactsWithSubstring:[NSString stringWithFormat:@"%@*", substring]];
 	} else {
 		self.view.hidden = YES;
 	}
@@ -56,7 +56,6 @@
 		NSMutableArray *list = [[NSMutableArray alloc] init];
 		NSArray *addresses = (NSArray*)ABAddressBookCopyPeopleWithName(addressBook, (CFStringRef)substring);
 		NSInteger addressesCount = [addresses count];
-	
 		for (CFIndex i = 0; i < addressesCount; i++) {
 			ABRecordRef record = [[addresses objectAtIndex:i] retain];
 			ABMultiValueRef streets = ABRecordCopyValue(record, kABPersonAddressProperty);

@@ -136,6 +136,8 @@
 		location.longitude = [[listItems objectAtIndex:3] doubleValue];
 		self.addressLocation = [[[CLLocation alloc] initWithLatitude:location.latitude 
 														   longitude:location.longitude] autorelease];
+	} else {
+		[self performSelectorOnMainThread:@selector(showOutOfBoundsError) withObject:nil waitUntilDone:NO];
 	}
     self.responseData = nil;
 	done = YES;

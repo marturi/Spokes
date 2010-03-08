@@ -78,7 +78,7 @@ public class RouteSegment {
 		return nextSegment;
 	}
 
-	void setNextSegment(RouteSegment nextSegment){
+	protected void setNextSegment(RouteSegment nextSegment){
 		this.nextSegment = nextSegment;
 	}
 
@@ -86,7 +86,7 @@ public class RouteSegment {
 		return prevSegment;
 	}
 
-	void setPrevSegment(RouteSegment prevSegment){
+	protected void setPrevSegment(RouteSegment prevSegment){
 		this.prevSegment = prevSegment;
 	}
 

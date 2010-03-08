@@ -53,4 +53,4 @@
 		<servlet-name>spokes</servlet-name>
 		<url-pattern>/icycle/*</url-pattern>
 	</servlet-mapping>
-</web-app> 
+</web-app>

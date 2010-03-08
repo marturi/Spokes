@@ -21,6 +21,9 @@ public class RouteServiceImpl implements RouteService {
 		Point startPoint = geometryFactory.createPoint(routeCriteria.getStartPoint());
 		Point endPoint = geometryFactory.createPoint(routeCriteria.getEndPoint());
 		List<BookendRouteSegment> startEdges = routeSegmentRepository.findClosestEdges(startPoint.getCoordinate());
+		for(BookendRouteSegment brs : startEdges) {
+			brs.setStartEdge(true);
+		}
 		List<BookendRouteSegment> endEdges = routeSegmentRepository.findClosestEdges(endPoint.getCoordinate());
 		if(startEdges == null || startEdges.isEmpty() || endEdges == null || endEdges.isEmpty()){
 			int exType = ClosestEdgeNotFoundException.END;

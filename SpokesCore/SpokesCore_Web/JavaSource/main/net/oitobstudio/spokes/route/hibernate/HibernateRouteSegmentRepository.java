@@ -62,6 +62,7 @@ public class HibernateRouteSegmentRepository extends HibernateDaoSupport impleme
 			BookendRouteSegment endEdge, 
 			Map<String,String> options){
 		//System.out.println("startEdge.getStartOrEndVertex() = " + startEdge.getStartOrEndVertex());
+		//System.out.println("startEdge.isStartEdge() = " + startEdge.isStartEdge());
 		//System.out.println("endEdge.getStartOrEndVertex() = " + endEdge.getStartOrEndVertex());
 		List<RouteSegment> segments = getHibernateTemplate().findByNamedQueryAndNamedParam("shortestPath", 
 				new String[]{"source", "target"}, 

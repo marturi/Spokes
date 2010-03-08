@@ -188,7 +188,7 @@ static CGFloat const kHeight = 94.0;
 	SegmentType *st = nil;
 	NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
 	while ((st = (SegmentType*)[enumerator nextObject])) {
-		NSString *key = ([st.segmentType isEqualToString:@"C"]) ? @"X" : st.segmentType;
+		NSString *key = (([st.segmentType isEqualToString:@"C"] || [st.segmentType isEqualToString:@"A"])) ? @"X" : st.segmentType;
 		if([dic objectForKey:key] == nil) {
 			[uniqueSurfaceTypes addObject:st];
 			[dic setObject:[NSNull null] forKey:key];

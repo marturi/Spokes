@@ -18,6 +18,7 @@ public class BookendRouteSegment extends RouteSegment {
 	private LineString trimmedEdge;
 	private RouteSegment nearestNeighbor;
 	private String accuracyLevel;
+	private boolean isStartEdge;
 
 	public static final String UNKNOWN 		= "0";
 	public static final String COUNTRY 		= "1";
@@ -34,8 +35,12 @@ public class BookendRouteSegment extends RouteSegment {
 		return onGraphPoint;
 	}
 
+	void setStartEdge(boolean isStartEdge) {
+		this.isStartEdge = isStartEdge;
+	}
+
 	public boolean isStartEdge(){
-		return getNextSegment() != null;
+		return isStartEdge;
 	}
 
 	void setAccuracyLevel(String accuracyLevel) {

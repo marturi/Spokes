@@ -28,6 +28,7 @@
 - (void) showAutoCompleteView;
 - (void) hideAutoCompleteView;
 - (void) saveAddresses:(NSArray*)addressesToSave;
+- (void) placeContactsButton:(UITextField*)textField;
 
 @end
 
@@ -75,13 +76,15 @@ static CGFloat const kHeight = 123.0;
 																	  action:@selector(swapValues)];
 	swapButtonItem.width = 30.0;
 
-	//Testing branch
 	UITextField *startTF = [[UITextField alloc] initWithFrame:CGRectMake(0.0, 8.0, 270.0, 30.0)];
 	self.startAddress = startTF;
 	[startTF release];
 	self.startAddress.placeholder = @"Start";
 	self.startAddress.tag = 0;
 	[self initTextField:self.startAddress];
+
+	contactsButton = [[UIButton buttonWithType:UIButtonTypeContactAdd] retain];
+	[contactsButton addTarget:self action:@selector(showPeoplePicker) forControlEvents:UIControlEventTouchUpInside];
 	
 	UITextField *endTF = [[UITextField alloc] initWithFrame:CGRectMake(0.0, self.startAddress.frame.size.height+12.0, 270.0, 30.0)];
 	self.endAddress = endTF;
@@ -162,7 +165,59 @@ static CGFloat const kHeight = 123.0;
 }
 
 #pragma mark -
+#pragma mark ABPeoplePickerNavigationControllerDelegate methods
+
+- (BOOL)peoplePickerNavigationController:(ABPeoplePickerNavigationController*)peoplePicker 
+	  shouldContinueAfterSelectingPerson:(ABRecordRef)person {
+	NSArray *props = [NSArray arrayWithObject:[NSNumber numberWithInt:kABPersonAddressProperty]];
+	peoplePicker.displayedProperties = props;
+	return YES;
+}
+
+- (BOOL)peoplePickerNavigationController:(ABPeoplePickerNavigationController*)peoplePicker 
+	  shouldContinueAfterSelectingPerson:(ABRecordRef)person 
+								property:(ABPropertyID)property 
+							  identifier:(ABMultiValueIdentifier)identifier {
+	ABMultiValueRef streets = ABRecordCopyValue(person, property);
+	NSMutableString *str = [[NSMutableString alloc] init];
+	CFDictionaryRef dict = ABMultiValueCopyValueAtIndex(streets, identifier);
+	NSString *street = [(NSString*)CFDictionaryGetValue(dict, kABPersonAddressStreetKey) copy];
+	if(street) {
+		NSString *city = [(NSString*)CFDictionaryGetValue(dict, kABPersonAddressCityKey) copy];
+		[str setString:street];
+		if(city) {
+			[str appendString:[NSString stringWithFormat:@", %@", city]];
+		}
+		[city release];
+	}
+	CFRelease(dict);
+	[street release];
+	if(pickingFor == 0) {
+		self.startAddress.text = str;
+	} else {
+		self.endAddress.text = str;
+	}
+	[str release];
+	[peoplePicker dismissModalViewControllerAnimated:YES];
+	[contactsButton removeFromSuperview];
+	CFRelease(streets);
+	return YES;
+}
+
+- (void)peoplePickerNavigationControllerDidCancel:(ABPeoplePickerNavigationController*)peoplePicker {
+	[peoplePicker dismissModalViewControllerAnimated:YES];
+}
+
+#pragma mark -
 #pragma mark RouteCriteria actions
+
+- (void) showPeoplePicker {
+	ABPeoplePickerNavigationController *picker = [[ABPeoplePickerNavigationController alloc] init];
+	picker.peoplePickerDelegate = self;
+	pickingFor = [self.startAddress isFirstResponder] ? 0 : 1;
+	[self presentModalViewController:picker animated:YES];
+	[picker release];
+}
 
 - (void) hideDirectionsNavBar:(id)sender {
 	[self hideAutoCompleteView];
@@ -210,8 +265,13 @@ static CGFloat const kHeight = 123.0;
 	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
 	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
+	if([self.startAddress isFirstResponder]) {
+		[self placeContactsButton:self.startAddress];
+	} else {
+		[self placeContactsButton:self.endAddress];
+	}
 	NSNotification *notification = [NSNotification notificationWithName:@"ExpireRoute" object:nil userInfo:nil];
-	[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
+	[[NSNotificationCenter defaultCenter] postNotification:notification];
 }
 
 - (void) swapValues {
@@ -328,6 +388,9 @@ static CGFloat const kHeight = 123.0;
 - (void) textFieldDidBeginEditing:(UITextField *)textField {
 	[self showDirectionsNavBar];
 	[self.autoCompleteViewController textFieldDidBeginEditing:textField];
+	if([textField.text length] == 0) {
+		[self placeContactsButton:textField];
+	}
 }
 
 - (void) textFieldDidEndEditing:(UITextField*)textField {
@@ -336,8 +399,14 @@ static CGFloat const kHeight = 123.0;
 
 - (BOOL) textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range 
  replacementString:(NSString *)string {
+	NSLog(@"fired");
 	[self handleFieldChange:textField];
 	[self.autoCompleteViewController textField:textField shouldChangeCharactersInRange:range replacementString:string];
+	if(range.length = [textField.text length] && [string length] == 0) {
+		[self placeContactsButton:textField];
+	} else if([string length] > 0) {
+		[contactsButton removeFromSuperview];
+	}
 	return YES;
 }
 
@@ -345,7 +414,19 @@ static CGFloat const kHeight = 123.0;
 	NSRange r = {0, textField.text.length};
 	[self handleFieldChange:textField];
 	[self.autoCompleteViewController textField:textField shouldChangeCharactersInRange:r replacementString:@""];
+	[self placeContactsButton:textField];
 	return YES;
+}
+
+- (void) placeContactsButton:(UITextField*)textField {
+	CGRect frame;
+	if(textField.tag == 0) {
+		frame = CGRectMake(289.0, 56.0, 23.0, 23.0);
+	} else {
+		frame = CGRectMake(289.0, 90.0, 23.0, 23.0);
+	}
+	contactsButton.frame = frame;
+	[self.view addSubview:contactsButton];
 }
 
 #pragma mark -
@@ -378,10 +459,13 @@ static CGFloat const kHeight = 123.0;
 	NSMutableArray *addresses = [NSMutableArray arrayWithArray:[defaults arrayForKey:@"addresses"]];
 	for(RoutePoint *pt in addressesToSave) {
 		BOOL alreadySaved = NO;
-		for(NSString *address in addresses) {
-			if([address rangeOfString:pt.address options:NSCaseInsensitiveSearch].location != NSNotFound) {
-				alreadySaved = YES;
-				break;
+		alreadySaved = [pt.address rangeOfString:@"current location" options:NSCaseInsensitiveSearch].location != NSNotFound;
+		if(!alreadySaved) {
+			for(NSString *address in addresses) {
+				if([address rangeOfString:pt.address options:NSCaseInsensitiveSearch].location != NSNotFound) {
+					alreadySaved = YES;
+					break;
+				}
 			}
 		}
 		if(!alreadySaved) {
@@ -491,6 +575,7 @@ static CGFloat const kHeight = 123.0;
 	self.startAddress = nil;
 	self.endAddress = nil;
 	self.autoCompleteViewController = nil;
+	[contactsButton release];
 	[_mapView release];
     [super dealloc];
 }

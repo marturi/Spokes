@@ -7,10 +7,11 @@
 //
 
 #import <MapKit/MapKit.h>
+#import <AddressBookUI/AddressBookUI.h>
 
 @class AutoCompleteViewController;
 
-@interface RouteCriteriaViewController : UIViewController <UITextFieldDelegate> {
+@interface RouteCriteriaViewController : UIViewController <UITextFieldDelegate, ABPeoplePickerNavigationControllerDelegate> {
 	CLLocation *cachedStartCoord;
 	CLLocation *cachedEndCoord;
 	NSString *cachedStartAccuracyLevel;
@@ -20,6 +21,8 @@
 	MKMapView *_mapView;
 	AutoCompleteViewController *autoCompleteViewController;
 	BOOL autocompleteHidden;
+	UIButton *contactsButton;
+	int pickingFor;
 }
 
 - (id) initWithMapView:(MKMapView*)mapView;

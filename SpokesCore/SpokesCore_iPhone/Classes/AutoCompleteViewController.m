@@ -54,6 +54,7 @@
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	NSMutableArray *addresses = [NSMutableArray arrayWithArray:[defaults arrayForKey:@"addresses"]];
 	[addresses addObject:@"Current Location|"];
+	int itemsMax = 5;
 	for(NSString *address in addresses) {
 		NSArray *listItems = [address componentsSeparatedByString:@"|"];
 		int cnt = [listItems count];
@@ -68,6 +69,9 @@
 				[list addObject:pers];
 				[pers release];
 			}
+		}
+		if([list count] == itemsMax) {
+			break;
 		}
 	}
 	[self didReceiveItems:list];
@@ -116,24 +120,15 @@
 - (UITableViewCell*)tableView:(UITableView*)newTableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
     AutocompleteEntry *currentEntry = [[autocompleteEntries objectAtIndex:indexPath.row] retain];
 	
-	UITableViewCell *cell = [[[UITableViewCell alloc] initWithFrame:CGRectZero] autorelease];
+	static NSString *kStatisticsCellID = @"AutocompleteCell";
+    UITableViewCell *cell = [newTableView dequeueReusableCellWithIdentifier:kStatisticsCellID];
+    if (cell == nil) {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:kStatisticsCellID] autorelease];
+		[cell setSelectionStyle:UITableViewCellSelectionStyleGray];
+		cell.textLabel.font = [UIFont boldSystemFontOfSize:16];
+	}
 	
-	[cell setSelectionStyle:UITableViewCellSelectionStyleGray];
-	UILabel *mainLabel = [[[UILabel alloc] initWithFrame:CGRectMake(40, 4, 250, 15)] autorelease];
-	UILabel *auxLabel = [[[UILabel alloc] initWithFrame:CGRectMake(40, 21, 50, 15)] autorelease];
-    UILabel *auxValue = [[[UILabel alloc] initWithFrame:CGRectMake(90, 21, 200, 15)] autorelease];
-	mainLabel.text = currentEntry.name;
-	mainLabel.font = [UIFont boldSystemFontOfSize:14];
-	auxLabel.text = currentEntry.auxlabel;
-	auxLabel.font = [UIFont boldSystemFontOfSize:12];
-	auxLabel.textColor = [UIColor grayColor];
-    auxValue.text = currentEntry.aux;
-    auxValue.font = [UIFont systemFontOfSize:12];
-    auxValue.textColor = [UIColor grayColor];
-	[cell addSubview:mainLabel];
-	[cell addSubview:auxLabel];
-    [cell addSubview:auxValue];
-    
+	cell.textLabel.text = currentEntry.name;
     [currentEntry release];
     
     return cell;

@@ -266,9 +266,9 @@ static CGFloat const kHeight = 123.0;
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
 	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
 	if([self.startAddress isFirstResponder]) {
-		[self placeContactsButton:self.startAddress];
+		//[self placeContactsButton:self.startAddress];
 	} else {
-		[self placeContactsButton:self.endAddress];
+		//[self placeContactsButton:self.endAddress];
 	}
 	NSNotification *notification = [NSNotification notificationWithName:@"ExpireRoute" object:nil userInfo:nil];
 	[[NSNotificationCenter defaultCenter] postNotification:notification];
@@ -389,7 +389,7 @@ static CGFloat const kHeight = 123.0;
 	[self showDirectionsNavBar];
 	[self.autoCompleteViewController textFieldDidBeginEditing:textField];
 	if([textField.text length] == 0) {
-		[self placeContactsButton:textField];
+		//[self placeContactsButton:textField];
 	}
 }
 
@@ -399,11 +399,10 @@ static CGFloat const kHeight = 123.0;
 
 - (BOOL) textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range 
  replacementString:(NSString *)string {
-	NSLog(@"fired");
 	[self handleFieldChange:textField];
 	[self.autoCompleteViewController textField:textField shouldChangeCharactersInRange:range replacementString:string];
 	if(range.length = [textField.text length] && [string length] == 0) {
-		[self placeContactsButton:textField];
+		//[self placeContactsButton:textField];
 	} else if([string length] > 0) {
 		[contactsButton removeFromSuperview];
 	}
@@ -414,19 +413,19 @@ static CGFloat const kHeight = 123.0;
 	NSRange r = {0, textField.text.length};
 	[self handleFieldChange:textField];
 	[self.autoCompleteViewController textField:textField shouldChangeCharactersInRange:r replacementString:@""];
-	[self placeContactsButton:textField];
+	//[self placeContactsButton:textField];
 	return YES;
 }
 
 - (void) placeContactsButton:(UITextField*)textField {
-	CGRect frame;
-	if(textField.tag == 0) {
-		frame = CGRectMake(289.0, 56.0, 23.0, 23.0);
-	} else {
-		frame = CGRectMake(289.0, 90.0, 23.0, 23.0);
-	}
-	contactsButton.frame = frame;
-	[self.view addSubview:contactsButton];
+//	CGRect frame;
+//	if(textField.tag == 0) {
+//		frame = CGRectMake(289.0, 56.0, 23.0, 23.0);
+//	} else {
+//		frame = CGRectMake(289.0, 90.0, 23.0, 23.0);
+//	}
+//	contactsButton.frame = frame;
+//	[self.view addSubview:contactsButton];
 }
 
 #pragma mark -

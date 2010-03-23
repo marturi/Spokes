@@ -318,6 +318,10 @@ static CGFloat const kHeight = 94.0;
 	} else if(newLegIndex == currentRoute.legs.count) {
 		[MapViewHelper focusToPoint:currentRoute.endCoordinate mapView:_mapView];
 	}
+	[self performSelector:@selector(doChangeLeg) withObject:nil afterDelay:01];
+}
+
+- (void) doChangeLeg {
 	[self initRouteNavigator];
 	[self initRouteText];
 }

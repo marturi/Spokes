@@ -113,31 +113,46 @@
 #pragma mark -
 #pragma mark NSXMLParser Delegate methods
 
+static NSString *kName_Route = @"R";
+static NSString *kName_Leg = @"Leg";
+static NSString *kName_CoordSeq = @"CS";
+static NSString *kName_SegType = @"SegType";
+static NSString *kAttName_MinY = @"minY";
+static NSString *kAttName_MinX = @"minX";
+static NSString *kAttName_MaxY = @"maxY";
+static NSString *kAttName_MaxX = @"maxX";
+static NSString *kAttName_Length = @"l";
+static NSString *kAttName_Street = @"s";
+static NSString *kAttName_Turn = @"t";
+static NSString *kAttName_Index = @"idx";
+static NSString *kAttName_SegType = @"segType";
+static NSString *kAttName_CIndex = @"cidx";
+
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName 
   namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qualifiedName
 	attributes:(NSDictionary *)attributeDict {
 	
-	if([elementName isEqualToString:@"R"]) {
+	if([elementName isEqualToString:kName_Route]) {
 		CLLocationCoordinate2D minCoordinate;
-		minCoordinate.latitude = [[attributeDict objectForKey:@"minY"] doubleValue];
-		minCoordinate.longitude = [[attributeDict objectForKey:@"minX"] doubleValue];
+		minCoordinate.latitude = [[attributeDict objectForKey:kAttName_MinY] doubleValue];
+		minCoordinate.longitude = [[attributeDict objectForKey:kAttName_MinX] doubleValue];
 		self.currentRoute.minCoordinate = minCoordinate;
 		CLLocationCoordinate2D maxCoordinate;
-		maxCoordinate.latitude = [[attributeDict objectForKey:@"maxY"] doubleValue];
-		maxCoordinate.longitude = [[attributeDict objectForKey:@"maxX"] doubleValue];
+		maxCoordinate.latitude = [[attributeDict objectForKey:kAttName_MaxY] doubleValue];
+		maxCoordinate.longitude = [[attributeDict objectForKey:kAttName_MaxX] doubleValue];
 		self.currentRoute.maxCoordinate = maxCoordinate;
-		[self.currentRoute setLength:[NSNumber numberWithInteger:[[attributeDict objectForKey:@"l"] integerValue]]];
-	} else if([elementName isEqualToString:@"Leg"]) {
-		self.currentLeg = (Leg *)[NSEntityDescription insertNewObjectForEntityForName:@"Leg" inManagedObjectContext:_managedObjectContext];
-		[self.currentLeg setLength:[NSNumber numberWithInteger:[[attributeDict objectForKey:@"l"] integerValue]]];
-		[self.currentLeg setStreet:(NSString*)[attributeDict objectForKey:@"s"]];
-		[self.currentLeg setTurn:(NSString*)[attributeDict objectForKey:@"t"]];
-		[self.currentLeg setIndex:[NSNumber numberWithInteger:[[attributeDict objectForKey:@"idx"] integerValue]]];
+		[self.currentRoute setLength:[NSNumber numberWithInteger:[[attributeDict objectForKey:kAttName_Length] integerValue]]];
+	} else if([elementName isEqualToString:kName_Leg]) {
+		self.currentLeg = (Leg *)[NSEntityDescription insertNewObjectForEntityForName:kName_Leg inManagedObjectContext:_managedObjectContext];
+		[self.currentLeg setLength:[NSNumber numberWithInteger:[[attributeDict objectForKey:kAttName_Length] integerValue]]];
+		[self.currentLeg setStreet:(NSString*)[attributeDict objectForKey:kAttName_Street]];
+		[self.currentLeg setTurn:(NSString*)[attributeDict objectForKey:kAttName_Turn]];
+		[self.currentLeg setIndex:[NSNumber numberWithInteger:[[attributeDict objectForKey:kAttName_Index] integerValue]]];
 		coordinateCnt = 0;
-	} else if([elementName isEqualToString:@"SegType"]) {
+	} else if([elementName isEqualToString:kName_SegType]) {
 		SegmentType* segType = (SegmentType*)[NSEntityDescription insertNewObjectForEntityForName:@"SegmentType" inManagedObjectContext:_managedObjectContext];
-		[segType setChangeIndex:(NSString*)[attributeDict objectForKey:@"cidx"]];
-		[segType setSegmentType:(NSString*)[attributeDict objectForKey:@"segType"]];
+		[segType setChangeIndex:(NSString*)[attributeDict objectForKey:kAttName_CIndex]];
+		[segType setSegmentType:(NSString*)[attributeDict objectForKey:kAttName_SegType]];
 		[self.currentRoute addSegmentTypesObject:segType];
 	}
 }
@@ -145,12 +160,12 @@
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName
   namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
 	[super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
-	if([elementName isEqualToString:@"R"]) {
+	if([elementName isEqualToString:kName_Route]) {
 		return;
-	} else if([elementName isEqualToString:@"Leg"]) {
+	} else if([elementName isEqualToString:kName_Leg]) {
 		[self.currentRoute addLegsObject:self.currentLeg];
 		self.currentLeg = nil;
-	} else if([elementName isEqualToString:@"CS"]) {
+	} else if([elementName isEqualToString:kName_CoordSeq]) {
 		NSArray *ics = [self.currentElementValue componentsSeparatedByString:@" "];
 		IndexedCoordinate *ic = nil;
 		for(NSString *coordinate in ics) {

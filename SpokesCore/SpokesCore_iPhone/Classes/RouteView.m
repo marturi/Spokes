@@ -13,72 +13,20 @@
 #import "Leg.h"
 #import "Route.h"
 #import "SegmentType.h"
-#import "RoutePointerView.h"
-
-@interface CoordinateColorPair : NSObject {
-	CLLocationCoordinate2D _coord;
-	UIColor *_color;
-	NSString *_segType;
-}
-
-@property CLLocationCoordinate2D coord;
-@property (readonly) UIColor *color;
-@property (nonatomic, retain) NSString *segType;
-
-@end
-
-@implementation CoordinateColorPair
-
-@synthesize coord = _coord;
-@synthesize segType = _segType;
-
-- (id) initWithCoordinate:(CLLocationCoordinate2D)coord segType:(NSString*)segType {
-	if (self = [super init]) {
-		self.coord = coord;
-		self.segType = segType;
-	}
-	return self;
-}
-
-- (UIColor*) color {
-	if(_color == nil) {
-		if([self.segType isEqualToString:@"S"]) {
-			_color = [UIColor purpleColor];
-		} else if([self.segType isEqualToString:@"P"]) {
-			_color = [UIColor greenColor];
-		} else if([self.segType isEqualToString:@"L"]) {
-			_color = [UIColor blueColor];
-		} else if([self.segType isEqualToString:@"C"]) {
-			_color = [UIColor redColor];
-		} else if([self.segType isEqualToString:@"X"]) {
-			_color = [UIColor redColor];
-		} else if([self.segType isEqualToString:@"A"]) {
-			_color = [UIColor redColor];
-		}
-	}
-	return _color;
-}
-
-- (void) dealloc {
-	[_segType release];
-	[_color release];
-	[super dealloc];
-}
-
-@end
 
 @interface RouteViewInternal : UIView {
 	RouteView *_routeView;
-	RoutePointerView *routePointerView;
+	CALayer *routePointerView;
 	BOOL isInited;
-	NSMutableArray *coordinateColorPairs;
+	RouteAnnotation *routeAnnotation;
+	Route *currRoute;
+	NSArray *pts;
 }
 
-@property (nonatomic, retain) RouteView *routeView;
-@property (nonatomic, retain) RoutePointerView *routePointerView;
+@property (assign) RouteView *routeView;
+@property (nonatomic, retain) CALayer *routePointerView;
 
 - (void) placeRoutePointerView;
-- (void) initCoordinateColorPairs;
 
 @end
 
@@ -87,24 +35,36 @@
 @synthesize routeView			= _routeView;
 @synthesize routePointerView	= routePointerView;
 
+static NSString *cidxfmt = @"%i_%i";
+
 -(void) drawRect:(CGRect) rect {
 	if(!isInited) {
-		[self initCoordinateColorPairs];
+		routeAnnotation = (RouteAnnotation*)self.routeView.annotation;
+		pts = routeAnnotation.points;
 		[self placeRoutePointerView];
 		isInited = YES;
+		if(pts.count > 0) {
+			IndexedCoordinate *firstPt = [pts objectAtIndex:0];
+			currRoute = firstPt.leg.route;
+		}
 	}
-	if(nil != coordinateColorPairs && coordinateColorPairs.count > 0) {
+	if(nil != pts && pts.count > 0) {
 		CGContextRef context = UIGraphicsGetCurrentContext();
 		CGContextSetLineCap(context, kCGLineCapRound);
 		NSMutableString *currType = [[NSMutableString alloc] init];
 		int lastStroke = 0;
-		for(int idx = 0; idx < coordinateColorPairs.count; idx++) {
-			CoordinateColorPair *ccp = [coordinateColorPairs objectAtIndex:idx];
-			CGPoint point = [self.routeView.mapView convertCoordinate:ccp.coord toPointToView:self];
+		for(int idx = 0; idx < pts.count; idx++) {
+			IndexedCoordinate *pt = [pts objectAtIndex:idx];
+			Leg *leg = pt.leg;
+			CGPoint point = [self.routeView.mapView convertCoordinate:[pt asCLCoordinate] toPointToView:self];
 			if(idx > 0) {
 				CGContextAddLineToPoint(context, point.x, point.y);
 			}
-			if(ccp.segType != nil && ![currType isEqualToString:ccp.segType]) {
+			
+			NSString *cidx = [[NSString alloc] initWithFormat:cidxfmt, [leg.index intValue], [pt.index intValue]];
+			NSString *segType = [currRoute segmentTypeForIndex:cidx].segmentType;
+			[cidx release];
+			if(segType != nil && ![currType isEqualToString:segType]) {
 				if(idx > 0) {
 					CGContextStrokePath(context);
 					lastStroke = idx;
@@ -112,14 +72,12 @@
 				}
 				CGContextMoveToPoint(context, point.x, point.y);
 				CGContextSetLineWidth(context, 5.0);
-				CGColorRef cgColor = CGColorCreateCopyWithAlpha(ccp.color.CGColor, .7);
-				CGContextSetStrokeColorWithColor(context, cgColor);
-				CGColorRelease(cgColor);
-				if(ccp.segType != nil) 
-					[currType setString:ccp.segType];
+				CGContextSetStrokeColorWithColor(context, [routeAnnotation color:segType]);
+				if(segType != nil) 
+					[currType setString:segType];
 			}
 		}
-		if(lastStroke < (coordinateColorPairs.count-1)) {
+		if(lastStroke < (pts.count-1)) {
 			CGContextStrokePath(context);
 			CGContextFillPath(context);
 		}
@@ -128,9 +86,9 @@
 }
 
 - (void) placeRoutePointerView {
-	if(self.routePointerView.superview == nil) {
+	if(self.routePointerView.superlayer == nil) {
 		[_routeView resetRoutePointerView];
-		[self addSubview:self.routePointerView];
+		[self.layer addSublayer:self.routePointerView];
 	}
 }
 
@@ -138,35 +96,17 @@
 	self = [super init];
 	self.backgroundColor = [UIColor clearColor];
 	self.clipsToBounds = NO;
-	self.routePointerView = [[[RoutePointerView alloc] init] autorelease];
+	UIImage *image = [UIImage imageNamed:@"iconbike.png"];
+	CGRect frame = CGRectMake(0, 0, image.size.width, image.size.height);
+	CALayer *rpv = [CALayer layer];
+	rpv.frame = frame;
+	rpv.contents = (id)image.CGImage;
+	self.routePointerView = rpv;
+	
 	return self;
 }
 
-- (void) initCoordinateColorPairs {
-	RouteAnnotation *routeAnnotation = (RouteAnnotation*)self.routeView.annotation;
-	coordinateColorPairs = [[NSMutableArray alloc] init];
-	if(nil != routeAnnotation.points && routeAnnotation.points.count > 0) {
-		NSMutableString *cidx = [[NSMutableString alloc] init];
-		for(int idx = 0; idx < routeAnnotation.points.count; idx++) {
-			IndexedCoordinate *idxCoord = [routeAnnotation.points objectAtIndex:idx];
-			NSString *legIdxStr = [idxCoord.leg.index stringValue];
-			NSString *coordIdxStr = [idxCoord.index stringValue];
-			if(legIdxStr != nil && coordIdxStr != nil) {
-				[cidx setString:legIdxStr];
-				[cidx appendString:@"_"];
-				[cidx appendString:coordIdxStr];
-				NSString *segType = [idxCoord.leg.route segmentTypeForIndex:cidx].segmentType;
-				[coordinateColorPairs addObject:[[[CoordinateColorPair alloc] initWithCoordinate:[idxCoord asCLCoordinate] 
-																						 segType:segType] autorelease]];
-			}
-		}
-		[cidx release];
-	}
-}
-
 -(void) dealloc {
-	[coordinateColorPairs release];
-	self.routeView = nil;
 	self.routePointerView = nil;
 	[super dealloc];
 }
@@ -193,11 +133,17 @@
 }
 
 - (void) hideRoutePointerView {
+	[CATransaction begin]; 
+	[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
 	_internalRouteView.routePointerView.hidden = YES;
+	[CATransaction commit];
 }
 
 - (void) showRoutePointerView {
+	[CATransaction begin]; 
+	[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
 	_internalRouteView.routePointerView.hidden = NO;
+	[CATransaction commit];
 }
 
 - (void) resetRoutePointerView {
@@ -221,14 +167,20 @@
 			self.lastCoord = crd;
 			newPt = [self.mapView convertCoordinate:crd toPointToView:self.mapView];
 		}
-		_internalRouteView.routePointerView.center = newPt;
+		[CATransaction begin]; 
+		[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+		_internalRouteView.routePointerView.position = newPt;
+		[CATransaction commit];
 	}
 }
 
 - (void) checkRoutePointerView {
 	CGPoint chkPt = [_mapView convertCoordinate:self.lastCoord toPointToView:_mapView];
-	if(![_internalRouteView.routePointerView.layer containsPoint:chkPt]) {
-		_internalRouteView.routePointerView.center = chkPt;
+	if(![_internalRouteView.routePointerView containsPoint:chkPt]) {
+		[CATransaction begin]; 
+		[CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+		_internalRouteView.routePointerView.position = chkPt;
+		[CATransaction commit];
 	}
 }
 
@@ -241,8 +193,11 @@
 			currentLegIndex = [idxCoord.leg.route.currentLegIndex intValue];
 		}
 		if(currentLegIndex > -1) {
-			CALayer *routePointerLayer = _internalRouteView.routePointerView.layer;
+			CALayer *routePointerLayer = _internalRouteView.routePointerView;
 			CAKeyframeAnimation *routePointerAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+			routePointerAnimation.calculationMode = kCAAnimationPaced;
+			routePointerAnimation.duration = .75;
+			routePointerAnimation.removedOnCompletion = YES;
 			CGMutablePathRef thePath = CGPathCreateMutable();
 			CGPoint oldPt = [self.mapView convertCoordinate:lastCoord toPointToView:_mapView];
 			CGPathMoveToPoint(thePath, NULL, oldPt.x, oldPt.y);
@@ -258,7 +213,6 @@
 					self.lastCoord = currLeg.endCoordinate;
 				}
 			}
-			_internalRouteView.routePointerView.center = newPt;
 			if(currLeg.coordinateSequence.count > 2) {
 				if([pointerDirection intValue] == 1) {
 					for(int idx = 1; idx < (currLeg.coordinateSequence.count-1); idx++) {
@@ -274,8 +228,6 @@
 			}
 			CGPathAddLineToPoint(thePath, NULL, newPt.x, newPt.y);
 			routePointerAnimation.path = thePath;
-			routePointerAnimation.duration = 0.5;
-			routePointerAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
 			CGPathRelease(thePath);
 			[routePointerLayer addAnimation:routePointerAnimation forKey:@"routePointer"];
 		}

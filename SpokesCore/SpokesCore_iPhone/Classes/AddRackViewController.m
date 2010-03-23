@@ -28,7 +28,7 @@
 @synthesize msgButton		= msgButton;
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController {
-	_viewController = [viewController retain];
+	_viewController = viewController;
 	return [self initWithNibName:@"AddRackView" bundle:nil];
 }
 
@@ -213,7 +213,6 @@
 	self.rackType = nil;
 	self.rackLocation = nil;
 	[_geocoder release];
-	[_viewController release];
     [super dealloc];
 }
 

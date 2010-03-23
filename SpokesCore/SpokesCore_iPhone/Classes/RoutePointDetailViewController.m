@@ -31,7 +31,7 @@
 @implementation RoutePointDetailViewController
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController {
-	_viewController = [viewController retain];
+	_viewController = viewController;
 	routePoint = [[RoutePointRepository fetchSelectedPoint:_viewController.managedObjectContext] retain];
 	return [self initWithNibName:@"RoutePointDetailView" bundle:nil];
 }
@@ -256,7 +256,6 @@
 }
 
 - (void) dealloc {
-	[_viewController release];
 	[routePoint release];
     [super dealloc];
 }

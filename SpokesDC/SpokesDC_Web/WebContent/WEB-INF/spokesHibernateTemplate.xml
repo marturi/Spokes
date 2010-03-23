@@ -22,6 +22,7 @@
 				<value>net/oitobstudio/spokes/rack/hibernate/BikeRack.hbm.xml</value>
 				<value>net/oitobstudio/spokes/shop/hibernate/BikeShop.hbm.xml</value>
 				<value>net/oitobstudio/spokes/theft/hibernate/BikeTheft.hbm.xml</value>
+				<value>net/oitobstudio/spokesdc/smartbike/hibernate/SmartBikeStation.hbm.xml</value>
 			</list>
 		</property>
 		<property name="hibernateProperties">

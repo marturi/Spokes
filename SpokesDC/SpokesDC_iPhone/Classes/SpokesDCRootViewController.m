@@ -16,12 +16,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-	
-	AdWhirlView* rollerView = [AdWhirlView requestAdWhirlViewWithDelegate:self];
-	CGRect theFrame = rollerView.frame;
-	theFrame.origin.y = _mapView.frame.size.height;
-	rollerView.frame = theFrame;
-	[self.view addSubview:rollerView];
 }
 
 - (SEL) routePointsCall:(int)selectedIndex {
@@ -44,14 +38,6 @@
 	[pool drain];
 }
 
-#pragma mark -
-#pragma mark AdWhirlDelegate
-
-- (NSString*)adWhirlApplicationKey {
-	SpokesConstants* sc = [((SpokesAppDelegate*)[UIApplication sharedApplication].delegate) spokesConstants];
-    return [sc adWhirlAppKey];
-}
-
 - (void) doShowRoutePoints:(id)sender {
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeSmartBikeStation mapView:_mapView];
 	[super doShowRoutePoints:sender];
@@ -64,13 +50,6 @@
 		location = _mapView.userLocation.location;
 	}
 	return location;
-}
-
-- (void)rollerReceivedNotificationAdsAreOff:(AdWhirlView*)adWhirlView {
-	CGRect mapFrame = _mapView.frame;
-	mapFrame.size.height += adWhirlView.frame.size.height;
-	[adWhirlView removeFromSuperview];
-	_mapView.frame = mapFrame;
 }
 
 @end

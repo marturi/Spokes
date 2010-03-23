@@ -32,7 +32,7 @@
 @synthesize doneButton		= doneButton;
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController {
-	_viewController = [viewController retain];
+	_viewController = viewController;
 	return [self initWithNibName:@"ReportTheftView" bundle:nil];
 }
 
@@ -215,7 +215,6 @@
 	self.doneButton = nil;
 	self.comments = nil;
 	self.theftLocation = nil;
-	[_viewController release];
     [super dealloc];
 }
 

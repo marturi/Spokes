@@ -35,7 +35,7 @@
 @synthesize msgButton		= msgButton;
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController {
-	_viewController = [viewController retain];
+	_viewController = viewController;
 	return [self initWithNibName:@"AddShopView" bundle:nil];
 }
 
@@ -276,7 +276,6 @@
 	self.phoneAreaCode = nil;
 	self.phonePrefix = nil;
 	self.phoneSuffix = nil;
-	[_viewController release];
     [super dealloc];
 }
 

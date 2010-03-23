@@ -25,7 +25,8 @@
 			/WEB-INF/commonContext.xml,
 			/WEB-INF/bikeRackService.xml,
 			/WEB-INF/bikeTheftService.xml,
-			/WEB-INF/bikeShopService.xml
+			/WEB-INF/bikeShopService.xml,
+			/WEB-INF/smartBikeStationService.xml
 		</param-value>
 	</context-param>
 

@@ -565,8 +565,6 @@
 - (MKAnnotationView *) mapView:(MKMapView *)mapView viewForAnnotation:(id <MKAnnotation>) annotation {
 	MKAnnotationView* annotationView = nil;
 	if([annotation isKindOfClass:[RouteAnnotation class]]) {
-		RouteAnnotation *routeAnnotation = (RouteAnnotation*)annotation;
-		self.routeView.annotation = routeAnnotation;
 		self.routeView.mapView = mapView;
 		annotationView = self.routeView;
 	} else if([annotation isKindOfClass:[PointAnnotation class]]) {

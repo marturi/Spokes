@@ -12,17 +12,21 @@
 @implementation RouteAnnotation
 
 @synthesize coordinate = _center;
-@synthesize points = _points; 
 @synthesize routeID = _routeID;
 @synthesize maxCoordinate = _maxCoordinate;
 @synthesize minCoordinate = _minCoordinate;
+
+static CGColorRef routeRed = NULL;
+static CGColorRef routeGreen = NULL;
+static CGColorRef routeBlue = NULL;
+static CGColorRef routePurple = NULL;
 
 -(id) initWithPoints:(NSArray*) points 
 	   minCoordinate:(CLLocationCoordinate2D)minCoordinate 
 	   maxCoordinate:(CLLocationCoordinate2D)maxCoordinate {
 	self = [super init];
 
-	_points = [[NSMutableArray alloc] initWithArray:points];
+	_points = [points retain];
 	_minCoordinate = minCoordinate;
 	_maxCoordinate = maxCoordinate;
 
@@ -58,6 +62,38 @@
 	return self;
 }
 
+- (CGColorRef) color:(NSString*) segType {
+	if([segType isEqualToString:@"S"]) {
+		if(routePurple == NULL) {
+			CGColorRef cgColor = [UIColor purpleColor].CGColor;
+			routePurple = CGColorCreateCopyWithAlpha(cgColor, .7);
+		}
+		return routePurple;
+	} else if([segType isEqualToString:@"P"]) {
+		if(routeGreen == NULL) {
+			CGColorRef cgColor = [UIColor greenColor].CGColor;
+			routeGreen = CGColorCreateCopyWithAlpha(cgColor, .7);
+		}
+		return routeGreen;
+	} else if([segType isEqualToString:@"L"]) {
+		if(routeBlue == NULL) {
+			CGColorRef cgColor = [UIColor blueColor].CGColor;
+			routeBlue = CGColorCreateCopyWithAlpha(cgColor, .7);
+		}
+		return routeBlue;
+	} else {
+		if(routeRed == NULL) {
+			CGColorRef cgColor = [UIColor redColor].CGColor;
+			routeRed = CGColorCreateCopyWithAlpha(cgColor, .7);
+		}
+		return routeRed;
+	}
+}
+
+- (NSArray*) points {
+	return _points;
+}
+
 -(MKCoordinateRegion) region {
 	MKCoordinateRegion region;
 	region.center = _center;
@@ -67,6 +103,10 @@
 }
 
 -(void) dealloc {
+//	CGColorRelease(routeRed);
+//	CGColorRelease(routeGreen);
+//	CGColorRelease(routePurple);
+//	CGColorRelease(routeBlue);
 	[_points release];
 	[super dealloc];
 }

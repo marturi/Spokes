@@ -16,12 +16,9 @@
 	CLLocation *cachedEndCoord;
 	NSString *cachedStartAccuracyLevel;
 	NSString *cachedEndAccuracyLevel;
-	UITextField *startAddress;
-	UITextField *endAddress;
 	MKMapView *_mapView;
 	AutoCompleteViewController *autoCompleteViewController;
 	BOOL autocompleteHidden;
-	UIButton *contactsButton;
 	int pickingFor;
 }
 
@@ -29,13 +26,12 @@
 - (void) setTextFieldVisibility:(BOOL)visible;
 - (void) hideDirectionsNavBar:(id)sender;
 - (void) initAdresses;
+- (void) swapValues;
 
 @property (nonatomic, retain) CLLocation *cachedStartCoord;
 @property (nonatomic, retain) CLLocation *cachedEndCoord;
 @property (nonatomic, retain) NSString *cachedStartAccuracyLevel;
 @property (nonatomic, retain) NSString *cachedEndAccuracyLevel;
-@property (nonatomic, retain) UITextField *startAddress;
-@property (nonatomic, retain) UITextField *endAddress;
 @property (nonatomic, retain) AutoCompleteViewController *autoCompleteViewController;
 
 @end

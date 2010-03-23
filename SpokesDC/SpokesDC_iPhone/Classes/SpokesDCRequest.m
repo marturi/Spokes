@@ -26,6 +26,7 @@
 	[urlString appendString:@","];
 	[urlString appendString:[NSString stringWithFormat:@"%f", bottomRightCoordinate.latitude]];
 	[urlString appendString:@"/"];
+	NSLog(@"%@", urlString);
 	NSURL *url = [[NSURL alloc] initWithString:urlString];
 	[urlString release];
 	NSMutableURLRequest *req = [[[NSMutableURLRequest alloc] initWithURL:url 

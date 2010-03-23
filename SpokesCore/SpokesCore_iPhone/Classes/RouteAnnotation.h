@@ -9,7 +9,7 @@
 #import <MapKit/MapKit.h>
 
 @interface RouteAnnotation : NSObject <MKAnnotation> {
-	NSMutableArray *_points; 
+	NSArray *_points; 
 	MKCoordinateSpan _span;
 	CLLocationCoordinate2D _center;
 	UIColor *_lineColor;
@@ -21,9 +21,10 @@
 -(id) initWithPoints:(NSArray*) points 
 	   minCoordinate:(CLLocationCoordinate2D)minCoordinate 
 	   maxCoordinate:(CLLocationCoordinate2D)maxCoordinate;
+- (CGColorRef) color:(NSString*) segType;
 
 @property (readonly) MKCoordinateRegion region;
-@property (nonatomic, retain) NSMutableArray *points;
+@property (readonly) NSArray *points;
 @property (nonatomic, retain) NSString *routeID;
 @property (readonly) CLLocationCoordinate2D maxCoordinate;
 @property (readonly) CLLocationCoordinate2D minCoordinate;

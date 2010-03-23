@@ -23,18 +23,22 @@
 - (id)init {
 	if (self = [super init]) {
 		self.autocompleteThreshold = 1;
+		self.view = [[[UITableView alloc] initWithFrame:CGRectMake(0, 123, 320, 121) style:UITableViewStylePlain] autorelease];
+		self.view.hidden = YES;
+		CGRect frame = self.view.superview.frame;
+		frame.size.height = 123.0;
+		self.view.superview.frame = frame;
+		((UITableView*)self.view).delegate = self;
+		((UITableView*)self.view).dataSource = self;
+		((UITableView*)self.view).scrollEnabled = YES;
+		autocompleteEntriesLoading = [[NSMutableArray alloc] init];
+		[autocompleteEntriesLoading removeAllObjects];
 	}
 	return self;
 }
 
 - (void)loadView {
-	self.view = [[[UITableView alloc] initWithFrame:CGRectMake(0, 123, 320, 121) style:UITableViewStylePlain] autorelease];
-    ((UITableView*)self.view).delegate = self;
-    ((UITableView*)self.view).dataSource = self;
-    ((UITableView*)self.view).scrollEnabled = YES;
-    self.view.hidden = YES;
-	autocompleteEntriesLoading = [[NSMutableArray alloc] init];
-	[autocompleteEntriesLoading removeAllObjects];
+    
 }
 
 - (void)viewDidLoad {
@@ -46,6 +50,9 @@
 		[self searchSavedAddressesWithSubstring:substring];
 	} else {
 		self.view.hidden = YES;
+		CGRect frame = self.view.superview.frame;
+		frame.size.height = 123.0;
+		self.view.superview.frame = frame;
 	}
 }
 
@@ -86,8 +93,15 @@
         
 	if ([autocompleteEntries count]) {
 		self.view.hidden = NO;
+		CGRect frame = self.view.superview.frame;
+		frame.size.height = 244.0;
+		self.view.superview.frame = frame;
 	} else {
 		self.view.hidden = YES;
+		CGRect frame = self.view.superview.frame;
+		frame.size.height = 123.0;
+		self.view.superview.frame = frame;
+		
 	}
 	[((UITableView*)self.view) reloadData];
 }
@@ -104,6 +118,9 @@
 
 - (void)textFieldDidEndEditing:(UITextField*)textField {
     self.view.hidden = YES;
+	CGRect frame = self.view.superview.frame;
+	frame.size.height = 123.0;
+	self.view.superview.frame = frame;
 }
 
 - (BOOL)textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString*)string {
@@ -146,6 +163,9 @@
 	[autocompleteEntries removeAllObjects];
 	[((UITableView*)self.view) reloadData];
     ((UITableView*)self.view).hidden = YES;
+	CGRect frame = self.view.superview.frame;
+	frame.size.height = 123.0;
+	self.view.superview.frame = frame;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView*)tableView {

@@ -14,7 +14,6 @@
 @interface Leg :  NSManagedObject  
 {
 	BOOL hasSidewalk;
-	NSMutableDictionary *indexedCoordinates;
 }
 
 @property (nonatomic, retain) NSNumber * index;

@@ -15,13 +15,10 @@
 {
 }
 
-@property (nonatomic, retain) NSString * coordinate;
-@property (nonatomic, retain) NSNumber * index;
-@property (nonatomic, retain) Leg * leg;
+@property (nonatomic, retain) NSString *coordinate;
+@property (nonatomic, retain) NSNumber *index;
+@property (nonatomic, retain) Leg *leg;
 
 - (CLLocationCoordinate2D) asCLCoordinate;
 
 @end
-
-
-

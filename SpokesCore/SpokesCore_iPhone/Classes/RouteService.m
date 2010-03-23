@@ -13,6 +13,7 @@
 #import "SegmentType.h"
 #import "RoutePoint.h"
 #import "IndexedCoordinate.h"
+#import "SpokesAppDelegate.h"
 
 @implementation RouteService
 

@@ -23,15 +23,14 @@
 @dynamic index;
 
 - (IndexedCoordinate*) coordinateForIndex:(NSInteger)index {
-	if(!indexedCoordinates) {
-		indexedCoordinates = [[NSMutableDictionary alloc] initWithCapacity:[self.coordinateSequence count]];
-		NSEnumerator *enumerator = [self.coordinateSequence objectEnumerator];
-		id indexedCoordinate;
-		while ((indexedCoordinate = [enumerator nextObject])) {
-			[indexedCoordinates setObject:indexedCoordinate forKey:((IndexedCoordinate*)indexedCoordinate).index];
-		}
+	NSMutableDictionary *indexedCoordinates = [[NSMutableDictionary alloc] initWithCapacity:[self.coordinateSequence count]];
+	NSEnumerator *enumerator = [self.coordinateSequence objectEnumerator];
+	id indexedCoordinate;
+	while ((indexedCoordinate = [enumerator nextObject])) {
+		[indexedCoordinates setObject:indexedCoordinate forKey:((IndexedCoordinate*)indexedCoordinate).index];
 	}
 	IndexedCoordinate *retIndexedCoordinate = [indexedCoordinates objectForKey:[NSNumber numberWithInt:index]];
+	[indexedCoordinates release];
 	return retIndexedCoordinate;
 }
 
@@ -106,11 +105,6 @@
 		}
 	}
 	return segmentTypes;
-}
-
-- (void) didTurnIntoFault {
-	[super didTurnIntoFault];
-	[indexedCoordinates release];
 }
 
 @end

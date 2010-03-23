@@ -8,6 +8,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import "RouteCriteriaViewController.h"
+#import "RouteCriteriaView.h"
 #import "RouteService.h"
 #import "Route.h"
 #import "SpokesAppDelegate.h"
@@ -21,32 +22,23 @@
 
 @interface RouteCriteriaViewController()
 
-- (void)initTextField:(UITextField*)textField;
 - (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type addressText:(NSString*)addressText;
-- (void) initNavigationBar;
 - (BOOL) validateRouteCriteria;
 - (void) showAutoCompleteView;
 - (void) hideAutoCompleteView;
 - (void) saveAddresses:(NSArray*)addressesToSave;
-- (void) placeContactsButton:(UITextField*)textField;
+- (void) submitRoute:(NSDictionary*)params;
 
 @end
 
 
 @implementation RouteCriteriaViewController
 
-@synthesize startAddress				= startAddress;
-@synthesize endAddress					= endAddress;
 @synthesize autoCompleteViewController	= autoCompleteViewController;
 @synthesize cachedEndCoord				= cachedEndCoord;
 @synthesize cachedStartCoord			= cachedStartCoord;
 @synthesize cachedStartAccuracyLevel	= cachedStartAccuracyLevel;
 @synthesize cachedEndAccuracyLevel		= cachedEndAccuracyLevel;
-
-static CGFloat const kOriginX = 0.0;
-static CGFloat const kOriginY = -43.0;
-static CGFloat const kWidth = 320.0;
-static CGFloat const kHeight = 123.0;
 
 - (id) initWithMapView:(MKMapView*)mapView {
 	if (self = [super init]) {
@@ -62,50 +54,7 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (void)loadView {
-	CGRect frame = CGRectMake(kOriginX, kOriginY, kWidth, kHeight);
-	self.view = [[[UIView alloc] initWithFrame:frame] autorelease];
-	[self.view setBackgroundColor:[[UIColor blackColor] colorWithAlphaComponent:.4]];
-	
-	[self initNavigationBar];
-	
-	UIToolbar *myToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0.0, 43.0, kWidth, 80.0)];
-	myToolbar.tintColor = [UIColor colorWithRed:(0.0729211) green:(0.500023) blue:(0.148974) alpha:1.0];
-	UIBarButtonItem *swapButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"iconarrow.png"] 
-																	   style:UIBarButtonItemStyleBordered
-																	  target:self 
-																	  action:@selector(swapValues)];
-	swapButtonItem.width = 30.0;
-
-	UITextField *startTF = [[UITextField alloc] initWithFrame:CGRectMake(0.0, 8.0, 270.0, 30.0)];
-	self.startAddress = startTF;
-	[startTF release];
-	self.startAddress.placeholder = @"Start";
-	self.startAddress.tag = 0;
-	[self initTextField:self.startAddress];
-
-	contactsButton = [[UIButton buttonWithType:UIButtonTypeContactAdd] retain];
-	[contactsButton addTarget:self action:@selector(showPeoplePicker) forControlEvents:UIControlEventTouchUpInside];
-	
-	UITextField *endTF = [[UITextField alloc] initWithFrame:CGRectMake(0.0, self.startAddress.frame.size.height+12.0, 270.0, 30.0)];
-	self.endAddress = endTF;
-	[endTF release];
-	self.endAddress.placeholder = @"End";
-	self.endAddress.tag = 1;
-	[self initTextField:self.endAddress];
-	
-	UIView *containerView = [[UIView alloc] initWithFrame:CGRectMake(30.0, 44.0, kWidth-30, 79.0)];
-	[containerView setBackgroundColor:[UIColor clearColor]];
-	[containerView addSubview:startAddress];
-	[containerView addSubview:endAddress];
-	UIBarButtonItem *containerItem = [[UIBarButtonItem alloc] initWithCustomView:containerView];
-	containerItem.width = containerView.frame.size.width;
-	[myToolbar setItems:[NSArray arrayWithObjects: swapButtonItem, containerItem, nil]];
-	[self.view addSubview:myToolbar];
-	
-	[swapButtonItem release];
-	[containerView release];
-	[containerItem release];
-	[myToolbar release];
+	self.view = [[[RouteCriteriaView alloc] initWithViewController:self] autorelease];
 }
 
 - (void)viewDidLoad {
@@ -113,55 +62,15 @@ static CGFloat const kHeight = 123.0;
 	[self initAdresses];
 }
 
-- (void)initTextField:(UITextField*)textField {
-	textField = (textField.tag == 0) ? self.startAddress : self.endAddress;
-	textField.borderStyle = UITextBorderStyleRoundedRect;
-	textField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
-	textField.textColor = [UIColor blackColor];
-	textField.font = [UIFont systemFontOfSize:17.0];
-	
-	textField.backgroundColor = [UIColor clearColor];
-	textField.autocorrectionType = UITextAutocorrectionTypeNo;
-	
-	textField.keyboardType = UIKeyboardTypeDefault;
-	textField.returnKeyType = UIReturnKeyRoute;
-	
-	textField.clearButtonMode = UITextFieldViewModeAlways;
-	textField.clearsOnBeginEditing = NO;
-	
-	textField.delegate = self;
-}
-
 - (void) setTextFieldVisibility:(BOOL)visible {
 	CATransition *hideTransition = [CATransition animation];
 	hideTransition.duration = 0.3;
 	hideTransition.type = kCATransitionFade;
-	[self.startAddress.layer addAnimation:hideTransition forKey:nil];
-	[self.endAddress.layer addAnimation:hideTransition forKey:nil];
-	self.startAddress.hidden = !visible;
-	self.endAddress.hidden = !visible;
-}
-
-- (void) initNavigationBar {
-	UINavigationBar *navBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0.0, 0.0, 320.0, 44.0)];
-	navBar.tintColor = [UIColor colorWithRed:(0.0729211) green:(0.500023) blue:(0.148974) alpha:0.7];
-	UINavigationItem *directionsItem = [[UINavigationItem alloc] initWithTitle:@"Directions"];
-	UIBarButtonItem *clearItem = [[UIBarButtonItem alloc] initWithTitle:@"Clear"
-																  style:UIBarButtonItemStyleDone
-																 target:self
-																 action:@selector(clearValues:)];
-	UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:@"Cancel"
-																   style:UIBarButtonItemStyleDone
-																  target:self
-																  action:@selector(hideDirectionsNavBar:)];
-	[directionsItem setLeftBarButtonItem:clearItem animated:NO];
-	[clearItem release];
-	[directionsItem setRightBarButtonItem:cancelItem animated:NO];
-	[cancelItem release];
-	navBar.items = [NSArray arrayWithObject:directionsItem];
-	[directionsItem release];
-	[self.view addSubview:navBar];
-	[navBar release];
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
+	[rcv.startAddress.layer addAnimation:hideTransition forKey:nil];
+	[rcv.endAddress.layer addAnimation:hideTransition forKey:nil];
+	rcv.startAddress.hidden = !visible;
+	rcv.endAddress.hidden = !visible;
 }
 
 #pragma mark -
@@ -178,6 +87,7 @@ static CGFloat const kHeight = 123.0;
 	  shouldContinueAfterSelectingPerson:(ABRecordRef)person 
 								property:(ABPropertyID)property 
 							  identifier:(ABMultiValueIdentifier)identifier {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	ABMultiValueRef streets = ABRecordCopyValue(person, property);
 	NSMutableString *str = [[NSMutableString alloc] init];
 	CFDictionaryRef dict = ABMultiValueCopyValueAtIndex(streets, identifier);
@@ -193,34 +103,39 @@ static CGFloat const kHeight = 123.0;
 	CFRelease(dict);
 	[street release];
 	if(pickingFor == 0) {
-		self.startAddress.text = str;
+		rcv.startAddress.text = str;
 	} else {
-		self.endAddress.text = str;
+		rcv.endAddress.text = str;
 	}
 	[str release];
 	[peoplePicker dismissModalViewControllerAnimated:YES];
-	[contactsButton removeFromSuperview];
+	[rcv.contactsButton removeFromSuperview];
 	CFRelease(streets);
-	return YES;
+	return NO;
 }
 
 - (void)peoplePickerNavigationControllerDidCancel:(ABPeoplePickerNavigationController*)peoplePicker {
 	[peoplePicker dismissModalViewControllerAnimated:YES];
+	CGRect f = self.view.frame;
+	f.size.height = 123.0;
+	self.view.frame = f;
 }
 
 #pragma mark -
 #pragma mark RouteCriteria actions
 
 - (void) showPeoplePicker {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	ABPeoplePickerNavigationController *picker = [[ABPeoplePickerNavigationController alloc] init];
 	picker.peoplePickerDelegate = self;
-	pickingFor = [self.startAddress isFirstResponder] ? 0 : 1;
+	pickingFor = [rcv.startAddress isFirstResponder] ? 0 : 1;
 	[self presentModalViewController:picker animated:YES];
 	[picker release];
 }
 
 - (void) hideDirectionsNavBar:(id)sender {
 	[self hideAutoCompleteView];
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 	RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
 	Route *currentRoute = [routeService fetchCurrentRoute];
@@ -230,7 +145,8 @@ static CGFloat const kHeight = 123.0;
 		NSNotification *notification = [NSNotification notificationWithName:@"ShowRoute" object:nil userInfo:params];
 		[[NSNotificationCenter defaultCenter] performSelectorOnMainThread:@selector(postNotification:) withObject:notification waitUntilDone:NO];
 	} else {
-		[(self.startAddress.editing ? self.startAddress : self.endAddress) resignFirstResponder];
+		[(rcv.startAddress.editing ? rcv.startAddress : rcv.endAddress) resignFirstResponder];
+		[rcv.contactsButton removeFromSuperview];
 		CGRect viewFrame = self.view.frame;
 		
 		[UIView beginAnimations:@"frame" context:nil];
@@ -258,28 +174,30 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (void) clearValues:(id)sender {
-	self.startAddress.text = nil;
-	self.endAddress.text = nil;
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
+	rcv.startAddress.text = nil;
+	rcv.endAddress.text = nil;
 	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeStart mapView:_mapView];
 	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
 	[RoutePointRepository deleteRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
-	if([self.startAddress isFirstResponder]) {
-		//[self placeContactsButton:self.startAddress];
+	if([rcv.startAddress isFirstResponder]) {
+		[rcv placeContactsButton:rcv.startAddress];
 	} else {
-		//[self placeContactsButton:self.endAddress];
+		[rcv placeContactsButton:rcv.endAddress];
 	}
 	NSNotification *notification = [NSNotification notificationWithName:@"ExpireRoute" object:nil userInfo:nil];
 	[[NSNotificationCenter defaultCenter] postNotification:notification];
 }
 
 - (void) swapValues {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeStart mapView:_mapView];
 	[MapViewHelper removeAnnotationsOfType:PointAnnotationTypeEnd mapView:_mapView];
-	NSString *startAddressStr = [self.startAddress.text copy];
-	self.startAddress.text = self.endAddress.text;
-	self.endAddress.text = startAddressStr;
+	NSString *startAddressStr = [rcv.startAddress.text copy];
+	rcv.startAddress.text = rcv.endAddress.text;
+	rcv.endAddress.text = startAddressStr;
 	[startAddressStr release];
 	[NSThread detachNewThreadSelector:@selector(finishSwapValues) toTarget:self withObject:nil];
 }
@@ -322,14 +240,15 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (void) handleAutocompleteSelected:(NSNotification*)notification {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	SpokesConstants *constants = [((SpokesAppDelegate*)[UIApplication sharedApplication].delegate) spokesConstants];
 	NSDictionary *params = [notification userInfo];
 	Person *selectedAddress = [params objectForKey:@"selectedAddress"];
-	if(self.startAddress.editing) {
+	if(rcv.startAddress.editing) {
 		if(selectedAddress.address) {
-			self.startAddress.text = selectedAddress.address;
+			rcv.startAddress.text = selectedAddress.address;
 		} else if(selectedAddress.name) {
-			self.startAddress.text = selectedAddress.name;
+			rcv.startAddress.text = selectedAddress.name;
 			if(selectedAddress.coord.latitude > [constants minCoordinate].latitude 
 			   && selectedAddress.coord.longitude > [constants minCoordinate].longitude) {
 				self.cachedStartCoord = [[[CLLocation alloc] initWithLatitude:selectedAddress.coord.latitude longitude:selectedAddress.coord.longitude] autorelease];
@@ -338,9 +257,9 @@ static CGFloat const kHeight = 123.0;
 		}
 	} else {
 		if(selectedAddress.address) {
-			self.endAddress.text = selectedAddress.address;
+			rcv.endAddress.text = selectedAddress.address;
 		} else if(selectedAddress.name) {
-			self.endAddress.text = selectedAddress.name;
+			rcv.endAddress.text = selectedAddress.name;
 			if(selectedAddress.coord.latitude > [constants minCoordinate].latitude 
 			   && selectedAddress.coord.longitude > [constants minCoordinate].longitude) {
 				self.cachedEndCoord = [[[CLLocation alloc] initWithLatitude:selectedAddress.coord.latitude longitude:selectedAddress.coord.longitude] autorelease];
@@ -351,17 +270,11 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (void) showAutoCompleteView {
-	CGRect frame = self.view.frame;
-	frame.size.height = 244;
-	self.view.frame = frame;
 	[self.view addSubview:self.autoCompleteViewController.view];
 	autocompleteHidden = NO;
 }
 
 - (void) hideAutoCompleteView {
-	CGRect frame = self.view.frame;
-	frame.size.height = 123;
-	self.view.frame = frame;
 	[self.autoCompleteViewController.view removeFromSuperview];
 	autocompleteHidden = YES;
 }
@@ -370,10 +283,12 @@ static CGFloat const kHeight = 123.0;
 #pragma mark UITextFieldDelegate events
 
 - (BOOL) textFieldShouldReturn:(UITextField *)textField {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	if([self validateRouteCriteria]) {
-		NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:self.startAddress.text,@"startAddress",
-									   self.endAddress.text,@"endAddress",nil];
+		NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:rcv.startAddress.text,@"startAddress",
+									   rcv.endAddress.text,@"endAddress",nil];
 		[NSThread detachNewThreadSelector:@selector(submitRoute:) toTarget:self withObject:params];
+		//[self submitRoute:params];
 		[self hideDirectionsNavBar:nil];
 		return YES;
 	}
@@ -386,10 +301,11 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (void) textFieldDidBeginEditing:(UITextField *)textField {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	[self showDirectionsNavBar];
 	[self.autoCompleteViewController textFieldDidBeginEditing:textField];
 	if([textField.text length] == 0) {
-		//[self placeContactsButton:textField];
+		[rcv placeContactsButton:textField];
 	}
 }
 
@@ -399,33 +315,24 @@ static CGFloat const kHeight = 123.0;
 
 - (BOOL) textField:(UITextField*)textField shouldChangeCharactersInRange:(NSRange)range 
  replacementString:(NSString *)string {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	[self handleFieldChange:textField];
 	[self.autoCompleteViewController textField:textField shouldChangeCharactersInRange:range replacementString:string];
 	if(range.length = [textField.text length] && [string length] == 0) {
-		//[self placeContactsButton:textField];
+		[rcv placeContactsButton:textField];
 	} else if([string length] > 0) {
-		[contactsButton removeFromSuperview];
+		[rcv.contactsButton removeFromSuperview];
 	}
 	return YES;
 }
 
 - (BOOL) textFieldShouldClear:(UITextField*)textField {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	NSRange r = {0, textField.text.length};
 	[self handleFieldChange:textField];
 	[self.autoCompleteViewController textField:textField shouldChangeCharactersInRange:r replacementString:@""];
-	//[self placeContactsButton:textField];
+	[rcv placeContactsButton:textField];
 	return YES;
-}
-
-- (void) placeContactsButton:(UITextField*)textField {
-//	CGRect frame;
-//	if(textField.tag == 0) {
-//		frame = CGRectMake(289.0, 56.0, 23.0, 23.0);
-//	} else {
-//		frame = CGRectMake(289.0, 90.0, 23.0, 23.0);
-//	}
-//	contactsButton.frame = frame;
-//	[self.view addSubview:contactsButton];
 }
 
 #pragma mark -
@@ -444,6 +351,7 @@ static CGFloat const kHeight = 123.0;
 			if(startPt != nil && endPt != nil) {
 				NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 				RouteService *routeService = [[RouteService alloc] initWithManagedObjectContext:managedObjectContext];
+				//RouteService2 *routeService = [[RouteService2 alloc] initWithManagedObjectContext:managedObjectContext];
 				[routeService createRoute:startPt endPoint:endPt];
 				[routeService release];
 				[self saveAddresses:[NSArray arrayWithObjects:startPt,endPt,nil]];
@@ -478,24 +386,25 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (void) initAdresses {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	NSManagedObjectContext *managedObjectContext = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).managedObjectContext;
 	BOOL locationServicesEnabled = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).locationServicesEnabled;
 	NSString *otherField = (locationServicesEnabled && _mapView.showsUserLocation) ? @"Current Location" : nil;
 	NSArray *results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:PointAnnotationTypeStart];
 	if(results.count > 0) {
-		self.startAddress.text = ((RoutePoint*)[results objectAtIndex:0]).address;
+		rcv.startAddress.text = ((RoutePoint*)[results objectAtIndex:0]).address;
 	} else {
-		self.startAddress.text = otherField;
+		rcv.startAddress.text = otherField;
 	}
 	results = [RoutePointRepository fetchRoutePointsByType:managedObjectContext type:PointAnnotationTypeEnd];
 	if(results.count > 0) {
-		self.endAddress.text = ((RoutePoint*)[results objectAtIndex:0]).address;
+		rcv.endAddress.text = ((RoutePoint*)[results objectAtIndex:0]).address;
 	} else {
-		if(![self.startAddress.text isEqualToString:otherField]) {
-			self.endAddress.text = otherField;
+		if(![rcv.startAddress.text isEqualToString:otherField]) {
+			rcv.endAddress.text = otherField;
 		}
 	}
-	[self.endAddress becomeFirstResponder];
+	[rcv.endAddress becomeFirstResponder];
 }
 
 - (RoutePoint*) makeStartOrEndRoutePoint:(PointAnnotationType)type addressText:(NSString*)addressText {
@@ -529,13 +438,14 @@ static CGFloat const kHeight = 123.0;
 }
 
 - (BOOL) validateRouteCriteria {
+	RouteCriteriaView *rcv = (RouteCriteriaView*)self.view;
 	NSString *errorMsg = nil;
 	NSString *title = @"Forgot Something?";
-	if(self.startAddress.text == nil || [self.startAddress.text length] == 0) {
+	if(rcv.startAddress.text == nil || [rcv.startAddress.text length] == 0) {
 		errorMsg = @"Please enter a start address.";
-	} else if(self.endAddress.text == nil) {
+	} else if(rcv.endAddress.text == nil) {
 		errorMsg = @"Please enter an end address.";
-	} else if([[self.endAddress.text lowercaseString] isEqualToString:[self.startAddress.text lowercaseString]]) {
+	} else if([[rcv.endAddress.text lowercaseString] isEqualToString:[rcv.startAddress.text lowercaseString]]) {
 		errorMsg = @"The start and end addresses cannot be the same.";
 		title = @"You're already there!";
 	}
@@ -561,8 +471,6 @@ static CGFloat const kHeight = 123.0;
 	self.cachedStartCoord = nil;
 	self.cachedStartAccuracyLevel = nil;
 	self.cachedEndAccuracyLevel = nil;
-	self.startAddress = nil;
-	self.endAddress = nil;
 	self.autoCompleteViewController = nil;
 }
 
@@ -571,10 +479,7 @@ static CGFloat const kHeight = 123.0;
 	self.cachedStartCoord = nil;
 	self.cachedStartAccuracyLevel = nil;
 	self.cachedEndAccuracyLevel = nil;
-	self.startAddress = nil;
-	self.endAddress = nil;
 	self.autoCompleteViewController = nil;
-	[contactsButton release];
 	[_mapView release];
     [super dealloc];
 }

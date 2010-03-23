@@ -24,10 +24,6 @@
 	return kSpokesBaseURL;
 }
 
-- (NSString*) adWhirlAppKey {
-	return kAdWhirlApplicationKey;
-}
-
 - (NSString*) geocodeViewportBias {
 	return kGeocodeViewportBias;
 }

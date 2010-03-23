@@ -13,7 +13,7 @@
 #define kRacksTimeout 10.0
 #define kShopsTimeout 10.0
 #define kTheftsTimeout 10.0
-#define kGeocoderTimeout 5.0
+#define kGeocoderTimeout 10.0
 
 #define kSpokesDateFormat @"MM-dd-yyyy"
 

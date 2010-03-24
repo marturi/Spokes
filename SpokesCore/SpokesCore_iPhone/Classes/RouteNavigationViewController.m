@@ -227,10 +227,12 @@ static CGFloat const kHeight = 94.0;
 - (void) placeRouteNavigatorButton {
 	if(self.routeNavigator == nil) {
 		NSArray *imgs = [NSArray arrayWithObjects:[UIImage imageNamed:@"icon_arrow_left.png"],[UIImage imageNamed:@"icon_arrow_right.png"],nil];
-		self.routeNavigator = [[UISegmentedControl alloc] initWithItems:imgs];
-		self.routeNavigator.segmentedControlStyle = UISegmentedControlStyleBar;
-		self.routeNavigator.momentary = YES;
-		[self.routeNavigator addTarget:self action:@selector(changeLeg:) forControlEvents:UIControlEventValueChanged];
+		UISegmentedControl *segCtrl = [[UISegmentedControl alloc] initWithItems:imgs];
+		segCtrl.segmentedControlStyle = UISegmentedControlStyleBar;
+		segCtrl.momentary = YES;
+		[segCtrl addTarget:self action:@selector(changeLeg:) forControlEvents:UIControlEventValueChanged];
+		self.routeNavigator = segCtrl;
+		[segCtrl release];
 	}
 	UIBarButtonItem *routeNavigatorItem = [[UIBarButtonItem alloc] initWithCustomView:routeNavigator];
 	[navBar.topItem setRightBarButtonItem:routeNavigatorItem animated:YES];

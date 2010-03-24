@@ -243,13 +243,13 @@ static CGFloat const kHeight = 94.0;
 	RouteView *currentRouteView = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).rootViewController.routeView;
 	int currLegIdx = [currentRoute.currentLegIndex intValue];
 	if(currLegIdx == -1) {
-		if(startRouteButton == nil) {
-			startRouteButton = [[UIBarButtonItem alloc] initWithTitle:@"Start" 
-																style:UIBarButtonItemStyleDone 
-															   target:self 
-															   action:@selector(startNavigatingRoute:)];
+		if(self.startRouteButton == nil) {
+			self.startRouteButton = [[[UIBarButtonItem alloc] initWithTitle:@"Start"
+																	  style:UIBarButtonItemStyleDone 
+																	 target:self 
+																	 action:@selector(startNavigatingRoute:)] autorelease];
 		}
-		[navBar.topItem setRightBarButtonItem:startRouteButton animated:YES];
+		[navBar.topItem setRightBarButtonItem:self.startRouteButton animated:YES];
 		[currentRouteView hideRoutePointerView];
 	} else if(currLegIdx > -1 && currLegIdx <= ([[currentRoute legs] count]-1)) {
 		[self placeRouteNavigatorButton];

@@ -296,16 +296,23 @@ static CGFloat const kHeight = 94.0;
 }
 
 - (void) changeLeg:(id)sender {
+	int sel = ((UISegmentedControl*)sender).selectedSegmentIndex;
+	[self performSelector:@selector(doChangeLeg:) withObject:[NSNumber numberWithInt:sel] afterDelay:0.01];
+}
+
+- (void) doChangeLeg:(NSNumber*)selectedSegmentIndex {
+	NSLog(@"here2");
+	int sel = [selectedSegmentIndex intValue];
 	RouteView *currentRouteView = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).rootViewController.routeView;
 	[currentRouteView hideRoutePointerView];
 	int newLegIndex = [currentRoute.currentLegIndex intValue];
-	if(self.routeNavigator != nil && self.routeNavigator.selectedSegmentIndex > -1) {
-		if(self.routeNavigator.selectedSegmentIndex == 0) {
+	if(sel > -1) {
+		if(sel == 0) {
 			newLegIndex--;
 		} else {
 			newLegIndex++;
 		}
-		movePointerDirection = self.routeNavigator.selectedSegmentIndex;
+		movePointerDirection = sel;
 		isLegTransition = YES;
 	}
 	currentRoute.currentLegIndex = [NSNumber numberWithInt:newLegIndex];
@@ -318,10 +325,6 @@ static CGFloat const kHeight = 94.0;
 	} else if(newLegIndex == currentRoute.legs.count) {
 		[MapViewHelper focusToPoint:currentRoute.endCoordinate mapView:_mapView];
 	}
-	[self performSelector:@selector(doChangeLeg) withObject:nil afterDelay:01];
-}
-
-- (void) doChangeLeg {
 	[self initRouteNavigator];
 	[self initRouteText];
 }

@@ -196,7 +196,7 @@ static NSString *cidxfmt = @"%i_%i";
 			CALayer *routePointerLayer = _internalRouteView.routePointerView;
 			CAKeyframeAnimation *routePointerAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
 			routePointerAnimation.calculationMode = kCAAnimationPaced;
-			routePointerAnimation.duration = .75;
+			routePointerAnimation.duration = .5;
 			routePointerAnimation.removedOnCompletion = YES;
 			CGMutablePathRef thePath = CGPathCreateMutable();
 			CGPoint oldPt = [self.mapView convertCoordinate:lastCoord toPointToView:_mapView];
@@ -230,6 +230,7 @@ static NSString *cidxfmt = @"%i_%i";
 			routePointerAnimation.path = thePath;
 			CGPathRelease(thePath);
 			[routePointerLayer addAnimation:routePointerAnimation forKey:@"routePointer"];
+			routePointerLayer.position = CGPointZero;
 		}
 	}
 }

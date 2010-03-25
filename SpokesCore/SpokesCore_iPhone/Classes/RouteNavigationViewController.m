@@ -229,7 +229,7 @@ static CGFloat const kHeight = 94.0;
 		NSArray *imgs = [NSArray arrayWithObjects:[UIImage imageNamed:@"icon_arrow_left.png"],[UIImage imageNamed:@"icon_arrow_right.png"],nil];
 		UISegmentedControl *segCtrl = [[UISegmentedControl alloc] initWithItems:imgs];
 		segCtrl.segmentedControlStyle = UISegmentedControlStyleBar;
-		//segCtrl.momentary = YES;
+		segCtrl.momentary = YES;
 		[segCtrl addTarget:self action:@selector(changeLeg:) forControlEvents:UIControlEventValueChanged];
 		self.routeNavigator = segCtrl;
 		[segCtrl release];
@@ -299,14 +299,6 @@ static CGFloat const kHeight = 94.0;
 
 - (void) changeLeg:(id)sender {
 	int sel = ((UISegmentedControl*)sender).selectedSegmentIndex;
-	//[self performSelector:@selector(doChangeLeg:) withObject:[NSNumber numberWithInt:sel] afterDelay:.25];
-	[self doChangeLeg:[NSNumber numberWithInt:sel]];
-}
-
-- (void) doChangeLeg:(NSNumber*)selectedSegmentIndex {
-	int sel = [selectedSegmentIndex intValue];
-	RouteView *currentRouteView = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).rootViewController.routeView;
-	[currentRouteView hideRoutePointerView];
 	int newLegIndex = [currentRoute.currentLegIndex intValue];
 	if(sel > -1) {
 		if(sel == 0) {
@@ -318,8 +310,12 @@ static CGFloat const kHeight = 94.0;
 		isLegTransition = YES;
 	}
 	currentRoute.currentLegIndex = [NSNumber numberWithInt:newLegIndex];
+	[self performSelector:@selector(doChangeLeg:) withObject:[NSNumber numberWithInt:sel] afterDelay:.25];
 	[self initRouteNavigator];
-	[self initRouteText];
+}
+
+- (void) doChangeLeg:(NSNumber*)selectedSegmentIndex {
+	int newLegIndex = [currentRoute.currentLegIndex intValue];
 	if(newLegIndex == -1) {
 		[MapViewHelper focusToCenterOfPoints:[currentRoute startAndEndPoints] mapView:_mapView autoFit:NO];
 		isLegTransition = NO;
@@ -329,6 +325,7 @@ static CGFloat const kHeight = 94.0;
 	} else if(newLegIndex == currentRoute.legs.count) {
 		[MapViewHelper focusToPoint:currentRoute.endCoordinate mapView:_mapView];
 	}
+	[self initRouteText];
 }
 
 - (void) startNavigatingRoute:(id)sender {

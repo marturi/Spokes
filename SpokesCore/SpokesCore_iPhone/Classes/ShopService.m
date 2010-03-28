@@ -29,8 +29,8 @@
 	CLLocation *br = [params objectForKey:@"bottomRight"];
 	CLLocationCoordinate2D bottomRightCoordinate = br.coordinate;
 	SpokesRequest *shopsRequest = [[SpokesRequest alloc] init];
-	NSURLRequest *shopsURLRequest = [shopsRequest createShopsRequest:topLeftCoordinate 
-											   bottomRightCoordinate:bottomRightCoordinate];
+	NSMutableURLRequest *shopsURLRequest = [shopsRequest createShopsRequest:topLeftCoordinate 
+													  bottomRightCoordinate:bottomRightCoordinate];
 	[shopsRequest release];
 	[self downloadAndParse:shopsURLRequest];
 	if(self.spokesConnection != nil) {
@@ -65,11 +65,11 @@
   shopCoordinate:(CLLocationCoordinate2D)shopCoordinate {
 	
 	SpokesRequest *addShopRequest = [[SpokesRequest alloc] init];
-	NSURLRequest *addShopURLRequest = [addShopRequest createAddShopRequest:shopCoordinate
-															newShopAddress:shopAddress 
-															   newShopName:shopName
-																hasRentals:hasRentals
-															  newShopPhone:shopPhone];
+	NSMutableURLRequest *addShopURLRequest = [addShopRequest createAddShopRequest:shopCoordinate
+																   newShopAddress:shopAddress 
+																	  newShopName:shopName
+																	   hasRentals:hasRentals
+																	 newShopPhone:shopPhone];
 	[addShopRequest release];
 	[self downloadAndParse:addShopURLRequest];
 	if(self.spokesConnection != nil) {

@@ -18,10 +18,13 @@
 @synthesize currentElementValue	= currentElementValue;
 @synthesize done				= done;
 
-- (void) downloadAndParse:(NSURLRequest*)request {
+- (void) downloadAndParse:(NSMutableURLRequest*)request {
 	done = NO;
     self.responseData = [NSMutableData data];
-    self.spokesConnection = [[[NSURLConnection alloc] initWithRequest:request delegate:self] autorelease];
+	[request setHTTPShouldHandleCookies:NO];
+	NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:request delegate:self];
+    self.spokesConnection = conn;
+	[conn release];
 	[self performSelectorOnMainThread:@selector(toggleNetworkActivityIndicator:) 
 						   withObject:[NSNumber numberWithInt:YES] 
 						waitUntilDone:NO];

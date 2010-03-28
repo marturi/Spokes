@@ -14,7 +14,7 @@
 
 - (void) reportTheftFromRack:(RackPoint*)rackPoint {
 	SpokesRequest *reportTheftRequest = [[SpokesRequest alloc] init];
-	NSURLRequest *reportTheftURLRequest = [reportTheftRequest createReportTheftRequest:rackPoint];
+	NSMutableURLRequest *reportTheftURLRequest = [reportTheftRequest createReportTheftRequest:rackPoint];
 	[reportTheftRequest release];
 	[self downloadAndParse:reportTheftURLRequest];
 	if(self.spokesConnection != nil) {
@@ -43,7 +43,7 @@
 
 - (void) reportTheft:(CLLocationCoordinate2D)theftCoordinate comments:(NSString*)comments {
 	SpokesRequest *reportTheftRequest = [[SpokesRequest alloc] init];
-	NSURLRequest *reportTheftURLRequest = [reportTheftRequest createReportTheftRequest:theftCoordinate comments:comments];
+	NSMutableURLRequest *reportTheftURLRequest = [reportTheftRequest createReportTheftRequest:theftCoordinate comments:comments];
 	[reportTheftRequest release];
 	[self downloadAndParse:reportTheftURLRequest];
 	if(self.spokesConnection != nil) {

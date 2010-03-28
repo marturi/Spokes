@@ -48,7 +48,7 @@
 
 - (void) createRoute:(RoutePoint*)startPoint endPoint:(RoutePoint*)endPoint {
 	SpokesRequest *routeRequest = [[SpokesRequest alloc] init];
-	NSURLRequest *routeURLRequest = [routeRequest createRouteRequest:startPoint endPoint:endPoint];
+	NSMutableURLRequest *routeURLRequest = [routeRequest createRouteRequest:startPoint endPoint:endPoint];
 	[routeRequest release];
 	[self downloadAndParse:routeURLRequest];
 	if(self.spokesConnection != nil) {

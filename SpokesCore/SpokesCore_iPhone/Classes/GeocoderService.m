@@ -95,7 +95,7 @@
 		}
 	} else {
 		SpokesRequest *geocoderRequest = [[SpokesRequest alloc] init];
-		NSURLRequest *req = [geocoderRequest createGeocoderRequest:addressText];
+		NSMutableURLRequest *req = [geocoderRequest createGeocoderRequest:addressText];
 		[geocoderRequest release];
 		[self downloadAndParse:req];
 		if(self.spokesConnection != nil) {

@@ -29,8 +29,8 @@
 	CLLocation *br = [params objectForKey:@"bottomRight"];
 	CLLocationCoordinate2D bottomRightCoordinate = br.coordinate;
 	SpokesRequest *racksRequest = [[SpokesRequest alloc] init];
-	NSURLRequest *racksURLRequest = [racksRequest createRacksRequest:topLeftCoordinate 
-											   bottomRightCoordinate:bottomRightCoordinate];
+	NSMutableURLRequest *racksURLRequest = [racksRequest createRacksRequest:topLeftCoordinate 
+													  bottomRightCoordinate:bottomRightCoordinate];
 	[racksRequest release];
 	[self downloadAndParse:racksURLRequest];
 	if(self.spokesConnection != nil) {
@@ -68,9 +68,9 @@
 		rackTypeStr = @"I";
 	}
 	SpokesRequest *addRackRequest = [[SpokesRequest alloc] init];
-	NSURLRequest *addRackURLRequest = [addRackRequest createAddRackRequest:rackCoordinate
-														   newRackLocation:rackLocation 
-															   newRackType:rackTypeStr];
+	NSMutableURLRequest *addRackURLRequest = [addRackRequest createAddRackRequest:rackCoordinate
+																  newRackLocation:rackLocation 
+																	  newRackType:rackTypeStr];
 	[addRackRequest release];
 	[self downloadAndParse:addRackURLRequest];
 	if(self.spokesConnection != nil) {

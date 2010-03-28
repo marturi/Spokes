@@ -19,7 +19,7 @@
 }
 
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal;
-- (void) downloadAndParse:(NSURLRequest*)request;
+- (void) downloadAndParse:(NSMutableURLRequest*)request;
 
 @property (nonatomic, retain) NSMutableData *responseData;
 @property (nonatomic, retain) NSURLConnection *spokesConnection;

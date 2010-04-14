@@ -10,13 +10,12 @@
 
 @class SpokesRootViewController;
 
-@interface AddRackViewController : UIViewController <UITextFieldDelegate,MKReverseGeocoderDelegate> {
+@interface AddRackViewController : UIViewController <UITextFieldDelegate> {
 	SpokesRootViewController *_viewController;
 	IBOutlet UITextField *rackLocation;
 	IBOutlet UISegmentedControl *rackType;
 	UIButton *msgButton;
 	NSString *rackLocationStr;
-	MKReverseGeocoder *_geocoder;
 }
 
 - (id) initWithViewController:(SpokesRootViewController*)viewController;

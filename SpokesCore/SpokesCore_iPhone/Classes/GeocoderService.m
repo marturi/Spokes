@@ -17,14 +17,16 @@
 - (void) showOutOfBoundsError;
 - (void) showLocationServicesError;
 - (void) toggleNetworkActivityIndicator:(NSNumber*)onOffVal;
+- (void) doReverseGeocode;
 
 @end
 
 
 @implementation GeocoderService
 
-@synthesize addressLocation = addressLocation;
-@synthesize accuracyLevel	= accuracyLevel;
+@synthesize addressLocation			= addressLocation;
+@synthesize accuracyLevel			= accuracyLevel;
+@synthesize reverseGeocodedAddress	= reverseGeocodedAddress;
 
 - (id) initWithMapView:(MKMapView*)mapView {
 	if ((self = [super init])) {
@@ -52,7 +54,7 @@
 			if([self validateCoordinate:[self.addressLocation coordinate]]) {
 				point = [RoutePoint routePointWithCoordinate:[self.addressLocation coordinate] context:context];
 				self.addressLocation = nil;
-				point.address = addressText;
+				point.address = reverseGeocodedAddress != nil ? reverseGeocodedAddress : addressText;
 				point.type = [NSNumber numberWithInt:type];
 				point.accuracyLevel = self.accuracyLevel;
 			}else{
@@ -87,8 +89,10 @@
 	if([addressText rangeOfString:@"current location" options:NSCaseInsensitiveSearch].location != NSNotFound) {
 		BOOL locationServicesEnabled = ((SpokesAppDelegate*)[UIApplication sharedApplication].delegate).locationServicesEnabled;
 		if(_mapView.showsUserLocation && locationServicesEnabled) {
-			self.addressLocation = _mapView.userLocation.location;
-			done = YES;
+			[self doReverseGeocode];
+			do {
+				[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+			} while (!done);
 		} else {
 			[self performSelectorOnMainThread:@selector(showLocationServicesError) withObject:nil waitUntilDone:NO];
 			done = YES;
@@ -143,9 +147,41 @@
 	done = YES;
 }
 
+#pragma mark -
+#pragma mark ReverseGeocoding methods
+
+- (void) doReverseGeocode {
+	[UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+	if([self validateCoordinate:_mapView.userLocation.location.coordinate]) {
+		MKReverseGeocoder *_geocoder = [[MKReverseGeocoder alloc] initWithCoordinate:_mapView.userLocation.location.coordinate];
+		_geocoder.delegate = self;
+		[_geocoder start];
+	} else {
+		[self performSelectorOnMainThread:@selector(showMsg:) withObject:@"Whoops! Looks like you are outside of city limits right now." waitUntilDone:NO];
+	}
+}
+
+- (void)reverseGeocoder:(MKReverseGeocoder*)geocoder didFailWithError:(NSError*)error{
+	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+	[geocoder release];
+	done = YES;
+}
+
+- (void)reverseGeocoder:(MKReverseGeocoder*)geocoder didFindPlacemark:(MKPlacemark*)placemark {
+	[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+	CLLocation *coord = [[CLLocation alloc] initWithLatitude:placemark.coordinate.latitude 
+												   longitude:placemark.coordinate.longitude];
+	self.addressLocation = coord;
+	self.reverseGeocodedAddress = [NSString stringWithFormat:@"%@ %@", placemark.subThoroughfare, placemark.thoroughfare];
+	[coord release];
+	[geocoder release];
+	done = YES;
+}
+
 - (void) dealloc {
 	self.addressLocation = nil;
 	self.accuracyLevel = nil;
+	self.reverseGeocodedAddress = nil;
 	[_mapView release];
 	[super dealloc];
 }
